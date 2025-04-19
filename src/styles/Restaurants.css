@@ -1,0 +1,11 @@
+.restaurants-page {
+    background-color: #121212;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  
+  .restaurants-title {
+    font-size: 2.2rem;
+    color: #F44336;
+  }
+  

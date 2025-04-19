@@ -1,0 +1,71 @@
+.menu-card {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .menu-card.hovered {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2);
+  }
+  
+  .menu-title {
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .menu-desc {
+    color: #cccccc;
+    font-size: 0.9rem;
+    flex-grow: 1;
+  }
+  
+  .menu-price {
+    color: #ffffff;
+    font-weight: bold;
+    margin-top: 0.75rem;
+  }
+  
+  .menu-cart-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+  
+  .menu-add-btn {
+    background-color: #e4002b;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  
+  .menu-counter-btn {
+    background-color: #fff;
+    color: #e4002b;
+    border: none;
+    border-radius: 50%;
+    width: 1.8rem;
+    height: 1.8rem;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.5rem;
+    cursor: pointer;
+  }
+  
