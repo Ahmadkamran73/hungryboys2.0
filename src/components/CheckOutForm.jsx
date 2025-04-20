@@ -188,6 +188,7 @@ const CheckOutForm = () => {
             required
           />
         </div>
+        
         <div className="col-12">
           <label className="form-label">Number of Persons *</label>
           <input
@@ -200,7 +201,8 @@ const CheckOutForm = () => {
             required
           />
           <small className="text">Each delivery is Rs 100 per person</small>
-        </div>
+        </div> 
+
 
         <div className="col-12 mt-4">
           <h5 className="text-light">Order Summary</h5>
