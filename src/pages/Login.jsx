@@ -1,7 +1,7 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase"; // Make sure db (Firestore) is exported from firebase.js
+import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
@@ -13,9 +13,19 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/admin");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists() && userDoc.data().role === "admin") {
+        navigate("/admin");
+      } else {
+        setError("Access denied. You are not an admin.");
+      }
     } catch (err) {
       setError("Invalid credentials or user does not exist.");
       console.error(err.message);
@@ -44,7 +54,7 @@ function Login() {
             <input
               type="password"
               className="form-control"
-              placeholder="••••••••"
+              placeholder="******"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
