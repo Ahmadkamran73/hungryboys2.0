@@ -1,58 +1,49 @@
 import React from "react";
+import { useCart } from "../context/CartContext";
 import "../styles/MenuItemCard.css";
 
-class MenuItemCard extends React.Component {
-  state = {
-    hovered: false,
-    quantity: 0,
-  };
+const MenuItemCard = ({ name, price, restaurantName }) => {
+  const { addToCart, cartItems, incrementItem, decrementItem } = useCart();
 
-  toggleHover = (hovered) => this.setState({ hovered });
+  // Find the item using name + restaurantName combination
+  const cartItem = cartItems.find(
+    (item) => item.name === name && item.restaurantName === restaurantName
+  );
+  const quantity = cartItem ? cartItem.quantity : 0;
 
-  increment = () => {
-    this.setState((prev) => ({ quantity: prev.quantity + 1 }));
-  };
+  return (
+    <div className="menu-card">
+      <h5 className="menu-title">{name}</h5>
+      <div className="menu-price">Rs {price}</div>
 
-  decrement = () => {
-    this.setState((prev) => ({
-      quantity: Math.max(prev.quantity - 1, 0),
-    }));
-  };
-
-  render() {
-    const { name, price, description } = this.props;
-    const { hovered, quantity } = this.state;
-
-    return (
-      <div
-        className={`menu-card ${hovered ? "hovered" : ""}`}
-        onMouseEnter={() => this.toggleHover(true)}
-        onMouseLeave={() => this.toggleHover(false)}
-      >
-        <h5 className="menu-title">{name}</h5>
-        <p className="menu-desc">{description}</p>
-        <div className="menu-price">Rs {price}</div>
-
-        <div className="menu-cart-section">
-          {quantity > 0 ? (
-            <>
-              <button className="menu-counter-btn" onClick={this.decrement}>
-                -
-              </button>
-              <span>{quantity}</span>
-              <button className="menu-counter-btn" onClick={this.increment}>
-                +
-              </button>
-            </>
-          ) : (
-            <button className="menu-add-btn" onClick={this.increment}>
-              + Add to Bucket
+      <div className="menu-cart-section">
+        {quantity > 0 ? (
+          <>
+            <button
+              className="menu-counter-btn"
+              onClick={() => decrementItem(name, restaurantName)}
+            >
+              -
             </button>
-          )}
-        </div>
+            <span>{quantity}</span>
+            <button
+              className="menu-counter-btn"
+              onClick={() => incrementItem(name, restaurantName)}
+            >
+              +
+            </button>
+          </>
+        ) : (
+          <button
+            className="menu-add-btn"
+            onClick={() => addToCart({ name, price }, restaurantName)}
+          >
+            + Add to Bucket
+          </button>
+        )}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default MenuItemCard;

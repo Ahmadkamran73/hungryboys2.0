@@ -1,0 +1,30 @@
+.checkout-container {
+    background-color: #121212;
+    color: #ffffff;
+    padding: 2rem;
+  }
+  
+  .dark-input {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    color: #ffffff;
+  }
+  
+  .dark-input:focus {
+    background-color: #1a1a1a;
+    border-color: #e4002b;
+    color: #ffffff;
+  }
+  
+  .btn-danger {
+    background-color: #e4002b;
+    border: none;
+  }
+  
+  .btn-danger:hover {
+    background-color: #F44336;
+  }
+  
+  .text{
+    color: #F44336;
+  }

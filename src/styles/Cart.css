@@ -1,0 +1,16 @@
+/* Cart.css */
+.cart-page {
+    background-color: #121212;
+    min-height: 100vh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  .cart-heading {
+    font-weight: bold;
+    color: #f44336;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+  }
+  
