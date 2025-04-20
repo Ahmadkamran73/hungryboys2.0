@@ -188,20 +188,37 @@ const CheckOutForm = () => {
             required
           />
         </div>
-        
+
         <div className="col-12">
           <label className="form-label">Number of Persons *</label>
-          <input
-            type="number"
-            className="form-control dark-input"
-            name="persons"
-            value={form.persons}
-            onChange={handleChange}
-            min="1"
-            required
-          />
+          <div className="input-group">
+            <button
+              className="btn btn-danger"
+              type="button"
+              onClick={() => setForm(prev => ({ ...prev, persons: Math.max(1, prev.persons - 1) }))}
+            >
+              −
+            </button>
+            <input
+              type="number"
+              className="form-control text-center dark-input"
+              name="persons"
+              value={form.persons}
+              onChange={handleChange}
+              min="1"
+              required
+            />
+            <button
+              className="btn btn-danger"
+              type="button"
+              onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}
+            >
+              +
+            </button>
+          </div>
           <small className="text">Each delivery is Rs 100 per person</small>
-        </div> 
+        </div>
+
 
 
         <div className="col-12 mt-4">
