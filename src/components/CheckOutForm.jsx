@@ -161,6 +161,7 @@ const CheckOutForm = () => {
           <input
             type="text"
             className="form-control dark-input"
+            placeholder="Hall Name - Room no"
             name="room"
             value={form.room}
             onChange={handleChange}
@@ -178,7 +179,7 @@ const CheckOutForm = () => {
           />
         </div>
         <div className="col-12">
-          <label className="form-label">Email Address (@cfd.nu.edu only) *</label>
+          <label className="form-label">Email Address (@  edu only) *</label>
           <input
             type="email"
             className="form-control dark-input"

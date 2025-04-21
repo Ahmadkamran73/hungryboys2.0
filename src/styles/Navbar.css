@@ -1,10 +1,19 @@
 .custom-navbar {
-    background-color: #f44336; /* Red */
-  }
-  
-  .logo-img {
-    height: 60px;
-    width: 60px;
-    border-radius: 50%;
-  }
- 
+  background-color: #f44336; /* Red */
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+}
+
+.logo-img {
+  height: 70px; /* smaller container height */
+  width: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  transform: scale(1.5); /* zoom in */
+}
+
+.logo-text{
+  font-size: 30px;
+  font-weight: 600;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}

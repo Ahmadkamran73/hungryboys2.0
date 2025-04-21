@@ -7,7 +7,6 @@ function Checkout() {
   return (
     <div className="checkout-page">
       <CheckOutForm />
-
       <FloatingCartButton />  
     </div>
   );

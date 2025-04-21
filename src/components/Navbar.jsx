@@ -9,7 +9,7 @@ function Navbar() {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img src={logo} alt="Hungry Boys" className="logo-img" />
-          <span className="ms-2 fw-bold">Hungry Boys</span>
+          <span className="ms-2 logo-text ">Hungry Boys</span>
         </Link>
         <button
           className="navbar-toggler"
