@@ -1,0 +1,51 @@
+.ribbon-container {
+    background-color: #b30000;
+    color: white;
+    overflow: hidden;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1000;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+  
+  .ribbon-text {
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 14px;
+    position: absolute;
+    will-change: transform;
+    animation: pingpong 8s ease-in-out infinite alternate;
+  }
+  
+  /* Desktop ping-pong animation */
+  @keyframes pingpong {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(calc(100vw - 100% - 20px));
+    }
+  }
+  
+  /* Mobile: override with continuous sliding animation */
+  @media (max-width: 768px) {
+    .ribbon-text {
+      animation: scroll-left 12s linear infinite;
+      position: relative;
+      left: 100%;
+    }
+  
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+  }
+  
