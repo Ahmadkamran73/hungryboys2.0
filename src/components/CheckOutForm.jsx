@@ -15,7 +15,7 @@ const CheckOutForm = () => {
     phone: "",
     email: "",
     persons: 1,
-    paymentMethod: "",
+    paymentMethod: "Online Payment", // hardcoded
     accountTitle: "",
     bankName: "",
   });
@@ -39,7 +39,7 @@ const CheckOutForm = () => {
 
   const isEmailValid = (email) => email.endsWith("@cfd.nu.edu.pk");
 
-  const deliveryCharge = form.persons * 100;
+  const deliveryCharge = form.persons * 130;
   const itemTotal = getTotalCost();
   const grandTotal = itemTotal + deliveryCharge;
 
@@ -98,7 +98,6 @@ const CheckOutForm = () => {
       lastName,
       phone,
       email,
-      paymentMethod,
       accountTitle,
       bankName,
     } = form;
@@ -108,7 +107,7 @@ const CheckOutForm = () => {
       return;
     }
 
-    if (!firstName || !lastName || !phone || !email || !paymentMethod) {
+    if (!firstName || !lastName || !phone || !email) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -118,26 +117,22 @@ const CheckOutForm = () => {
       return;
     }
 
-    if (paymentMethod === "Online Payment") {
-      if (!screenshotFile || !accountTitle || !bankName) {
-        setError("Please complete all online payment fields.");
-        return;
-      }
+    if (!screenshotFile || !accountTitle || !bankName) {
+      setError("Please complete all online payment fields.");
+      return;
     }
 
     setError("");
     setLoading(true);
 
     let uploadedURL = "";
-    if (paymentMethod === "Online Payment" && screenshotFile) {
-      try {
-        uploadedURL = await handleImageUpload(screenshotFile);
-        setScreenshotURL(uploadedURL);
-      } catch (err) {
-        setError("Screenshot upload failed. Try again.");
-        setLoading(false);
-        return;
-      }
+    try {
+      uploadedURL = await handleImageUpload(screenshotFile);
+      setScreenshotURL(uploadedURL);
+    } catch (err) {
+      setError("Screenshot upload failed. Try again.");
+      setLoading(false);
+      return;
     }
 
     const order = {
@@ -166,13 +161,13 @@ const CheckOutForm = () => {
       <div className="checkout-container text-center text-white">
         <h2>Thank you for shopping! 🎉</h2>
         <p>Your order has been placed successfully.</p>
-  
         <Link to="/restaurants" className="btn btn-danger mt-3">
           Start Ordering
         </Link>
       </div>
     );
   }
+
   return (
     <div className="checkout-container container-fluid py-4">
       <h2 className="text-center text-white mb-4">🧾 Checkout</h2>
@@ -208,41 +203,32 @@ const CheckOutForm = () => {
             <input type="number" className="form-control text-center dark-input" name="persons" value={form.persons} onChange={handleChange} min="1" required />
             <button type="button" className="btn btn-danger" onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}>+</button>
           </div>
-          <small className="text">Each delivery is Rs 100 per person</small>
+          <small className="text">Each delivery is Rs 130 per person</small>
         </div>
 
-        {/* Payment Method */}
+        {/* Hidden Payment Method */}
+        <input type="hidden" name="paymentMethod" value="Online Payment" />
+
+        <div className="col-12 text-white border p-3 rounded" style={{ backgroundColor: "#222" }}>
+              <strong>Pay to:</strong><br />
+              Account Title: Maratib Ali<br />
+              Bank: SadaPay<br />
+              Account Number: 03330374616
+            </div>
+
+        {/* Online Payment Fields - Always Visible */}
+        <div className="col-md-6">
+          <label className="form-label">Account Title *</label>
+          <input type="text" className="form-control dark-input" name="accountTitle" value={form.accountTitle} onChange={handleChange} required />
+        </div>
+        <div className="col-md-6">
+          <label className="form-label">Bank Name *</label>
+          <input type="text" className="form-control dark-input" name="bankName" value={form.bankName} onChange={handleChange} required />
+        </div>
         <div className="col-12">
-          <label className="form-label">Payment Method *</label><br />
-          <div className="form-check form-check-inline">
-            <input className="form-check-input" type="radio" name="paymentMethod" value="Cash on Delivery"
-              checked={form.paymentMethod === "Cash on Delivery"} onChange={handleChange} required />
-            <label className="form-check-label">Cash on Delivery</label>
-          </div>
-          <div className="form-check form-check-inline">
-            <input className="form-check-input" type="radio" name="paymentMethod" value="Online Payment"
-              checked={form.paymentMethod === "Online Payment"} onChange={handleChange} required />
-            <label className="form-check-label">Online Payment</label>
-          </div>
+          <label className="form-label">Upload Screenshot *</label>
+          <input type="file" accept="image/*" className="form-control dark-input" onChange={(e) => setScreenshotFile(e.target.files[0])} required />
         </div>
-
-        {/* Extra Fields for Online Payment */}
-        {form.paymentMethod === "Online Payment" && (
-          <>
-            <div className="col-md-6">
-              <label className="form-label">Account Title *</label>
-              <input type="text" className="form-control dark-input" name="accountTitle" value={form.accountTitle} onChange={handleChange} required />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Bank Name *</label>
-              <input type="text" className="form-control dark-input" name="bankName" value={form.bankName} onChange={handleChange} required />
-            </div>
-            <div className="col-12">
-              <label className="form-label">Upload Screenshot *</label>
-              <input type="file" accept="image/*" className="form-control dark-input" onChange={(e) => setScreenshotFile(e.target.files[0])} required />
-            </div>
-          </>
-        )}
 
         {/* Order Summary */}
         <div className="col-12 mt-4">
