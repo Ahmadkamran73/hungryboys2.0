@@ -154,7 +154,7 @@ const AdminCRUD = () => {
         <h4>Manage Orders</h4>
         <p>Click below to view and manage all orders in the Google Sheet.</p>
         <a
-          href="https://docs.google.com/spreadsheets/d/1lbjaiLA0qw0MpHiVQ5w8ovmKcT_2JwZf_7xDK6sXII4/edit?usp=drive_web" // Replace with your actual orders sheet URL
+          href="https://docs.google.com/spreadsheets/d/1_DLnrTlhehXlApq1jviG37-nKB_d8IC4XZZYHHkLdqM/edit?usp=sharing" // Replace with your actual orders sheet URL
           className="btn btn-danger w-100"
           target="_blank"
           rel="noopener noreferrer"
