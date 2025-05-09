@@ -156,11 +156,12 @@ const CheckOutForm = () => {
       screenshotURL: uploadedURL,
       cartItems: formatCartItems(cartItems),
       timestamp: formatDate(new Date().toISOString()),
+      
       recaptchaToken,
     };
 
     try {
-      await axios.post("http://localhost:5000/submit-order", order);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/submit-order`, order);
       clearCart();
       setSubmitted(true);
     } catch (err) {
