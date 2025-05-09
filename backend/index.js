@@ -63,7 +63,7 @@ app.post('/submit-order', async (req, res) => {
         order.deliveryCharge || '',
         order.itemTotal || '',
         order.grandTotal || '',
-        order.cartItems || '',  // No need to JSON.stringify twice; frontend already sends string
+        order.cartItems || '',  // Assuming frontend sends cartItems as a string
         new Date().toLocaleString('en-PK', {
           timeZone: 'Asia/Karachi',
           year: 'numeric',
@@ -76,7 +76,7 @@ app.post('/submit-order', async (req, res) => {
         order.accountTitle || '',
         order.bankName || '',
         order.screenshotURL || '',
-        order.specialInstruction || '',
+        order.specialInstructions || '',  // ✅ NEW FIELD ADDED HERE
       ],
     ];
 
