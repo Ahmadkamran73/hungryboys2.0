@@ -10,13 +10,13 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allow CORS only for specific origins
+// ✅ Explicit CORS setup for allowed frontend origins
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://www.hungryboys.live'
+  'https://www.hungryboys.live',
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -24,9 +24,13 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // ✅ Handle preflight requests
 
 app.use(bodyParser.json());
 
