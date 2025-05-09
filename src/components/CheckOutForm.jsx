@@ -156,7 +156,6 @@ const CheckOutForm = () => {
       screenshotURL: uploadedURL,
       cartItems: formatCartItems(cartItems),
       timestamp: formatDate(new Date().toISOString()),
-      specialInstruction,
       recaptchaToken,
     };
 
