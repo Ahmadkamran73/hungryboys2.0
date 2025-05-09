@@ -25,3 +25,5 @@ dist-ssr
 
 # .gitignore
 .env
+backend/credentials.json
+backend/.env

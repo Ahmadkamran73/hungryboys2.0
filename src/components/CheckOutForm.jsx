@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
+import ReCAPTCHA from "react-google-recaptcha";
 import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
@@ -15,9 +16,10 @@ const CheckOutForm = () => {
     phone: "",
     email: "",
     persons: 1,
-    paymentMethod: "Online Payment", // hardcoded
+    paymentMethod: "Online Payment",
     accountTitle: "",
     bankName: "",
+    specialInstruction: "", // <-- NEW FIELD
   });
 
   const [screenshotFile, setScreenshotFile] = useState(null);
@@ -25,9 +27,11 @@ const CheckOutForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +69,8 @@ const CheckOutForm = () => {
     });
     return Object.entries(grouped)
       .map(
-        ([restaurant, orders]) => `📍 ${restaurant}:\n  - ${orders.join("\n  - ")}`
+        ([restaurant, orders]) =>
+          `📍 ${restaurant}:\n  - ${orders.join("\n  - ")}`
       )
       .join("\n\n");
   };
@@ -81,10 +86,13 @@ const CheckOutForm = () => {
     data.append("file", compressedFile);
     data.append("upload_preset", uploadPreset);
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: "POST",
-      body: data,
-    });
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
 
     const cloudData = await res.json();
     return cloudData.secure_url;
@@ -122,6 +130,11 @@ const CheckOutForm = () => {
       return;
     }
 
+    if (!recaptchaToken) {
+      setError("Please complete the CAPTCHA.");
+      return;
+    }
+
     setError("");
     setLoading(true);
 
@@ -143,10 +156,11 @@ const CheckOutForm = () => {
       screenshotURL: uploadedURL,
       cartItems: formatCartItems(cartItems),
       timestamp: formatDate(new Date().toISOString()),
+      recaptchaToken,
     };
 
     try {
-      await axios.post("https://api.sheetbest.com/sheets/98798a0f-f89a-4d8b-b8b9-1017fcaa1dd1", order);
+      await axios.post("http://localhost:5000/submit-order", order);
       clearCart();
       setSubmitted(true);
     } catch (err) {
@@ -161,9 +175,7 @@ const CheckOutForm = () => {
       <div className="checkout-container text-center text-white">
         <h2>Thank you for shopping! 🎉</h2>
         <p>Your order has been placed successfully.</p>
-        <Link to="/restaurants" className="btn btn-danger mt-3">
-          Start Ordering
-        </Link>
+        <Link to="/restaurants" className="btn btn-danger mt-3">Start Ordering</Link>
       </div>
     );
   }
@@ -173,6 +185,7 @@ const CheckOutForm = () => {
       <h2 className="text-center text-white mb-4">🧾 Checkout</h2>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit} className="row g-3 text-white">
+
         {/* Basic Info */}
         <div className="col-md-6">
           <label className="form-label">First Name *</label>
@@ -206,17 +219,29 @@ const CheckOutForm = () => {
           <small className="text">Each delivery is Rs 130 per person</small>
         </div>
 
-        {/* Hidden Payment Method */}
+        {/* Special Instructions */}
+        <div className="col-12">
+          <label className="form-label">Special Instructions (Optional)</label>
+          <textarea
+            className="form-control dark-input"
+            name="specialInstruction"
+            placeholder="Any extra sauce, drinks, or requests?"
+            value={form.specialInstruction}
+            onChange={handleChange}
+            rows="3"
+          ></textarea>
+        </div>
+
+        {/* Payment Instructions */}
         <input type="hidden" name="paymentMethod" value="Online Payment" />
-
         <div className="col-12 text-white border p-3 rounded" style={{ backgroundColor: "#222" }}>
-              <strong>Pay to:</strong><br />
-              Account Title: Maratib Ali<br />
-              Bank: SadaPay<br />
-              Account Number: 03330374616
-            </div>
+          <strong>Pay to:</strong><br />
+          Account Title: Maratib Ali<br />
+          Bank: SadaPay<br />
+          Account Number: 03330374616
+        </div>
 
-        {/* Online Payment Fields - Always Visible */}
+        {/* Online Payment Info */}
         <div className="col-md-6">
           <label className="form-label">Account Title *</label>
           <input type="text" className="form-control dark-input" name="accountTitle" value={form.accountTitle} onChange={handleChange} required />
@@ -238,6 +263,14 @@ const CheckOutForm = () => {
             <li className="list-group-item bg-dark text-white">Delivery Charge: Rs {deliveryCharge}</li>
             <li className="list-group-item bg-dark text-white">Grand Total: Rs {grandTotal}</li>
           </ul>
+        </div>
+
+        {/* CAPTCHA */}
+        <div className="col-12 mt-3">
+          <ReCAPTCHA
+            sitekey={recaptchaSiteKey}
+            onChange={(token) => setRecaptchaToken(token)}
+          />
         </div>
 
         {/* Submit */}
