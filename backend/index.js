@@ -9,7 +9,25 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ✅ Allow CORS only for specific origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://www.hungryboys.live'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
+
 app.use(bodyParser.json());
 
 // ✅ Load credentials from base64-encoded environment variable
@@ -52,34 +70,31 @@ app.post('/submit-order', async (req, res) => {
     }
 
     // 2. Prepare data for Google Sheets
-    const orderData = [
-  [
-    order.firstName || '',
-    order.lastName || '',
-    order.room || '',
-    order.phone || '',
-    order.email || '',
-    order.persons || '',
-    order.deliveryCharge || '',
-    order.itemTotal || '',
-    order.grandTotal || '',
-    order.cartItems || '',
-    new Date().toLocaleString('en-PK', {
-      timeZone: 'Asia/Karachi',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }),
-    order.accountTitle || '',
-    order.bankName || '',
-    order.screenshotURL || '',
-    order.specialInstruction || '',  // ✅ Fixed here
-  ],
-];
-
+    const orderData = [[
+      order.firstName || '',
+      order.lastName || '',
+      order.room || '',
+      order.phone || '',
+      order.email || '',
+      order.persons || '',
+      order.deliveryCharge || '',
+      order.itemTotal || '',
+      order.grandTotal || '',
+      order.cartItems || '',
+      new Date().toLocaleString('en-PK', {
+        timeZone: 'Asia/Karachi',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+      order.accountTitle || '',
+      order.bankName || '',
+      order.screenshotURL || '',
+      order.specialInstruction || '',
+    ]];
 
     // 3. Append to the Google Sheet
     await sheets.spreadsheets.values.append({
