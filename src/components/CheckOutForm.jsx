@@ -188,7 +188,8 @@ const CheckOutForm = () => {
       
       // Also submit to backend API for backup/notification purposes
       try {
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/submit-order`, order);
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        await axios.post(`${backendUrl}/submit-order`, order);
       } catch (apiError) {
         console.warn('Backend API submission failed, but order was saved to Google Sheets:', apiError);
       }
