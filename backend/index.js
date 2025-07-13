@@ -17,6 +17,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'https://www.hungryboys.live',
   'https://hungryboys2-0.vercel.app',
+  'https://hungryboys-backend-production.up.railway.app',
 ];
 
 const corsOptions = {
