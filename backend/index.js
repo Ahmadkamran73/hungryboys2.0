@@ -58,7 +58,7 @@ const auth = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: 'v4', auth });
 
 // ✅ Google Sheets Configuration
-const SPREADSHEET_ID = process.env.SPREADSHEET_ID || '1VCvhWcx3vOtxeiPe5KuWuDIbWSKfvRZkv4Y1P_M6QuM';
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID ;
 
 // ✅ Root route
 app.get('/', (req, res) => {
