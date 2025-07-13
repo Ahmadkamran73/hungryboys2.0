@@ -1,0 +1,126 @@
+.unauthorized-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  padding: 2rem 0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+.unauthorized-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  padding: 3rem 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.unauthorized-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.unauthorized-title {
+  color: #dc3545;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.unauthorized-message {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.unauthorized-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.unauthorized-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.unauthorized-actions .btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.unauthorized-actions .btn-primary {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border: none;
+}
+
+.unauthorized-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.unauthorized-actions .btn-outline-secondary {
+  color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+}
+
+.unauthorized-actions .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .unauthorized-page {
+    padding: 1rem 0;
+  }
+  
+  .unauthorized-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .unauthorized-icon {
+    font-size: 3rem;
+  }
+  
+  .unauthorized-title {
+    font-size: 2rem;
+  }
+  
+  .unauthorized-message {
+    font-size: 1.1rem;
+  }
+  
+  .unauthorized-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .unauthorized-actions .btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .unauthorized-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .unauthorized-icon {
+    font-size: 2.5rem;
+  }
+  
+  .unauthorized-title {
+    font-size: 1.8rem;
+  }
+} 

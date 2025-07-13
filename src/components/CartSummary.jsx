@@ -32,7 +32,9 @@ const CartSummary = () => {
               <div>
                 <strong>{item.name}</strong>
                 <div className="text-muted small">
-                  <span className="text-white">Restaurant: {item.restaurantName}</span><br />
+                  <span className="text-white">
+                    {item.restaurantName === "Mart" ? "Mart" : `Restaurant: ${item.restaurantName}`}
+                  </span><br />
                   <span className="text-white">Single Price: Rs {item.price}</span><br />
                   <span className="text-white">Total Price: Rs {item.price * item.quantity}</span>
                 </div>

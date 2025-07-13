@@ -1,0 +1,75 @@
+.mart-items-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  padding: 2rem 0;
+  color: #ffffff;
+}
+
+.mart-items-title {
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.mart-item-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mart-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(220, 53, 69, 0.5);
+}
+
+.mart-item-card .card-title {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.mart-item-card .card-text {
+  color: #cccccc;
+}
+
+.mart-item-card .card-text strong {
+  color: #dc3545;
+  font-size: 1.2rem;
+}
+
+.mart-item-image {
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mart-item-card .card-body {
+  padding: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mart-items-title {
+    font-size: 2rem;
+  }
+  
+  .mart-item-card {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .mart-items-page {
+    padding: 1rem 0;
+  }
+  
+  .mart-items-title {
+    font-size: 1.8rem;
+  }
+} 

@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { useUniversity } from "../context/UniversityContext";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import ReCAPTCHA from "react-google-recaptcha";
+import { handleError } from "../utils/errorHandler";
+import { submitOrderToSheet } from "../utils/googleSheets";
 import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
   const { cartItems, clearCart, getTotalCost } = useCart();
+  const { user } = useAuth();
+  const { selectedUniversity, selectedCampus } = useUniversity();
 
   const [form, setForm] = useState({
     firstName: "",
@@ -28,6 +34,16 @@ const CheckOutForm = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
+
+  // Auto-fill email when user is logged in
+  useEffect(() => {
+    if (user && user.email) {
+      setForm(prev => ({
+        ...prev,
+        email: user.email
+      }));
+    }
+  }, [user]);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -125,6 +141,12 @@ const CheckOutForm = () => {
       return;
     }
 
+    // Check if university and campus are selected
+    if (!selectedUniversity || !selectedCampus) {
+      setError("Please select your university and campus from the navigation bar.");
+      return;
+    }
+
     if (!screenshotFile || !accountTitle || !bankName) {
       setError("Please complete all online payment fields.");
       return;
@@ -143,7 +165,8 @@ const CheckOutForm = () => {
       uploadedURL = await handleImageUpload(screenshotFile);
       setScreenshotURL(uploadedURL);
     } catch (err) {
-      setError("Screenshot upload failed. Try again.");
+      const handledError = handleError(err, 'CheckOutForm - imageUpload');
+      setError(handledError.message);
       setLoading(false);
       return;
     }
@@ -160,11 +183,21 @@ const CheckOutForm = () => {
     };
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/submit-order`, order);
+      // Submit to Google Sheets
+      await submitOrderToSheet(order, selectedUniversity.name, selectedCampus.name);
+      
+      // Also submit to backend API for backup/notification purposes
+      try {
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/submit-order`, order);
+      } catch (apiError) {
+        console.warn('Backend API submission failed, but order was saved to Google Sheets:', apiError);
+      }
+      
       clearCart();
       setSubmitted(true);
     } catch (err) {
-      setError("Failed to place order.");
+      const handledError = handleError(err, 'CheckOutForm - submitOrder');
+      setError(handledError.message);
     } finally {
       setLoading(false);
     }
@@ -184,6 +217,12 @@ const CheckOutForm = () => {
     <div className="checkout-container container-fluid py-4">
       <h2 className="text-center text-white mb-4">🧾 Checkout</h2>
       {error && <div className="alert alert-danger">{error}</div>}
+      
+      {loading && (
+        <div className="text-center mb-4">
+          <p className="text-white">Processing...</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="row g-3 text-white">
 
         {/* Basic Info */}
@@ -205,7 +244,14 @@ const CheckOutForm = () => {
         </div>
         <div className="col-12">
           <label className="form-label">Email Address (@cfd.nu.edu.pk) *</label>
-          <input type="email" className="form-control dark-input" name="email" value={form.email} onChange={handleChange} required />
+          <input 
+            type="email" 
+            className="form-control dark-input" 
+            name="email" 
+            value={form.email} 
+            readOnly 
+            required 
+          />
         </div>
 
         {/* Persons */}

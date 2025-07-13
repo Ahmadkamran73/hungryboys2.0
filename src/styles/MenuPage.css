@@ -4,6 +4,9 @@
     min-height: 100vh;
     padding-top: 2rem;
     padding-bottom: 2rem;
+    color: #ffffff;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   
   .menu-heading {
@@ -12,6 +15,11 @@
     font-size: 2.5rem;
     margin-bottom: 2rem;
     text-transform: uppercase;
+  }
+
+  /* Override Bootstrap text-muted for dark backgrounds */
+  .menu-page .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
   
   /* Stylish loader (similar to Restaurants page) */

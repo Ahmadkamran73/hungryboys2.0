@@ -1,0 +1,182 @@
+.mart-item-card {
+  background-color: #0d0d0d;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mart-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2);
+}
+
+.mart-item-image-container {
+  width: 100%;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: #f8f9fa;
+}
+
+.mart-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mart-item-card:hover .mart-item-image {
+  transform: scale(1.05);
+}
+
+.mart-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mart-item-title {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.mart-item-description {
+  color: #cccccc;
+  font-size: 0.85rem;
+  flex-grow: 1;
+  margin-bottom: 0.4rem;
+}
+
+.mart-item-category {
+  margin-bottom: 0.5rem;
+}
+
+.mart-item-price {
+  color: #ffffff;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+
+.mart-item-stock {
+  margin-bottom: 0.5rem;
+}
+
+.mart-item-cart-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.mart-item-add-btn {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.mart-item-add-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+}
+
+.mart-item-add-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.mart-item-counter-btn {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  border: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.mart-item-counter-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: scale(1.1);
+}
+
+.mart-item-counter-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mart-item-cart-section span {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 1rem;
+  min-width: 25px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .mart-item-card {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+  
+  .mart-item-image-container {
+    height: 120px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .mart-item-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .mart-item-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .mart-item-price {
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+  }
+  
+  .mart-item-cart-section {
+    margin-top: 0.5rem;
+  }
+  
+  .mart-item-add-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .mart-item-counter-btn {
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 0.8rem;
+  }
+} 

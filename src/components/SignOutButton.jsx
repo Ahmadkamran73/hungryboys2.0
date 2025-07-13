@@ -1,17 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { handleError } from "../utils/errorHandler";
 
 function SignOutButton() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
+    setLoading(true);
     try {
       await signOut(auth);
       navigate("/login");
     } catch (err) {
-      console.error("Error signing out:", err.message);
+      const handledError = handleError(err, 'SignOutButton - signOut');
+      console.error("Error signing out:", handledError);
+      // You could show a toast notification here
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -20,6 +27,7 @@ function SignOutButton() {
       <button
         onClick={handleSignOut}
         className="btn btn-outline-danger"
+        disabled={loading}
         style={{
           padding: "10px 30px",
           fontWeight: "bold",
@@ -29,7 +37,7 @@ function SignOutButton() {
           boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        🚪 Sign Out
+        {loading ? "Signing Out..." : "🚪 Sign Out"}
       </button>
     </div>
   );

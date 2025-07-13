@@ -1,7 +1,16 @@
 .custom-navbar {
   background-color: #f44336; /* Red */
-  padding-top: 0rem;
-  padding-bottom: 0rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  min-height: 90px; /* Increased height to prevent logo cutting */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030; /* High z-index for navbar */
+  width: 100%;
+  overflow: visible;
+  margin: 0;
 }
 
 .logo-img {
@@ -10,10 +19,347 @@
   border-radius: 50%;
   object-fit: cover;
   transform: scale(1.5); /* zoom in */
+  max-width: 100%;
+  overflow: hidden;
 }
 
-.logo-text{
+.logo-text {
   font-size: 30px;
   font-weight: 600;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+/* Navbar brand styling */
+.navbar-brand {
+  text-decoration: none;
+  transition: transform 0.3s ease;
+  overflow: visible;
+}
+
+.navbar-brand:hover {
+  transform: translateY(-1px);
+}
+
+/* Navigation links */
+.custom-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.25rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.custom-navbar .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.custom-navbar .nav-link.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dropdown styling */
+.custom-navbar .dropdown-menu {
+  background: rgba(33, 37, 41, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  margin-top: 0.5rem;
+  z-index: 1040 !important; /* Higher than navbar z-index */
+  position: absolute !important;
+  min-width: 200px;
+  max-width: 300px;
+  top: 100% !important;
+}
+
+/* Prevent body scroll when dropdown is open */
+body.dropdown-open {
+  overflow: hidden;
+}
+
+/* Ensure html and body have no unwanted spacing */
+html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Add padding to body to account for fixed navbar */
+body {
+  padding-top: 90px; /* Match navbar min-height */
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto; /* Allow vertical scrolling */
+}
+
+/* Ensure app container doesn't cause spacing issues */
+#root {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Ensure dropdown container has proper positioning */
+.custom-navbar .dropdown {
+  position: relative;
+  overflow: visible;
+}
+
+/* Dropdown positioning for different screen sizes */
+@media (min-width: 992px) {
+  .custom-navbar .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 0.5rem;
+    z-index: 1040 !important;
+  }
+  
+  /* Ensure dropdown is above other elements */
+  .custom-navbar .dropdown-menu.show {
+    display: block !important;
+    z-index: 1040 !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .custom-navbar .dropdown-menu {
+    position: static !important;
+    float: none;
+    width: 100%;
+    margin-top: 0.5rem;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: auto;
+  }
+  
+  .custom-navbar .dropdown-menu.show {
+    display: block !important;
+  }
+}
+
+.custom-navbar .dropdown-item {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 0.8rem;
+  transition: all 0.3s ease;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.custom-navbar .dropdown-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.custom-navbar .dropdown-item-text {
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.custom-navbar .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 0.3rem 0;
+}
+
+/* Dropdown toggle button */
+.custom-navbar .dropdown-toggle::after {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Navbar toggler for mobile */
+.custom-navbar .navbar-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.25rem 0.5rem;
+}
+
+.custom-navbar .navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.custom-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* University selector positioning */
+.custom-navbar .me-3 {
+  margin-right: 1rem !important;
+}
+
+/* Container spacing */
+.custom-navbar .container {
+  padding: 0 1rem;
+  max-width: 100%;
+  overflow: visible;
+}
+
+/* Navbar collapse */
+.custom-navbar .navbar-collapse {
+  flex-grow: 1;
+  overflow: visible;
+}
+
+/* Navbar nav container */
+.custom-navbar .navbar-nav {
+  overflow: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .custom-navbar .navbar-collapse {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+    overflow: visible;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .custom-navbar .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    margin: 0.2rem 0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .custom-navbar .navbar-nav {
+    margin-bottom: 0.75rem;
+  }
+  
+  .custom-navbar .navbar-nav.ms-auto {
+    margin-left: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.75rem;
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+  }
+  
+  .logo-img {
+    height: 35px;
+    width: 35px;
+  }
+  
+  /* Make university selector smaller on mobile */
+  .custom-navbar .me-3 {
+    margin-right: 0.5rem !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .custom-navbar {
+    padding: 0.4rem 0;
+    min-height: 65px; /* Reduced height for mobile */
+  }
+  
+  body {
+    padding-top: 65px; /* Match mobile navbar height */
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto; /* Allow vertical scrolling */
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+  }
+  
+  .logo-img {
+    height: 30px;
+    width: 30px;
+  }
+  
+  .custom-navbar .container {
+    padding: 0 0.4rem;
+  }
+  
+  .custom-navbar .me-3 {
+    margin-right: 0.4rem !important;
+  }
+  
+  /* Make navbar toggler smaller */
+  .custom-navbar .navbar-toggler {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .logo-text {
+    font-size: 0.9rem;
+  }
+  
+  .logo-img {
+    height: 25px;
+    width: 25px;
+  }
+  
+  .custom-navbar .navbar-brand {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .custom-navbar .ms-2 {
+    margin-left: 0 !important;
+    margin-top: 0.2rem;
+  }
+  
+  .custom-navbar {
+    min-height: 60px;
+  }
+  
+  body {
+    padding-top: 60px;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto; /* Allow vertical scrolling */
+  }
+}
+
+/* Animation for dropdown */
+.dropdown-menu.show {
+  animation: dropdownFadeIn 0.3s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+.custom-navbar .nav-link:focus,
+.custom-navbar .dropdown-toggle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Active link indicator */
+.custom-navbar .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 1px;
 }

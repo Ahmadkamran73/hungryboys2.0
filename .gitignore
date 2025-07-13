@@ -27,4 +27,3 @@ dist-ssr
 .env
 backend/credentials.json
 backend/.env
-backend/base64.txt

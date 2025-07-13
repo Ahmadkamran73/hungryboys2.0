@@ -24,7 +24,7 @@ export const storage = getStorage(app); // ✅ Required for screenshot uploads
 // Set auth persistence to session only
 setPersistence(auth, browserSessionPersistence)
   .then(() => {
-    console.log("Firebase auth persistence set to 'session'");
+    
   })
   .catch((error) => {
     console.error("Failed to set session persistence:", error);

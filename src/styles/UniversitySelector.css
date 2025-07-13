@@ -1,0 +1,181 @@
+.university-selector-container {
+  position: relative;
+  display: inline-block;
+}
+
+.university-selector-btn {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.university-selector-btn:hover,
+.university-selector-btn:focus {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.university-selector-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.university-dropdown {
+  background-color: rgba(33, 37, 41, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.4rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  margin-top: 0.3rem;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-section {
+  padding: 0.5rem 0;
+}
+
+.dropdown-section:not(:last-child) {
+  border-bottom: 1px solid #333;
+}
+
+.dropdown-header {
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.8;
+}
+
+.dropdown-item {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+  width: 100%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: #1a1a1a !important;
+  color: #e4002b !important;
+}
+
+.dropdown-item.active {
+  background-color: #e4002b !important;
+  color: #ffffff !important;
+}
+
+.dropdown-item.active:hover {
+  background-color: #d60000 !important;
+  color: #ffffff !important;
+}
+
+.dropdown-item.text-danger {
+  color: #e4002b !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #1a1a1a !important;
+  color: #ff4444 !important;
+}
+
+.dropdown-item.text-muted {
+  color: #888 !important;
+  cursor: default;
+}
+
+.dropdown-item.text-muted:hover {
+  background-color: transparent !important;
+  color: #888 !important;
+}
+
+.dropdown-divider {
+  border-top: 1px solid #333;
+  margin: 0.5rem 0;
+}
+
+.campus-name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+/* Scrollbar styling for the dropdown */
+.university-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.university-dropdown::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+.university-dropdown::-webkit-scrollbar-thumb {
+  background: #e4002b;
+  border-radius: 3px;
+}
+
+.university-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #d60000;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .university-selector-btn {
+    min-width: 140px;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .university-dropdown {
+    min-width: 180px;
+    max-height: 250px;
+  }
+  
+  .dropdown-item {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .dropdown-header {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* Animation for dropdown */
+.university-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

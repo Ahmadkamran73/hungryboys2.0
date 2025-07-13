@@ -2,10 +2,32 @@
     background-color: #121212;
     min-height: 100vh;
     padding: 2rem;
+    color: #ffffff;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   
   .restaurants-title {
     font-size: 2.2rem;
     color: #F44336;
+  }
+
+  /* Override Bootstrap text-muted for dark backgrounds */
+  .restaurants-page .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Ensure all text is visible */
+  .restaurants-page h1,
+  .restaurants-page h2,
+  .restaurants-page h3,
+  .restaurants-page h4,
+  .restaurants-page h5,
+  .restaurants-page h6 {
+    color: #ffffff;
+  }
+
+  .restaurants-page p {
+    color: rgba(255, 255, 255, 0.9);
   }
   

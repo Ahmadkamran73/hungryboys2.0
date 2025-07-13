@@ -18,6 +18,10 @@ const AdminCRUD = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [menuForm, setMenuForm] = useState({ name: "", price: "", id: null });
 
+  // Domain management state
+  const [domains, setDomains] = useState([]);
+  const [domainForm, setDomainForm] = useState({ name: "", domain: "", id: null });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,8 +51,23 @@ const AdminCRUD = () => {
     setLoading(false);
   };
 
+  // Fetch allowed domains
+  const fetchDomains = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const querySnapshot = await getDocs(collection(db, "allowedDomains"));
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDomains(data);
+    } catch (err) {
+      setError("Failed to fetch domains.");
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchRestaurants();
+    fetchDomains();
   }, []);
 
   const handleRestaurantSubmit = async (e) => {
@@ -142,6 +161,45 @@ const AdminCRUD = () => {
     setLoading(false);
   };
 
+  // Domain management functions
+  const handleDomainSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const domainData = {
+        name: domainForm.name,
+        domain: domainForm.domain.startsWith('@') ? domainForm.domain : `@${domainForm.domain}`,
+      };
+
+      if (domainForm.id) {
+        await updateDoc(doc(db, "allowedDomains", domainForm.id), domainData);
+      } else {
+        await addDoc(collection(db, "allowedDomains"), domainData);
+      }
+
+      setDomainForm({ name: "", domain: "", id: null });
+      fetchDomains();
+    } catch (err) {
+      setError("Failed to save domain.");
+    }
+    setLoading(false);
+  };
+
+  const handleDomainEdit = (domain) => {
+    setDomainForm(domain);
+  };
+
+  const handleDomainDelete = async (id) => {
+    setLoading(true);
+    try {
+      await deleteDoc(doc(db, "allowedDomains", id));
+      fetchDomains();
+    } catch (err) {
+      setError("Failed to delete domain.");
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="container py-4">
       <h1 className="text-center mb-4">🍽️ Admin Dashboard</h1>
@@ -154,13 +212,76 @@ const AdminCRUD = () => {
         <h4>Manage Orders</h4>
         <p>Click below to view and manage all orders in the Google Sheet.</p>
         <a
-          href="https://docs.google.com/spreadsheets/d/19XmKUHo3RPAZReFbA4Sfr0G48y1KIFvkFGeVm8xYQpA/edit?usp=sharing" // Replace with your actual orders sheet URL
+          href="https://docs.google.com/spreadsheets/d/19XmKUHo3RPAZReFbA4Sfr0G48y1KIFvkFGeVm8xYQpA/edit?usp=sharing"
           className="btn btn-danger w-100"
           target="_blank"
           rel="noopener noreferrer"
         >
           View Orders
         </a>
+      </div>
+
+      {/* Domain Management Section */}
+      <div className="card p-4 mb-4">
+        <h4>🔐 Manage Allowed Email Domains</h4>
+        <p className="text-muted">Add or remove university email domains that are allowed for user registration.</p>
+        
+        <form onSubmit={handleDomainSubmit} className="row g-2 mb-3">
+          <div className="col-md-5">
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="Campus Name (e.g., CFD Campus)" 
+              required
+              value={domainForm.name}
+              onChange={(e) => setDomainForm({ ...domainForm, name: e.target.value })}
+            />
+          </div>
+          <div className="col-md-5">
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="Domain (e.g., cfd.nu.edu.pk)" 
+              required
+              value={domainForm.domain}
+              onChange={(e) => setDomainForm({ ...domainForm, domain: e.target.value })}
+            />
+          </div>
+          <div className="col-md-2">
+            <button type="submit" className="btn btn-primary w-100">
+              {domainForm.id ? "Update" : "Add"}
+            </button>
+          </div>
+        </form>
+
+        <div className="row">
+          {domains.map(domain => (
+            <div className="col-md-6 mb-2" key={domain.id}>
+              <div className="card p-3 shadow-sm">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="mb-1">{domain.name}</h6>
+                    <small className="text-muted">{domain.domain}</small>
+                  </div>
+                  <div>
+                    <button 
+                      className="btn btn-sm btn-outline-primary me-2" 
+                      onClick={() => handleDomainEdit(domain)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="btn btn-sm btn-outline-danger" 
+                      onClick={() => handleDomainDelete(domain.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Restaurant Form */}
