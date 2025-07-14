@@ -50,6 +50,8 @@ const SuperAdmin = () => {
   const [filterUniversity, setFilterUniversity] = useState("");
   const [filterCampus, setFilterCampus] = useState("");
   const [filterRestaurant, setFilterRestaurant] = useState("");
+  const [filterUserRole, setFilterUserRole] = useState("");
+  const [searchUser, setSearchUser] = useState("");
 
   // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState({
@@ -700,6 +702,37 @@ const SuperAdmin = () => {
     return allRestaurants.filter(r => r.campusId === campusId);
   };
 
+  const getFilteredUsers = () => {
+    let filteredUsers = users;
+
+    // Filter by role
+    if (filterUserRole) {
+      filteredUsers = filteredUsers.filter(user => user.role === filterUserRole);
+    }
+
+    // Filter by university
+    if (filterUniversity) {
+      filteredUsers = filteredUsers.filter(user => user.universityId === filterUniversity);
+    }
+
+    // Filter by campus
+    if (filterCampus) {
+      filteredUsers = filteredUsers.filter(user => user.campusId === filterCampus);
+    }
+
+    // Filter by search term
+    if (searchUser) {
+      const searchTerm = searchUser.toLowerCase();
+      filteredUsers = filteredUsers.filter(user => 
+        user.firstName?.toLowerCase().includes(searchTerm) ||
+        user.lastName?.toLowerCase().includes(searchTerm) ||
+        user.email?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return filteredUsers;
+  };
+
   // Statistics
   const getStats = () => {
     const totalCampuses = campuses.length;
@@ -1105,6 +1138,157 @@ const SuperAdmin = () => {
                 <div className="tab-pane fade show active">
                   <h3>User Management</h3>
                   
+                  {/* User Filters */}
+                  <div className="card mb-4">
+                    <div className="card-header">
+                      <h5 className="mb-0">Filters</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row g-3">
+                        <div className="col-md-3">
+                          <label className="form-label">Search Users</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search by name or email..."
+                            value={searchUser}
+                            onChange={(e) => setSearchUser(e.target.value)}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Role</label>
+                          <select
+                            className="form-select"
+                            value={filterUserRole}
+                            onChange={(e) => setFilterUserRole(e.target.value)}
+                          >
+                            <option value="">All Roles</option>
+                            <option value="user">Basic User</option>
+                            <option value="campusAdmin">Campus Admin</option>
+                            <option value="superAdmin">Super Admin</option>
+                          </select>
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">University</label>
+                          <select
+                            className="form-select"
+                            value={filterUniversity}
+                            onChange={(e) => {
+                              setFilterUniversity(e.target.value);
+                              setFilterCampus("");
+                            }}
+                          >
+                            <option value="">All Universities</option>
+                            {universities.map(uni => (
+                              <option key={uni.id} value={uni.id}>{uni.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Campus</label>
+                          <select
+                            className="form-select"
+                            value={filterCampus}
+                            onChange={(e) => setFilterCampus(e.target.value)}
+                            disabled={!filterUniversity}
+                          >
+                            <option value="">All Campuses</option>
+                            {filterUniversity && getCampusesForUniversity(filterUniversity).map(campus => (
+                              <option key={campus.id} value={campus.id}>{campus.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Actions</label>
+                          <div>
+                            <button 
+                              className="btn btn-outline-secondary btn-sm"
+                              onClick={() => {
+                                setFilterUserRole("");
+                                setFilterUniversity("");
+                                setFilterCampus("");
+                                setSearchUser("");
+                              }}
+                            >
+                              Clear Filters
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* User Statistics Cards */}
+                  <div className="row mb-4">
+                    <div className="col-md-3 mb-3">
+                      <div className="card text-center bg-primary text-white">
+                        <div className="card-body">
+                          <h4 className="card-title">{users.filter(u => u.role === "user").length}</h4>
+                          <p className="card-text">Basic Users</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="card text-center bg-warning text-white">
+                        <div className="card-body">
+                          <h4 className="card-title">{users.filter(u => u.role === "campusAdmin").length}</h4>
+                          <p className="card-text">Campus Admins</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="card text-center bg-danger text-white">
+                        <div className="card-body">
+                          <h4 className="card-title">{users.filter(u => u.role === "superAdmin").length}</h4>
+                          <p className="card-text">Super Admins</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="card text-center bg-success text-white">
+                        <div className="card-body">
+                          <h4 className="card-title">{getFilteredUsers().length}</h4>
+                          <p className="card-text">Filtered Results</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Filter Buttons */}
+                  <div className="card mb-4">
+                    <div className="card-header">
+                      <h5 className="mb-0">Quick Filters</h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="d-flex gap-2 flex-wrap">
+                        <button 
+                          className={`btn ${filterUserRole === "" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setFilterUserRole("")}
+                        >
+                          All Users ({users.length})
+                        </button>
+                        <button 
+                          className={`btn ${filterUserRole === "user" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setFilterUserRole("user")}
+                        >
+                          Basic Users ({users.filter(u => u.role === "user").length})
+                        </button>
+                        <button 
+                          className={`btn ${filterUserRole === "campusAdmin" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setFilterUserRole("campusAdmin")}
+                        >
+                          Campus Admins ({users.filter(u => u.role === "campusAdmin").length})
+                        </button>
+                        <button 
+                          className={`btn ${filterUserRole === "superAdmin" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setFilterUserRole("superAdmin")}
+                        >
+                          Super Admins ({users.filter(u => u.role === "superAdmin").length})
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
                   {/* Create User Form */}
                   <div className="card mb-4">
                     <div className="card-header">
@@ -1209,6 +1393,18 @@ const SuperAdmin = () => {
                   </div>
 
                   <div className="table-responsive">
+                    {/* Filter Status */}
+                    {(filterUserRole || filterUniversity || filterCampus || searchUser) && (
+                      <div className="alert alert-info mb-3">
+                        <strong>Active Filters:</strong>
+                        {searchUser && <span className="badge bg-dark me-2">Search: "{searchUser}"</span>}
+                        {filterUserRole && <span className="badge bg-primary me-2">Role: {filterUserRole}</span>}
+                        {filterUniversity && <span className="badge bg-secondary me-2">University: {universities.find(u => u.id === filterUniversity)?.name}</span>}
+                        {filterCampus && <span className="badge bg-info me-2">Campus: {campuses.find(c => c.id === filterCampus)?.name}</span>}
+                        <span className="badge bg-success">Showing {getFilteredUsers().length} of {users.length} users</span>
+                      </div>
+                    )}
+                    
                     <table className="table table-striped">
                       <thead>
                         <tr>
@@ -1222,23 +1418,52 @@ const SuperAdmin = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {users.map(user => (
+                        {getFilteredUsers().length === 0 ? (
+                          <tr>
+                            <td colSpan="7" className="text-center text-muted py-4">
+                              <i className="fas fa-search me-2"></i>
+                              No users found matching the current filters.
+                            </td>
+                          </tr>
+                        ) : (
+                          getFilteredUsers().map(user => (
                           <tr key={user.id}>
                             <td>{user.firstName} {user.lastName}</td>
                             <td>{user.email}</td>
                             <td>
-                              <select
-                                className="form-select form-select-sm"
-                                value={user.role || "user"}
-                                onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                              >
-                                <option value="user">User</option>
-                                <option value="campusAdmin">Campus Admin</option>
-                                <option value="superAdmin">Super Admin</option>
-                              </select>
+                              <div className="d-flex align-items-center gap-2">
+                                <span className={`badge ${
+                                  user.role === "superAdmin" ? "bg-danger" : 
+                                  user.role === "campusAdmin" ? "bg-warning" : "bg-secondary"
+                                }`}>
+                                  {user.role === "user" ? "Basic User" : 
+                                   user.role === "campusAdmin" ? "Campus Admin" : "Super Admin"}
+                                </span>
+                                <select
+                                  className="form-select form-select-sm"
+                                  value={user.role || "user"}
+                                  onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                                >
+                                  <option value="user">User</option>
+                                  <option value="campusAdmin">Campus Admin</option>
+                                  <option value="superAdmin">Super Admin</option>
+                                </select>
+                              </div>
                             </td>
-                            <td>{user.universityName || "N/A"}</td>
-                            <td>{user.campusName || "N/A"}</td>
+                            <td>
+                              {user.universityName ? (
+                                <span className="badge bg-primary">{user.universityName}</span>
+                              ) : (
+                                <span className="text-muted">N/A</span>
+                              )}
+                            </td>
+                            <td>
+                              {user.campusName ? (
+                                <span className="badge bg-info">{user.campusName}</span>
+                              ) : (
+                                <span className="text-muted">N/A</span>
+                              )}
+                            </td>
                             <td>
                               {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
                             </td>
@@ -1252,7 +1477,8 @@ const SuperAdmin = () => {
                               </button>
                             </td>
                           </tr>
-                        ))}
+                        ))
+                        )}
                       </tbody>
                     </table>
                   </div>
