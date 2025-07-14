@@ -12,7 +12,7 @@ import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
   const { cartItems, clearCart, getTotalCost } = useCart();
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const { selectedUniversity, selectedCampus } = useUniversity();
 
   const [form, setForm] = useState({
@@ -35,22 +35,39 @@ const CheckOutForm = () => {
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
 
-  // Auto-fill email when user is logged in
+  // Auto-fill email, firstName, lastName when user is logged in
   useEffect(() => {
-    if (user && user.email) {
-      setForm(prev => ({
-        ...prev,
-        email: user.email
-      }));
-    }
-  }, [user]);
+    setForm(prev => ({
+      ...prev,
+      email: user?.email || prev.email,
+      firstName: userData?.firstName || prev.firstName,
+      lastName: userData?.lastName || prev.lastName,
+    }));
+  }, [user, userData]);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
+  // Phone number validation for Pakistani format: 0300-0000000
+  const isPhoneValid = (phone) => {
+    return /^03\d{2}-\d{7}$/.test(phone);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Auto-format phone number
+    if (name === "phone") {
+      // Remove all non-digits
+      let digits = value.replace(/\D/g, "");
+      if (digits.length > 11) digits = digits.slice(0, 11);
+      let formatted = digits;
+      if (digits.length > 4) {
+        formatted = digits.slice(0, 4) + "-" + digits.slice(4);
+      }
+      setForm((prev) => ({ ...prev, phone: formatted }));
+      return;
+    }
     setForm((prev) => ({
       ...prev,
       [name]: name === "persons" ? Math.max(1, +value) : value,
@@ -133,6 +150,11 @@ const CheckOutForm = () => {
 
     if (!firstName || !lastName || !phone || !email) {
       setError("Please fill in all required fields.");
+      return;
+    }
+
+    if (!isPhoneValid(phone)) {
+      setError("Phone number must be in Pakistani format: 0300-0000000");
       return;
     }
 
@@ -229,11 +251,11 @@ const CheckOutForm = () => {
         {/* Basic Info */}
         <div className="col-md-6">
           <label className="form-label">First Name *</label>
-          <input type="text" className="form-control dark-input" name="firstName" value={form.firstName} onChange={handleChange} required />
+          <input type="text" className="form-control dark-input" name="firstName" value={form.firstName} onChange={handleChange} required autoComplete="given-name" />
         </div>
         <div className="col-md-6">
           <label className="form-label">Last Name *</label>
-          <input type="text" className="form-control dark-input" name="lastName" value={form.lastName} onChange={handleChange} required />
+          <input type="text" className="form-control dark-input" name="lastName" value={form.lastName} onChange={handleChange} required autoComplete="family-name" />
         </div>
         <div className="col-md-6">
           <label className="form-label">Hostel Room Number</label>
@@ -241,7 +263,19 @@ const CheckOutForm = () => {
         </div>
         <div className="col-md-6">
           <label className="form-label">Phone Number *</label>
-          <input type="tel" className="form-control dark-input" name="phone" value={form.phone} onChange={handleChange} required />
+          <input
+            type="tel"
+            className="form-control dark-input"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            required
+            pattern="03[0-9]{2}-[0-9]{7}"
+            maxLength={12}
+            placeholder="0300-0000000"
+            inputMode="numeric"
+            autoComplete="tel"
+          />
         </div>
         <div className="col-12">
           <label className="form-label">Email Address (@cfd.nu.edu.pk) *</label>
