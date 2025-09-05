@@ -13,6 +13,37 @@ import "../styles/CampusAdmin.css";
 const CampusAdmin = () => {
   const { universityId, campusId } = useParams();
   const { userData } = useAuth();
+
+  // Helper functions for time conversion
+  const convertTo24Hour = (time12h) => {
+    if (!time12h) return "10:00";
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    hours = parseInt(hours);
+    
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    } else if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  const convertTo12Hour = (time24h) => {
+    if (!time24h) return "10:00 AM";
+    const [hours, minutes] = time24h.split(':');
+    let hour = parseInt(hours);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    
+    if (hour === 0) {
+      hour = 12;
+    } else if (hour > 12) {
+      hour -= 12;
+    }
+    
+    return `${hour}:${minutes} ${period}`;
+  };
   const [restaurants, setRestaurants] = useState([]);
   const [martItems, setMartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +53,15 @@ const CampusAdmin = () => {
   const [menuItems, setMenuItems] = useState([]);
 
   // Form states
-  const [restaurantForm, setRestaurantForm] = useState({ name: "", location: "", cuisine: "", id: null });
+  const [restaurantForm, setRestaurantForm] = useState({ 
+    name: "", 
+    location: "", 
+    cuisine: "", 
+    openTime: "10:00 AM",
+    closeTime: "10:00 PM",
+    is24x7: true,
+    id: null 
+  });
   const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", id: null });
   const [martItemForm, setMartItemForm] = useState({ name: "", price: "", description: "", category: "", stock: "", id: null });
 
@@ -160,6 +199,9 @@ const CampusAdmin = () => {
         name: restaurantForm.name,
         location: restaurantForm.location,
         cuisine: restaurantForm.cuisine,
+        openTime: restaurantForm.openTime || "10:00 AM",
+        closeTime: restaurantForm.closeTime || "10:00 PM",
+        is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
       };
 
       if (restaurantForm.id) {
@@ -168,7 +210,15 @@ const CampusAdmin = () => {
         await addDoc(collection(db, "universities", universityId, "campuses", campusId, "restaurants"), restaurantData);
       }
 
-      setRestaurantForm({ name: "", location: "", cuisine: "", id: null });
+      setRestaurantForm({ 
+        name: "", 
+        location: "", 
+        cuisine: "", 
+        openTime: "10:00 AM",
+        closeTime: "10:00 PM",
+        is24x7: true,
+        id: null 
+      });
       fetchData();
     } catch (err) {
       const handledError = handleError(err, 'CampusAdmin - saveRestaurant');
@@ -180,7 +230,12 @@ const CampusAdmin = () => {
   };
 
   const handleRestaurantEdit = (restaurant) => {
-    setRestaurantForm(restaurant);
+    setRestaurantForm({
+      ...restaurant,
+      openTime: restaurant.openTime || "10:00 AM",
+      closeTime: restaurant.closeTime || "10:00 PM",
+      is24x7: restaurant.is24x7 !== undefined ? restaurant.is24x7 : true,
+    });
     setSelectedRestaurant(restaurant);
     fetchMenuItems(restaurant.id);
   };
@@ -434,6 +489,44 @@ const CampusAdmin = () => {
                             onChange={(e) => setRestaurantForm({ ...restaurantForm, cuisine: e.target.value })}
                           />
                         </div>
+                        
+                        {/* Restaurant Timing Fields */}
+                        <div className="col-md-3">
+                          <label className="form-label">Opening Time</label>
+                          <input
+                            type="time"
+                            className="form-control"
+                            value={convertTo24Hour(restaurantForm.openTime || "10:00 AM")}
+                            onChange={(e) => setRestaurantForm({...restaurantForm, openTime: convertTo12Hour(e.target.value)})}
+                            disabled={restaurantForm.is24x7}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Closing Time</label>
+                          <input
+                            type="time"
+                            className="form-control"
+                            value={convertTo24Hour(restaurantForm.closeTime || "10:00 PM")}
+                            onChange={(e) => setRestaurantForm({...restaurantForm, closeTime: convertTo12Hour(e.target.value)})}
+                            disabled={restaurantForm.is24x7}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Operating Hours</label>
+                          <div className="form-check form-switch">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              id="is24x7-campus"
+                              checked={restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true}
+                              onChange={(e) => setRestaurantForm({...restaurantForm, is24x7: e.target.checked})}
+                            />
+                            <label className="form-check-label" htmlFor="is24x7-campus">
+                              24/7 Open
+                            </label>
+                          </div>
+                        </div>
+                        
                         <div className="col-12">
                           <button type="submit" className="btn btn-primary">
                             {restaurantForm.id ? "Update Restaurant" : "Add Restaurant"}

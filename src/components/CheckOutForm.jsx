@@ -8,6 +8,7 @@ import imageCompression from "browser-image-compression";
 import ReCAPTCHA from "react-google-recaptcha";
 import { handleError } from "../utils/errorHandler";
 import { submitOrderToSheet } from "../utils/googleSheets";
+import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
@@ -205,6 +206,29 @@ const CheckOutForm = () => {
     };
 
     try {
+      // Check if any restaurants in the cart are closed
+      const closedRestaurants = [];
+      for (const item of cartItems) {
+        if (item.restaurantData && !isRestaurantOpen(item.restaurantData)) {
+          const nextOpeningTime = getNextOpeningTime(item.restaurantData);
+          closedRestaurants.push({
+            name: item.restaurantName,
+            nextOpeningTime: nextOpeningTime
+          });
+        }
+      }
+
+      if (closedRestaurants.length > 0) {
+        const closedRestaurant = closedRestaurants[0]; // Show first closed restaurant
+        const message = closedRestaurant.nextOpeningTime 
+          ? `Sorry, ${closedRestaurant.name} is currently closed. Please order after ${closedRestaurant.nextOpeningTime}.`
+          : `Sorry, ${closedRestaurant.name} is currently closed.`;
+        
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
       // Submit to Google Sheets
       await submitOrderToSheet(order, selectedUniversity.name, selectedCampus.name);
       

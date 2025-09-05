@@ -16,6 +16,7 @@ const MenuPage = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [restaurantName, setRestaurantName] = useState("");
+  const [restaurantData, setRestaurantData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,6 +46,7 @@ const MenuPage = () => {
         if (restaurantSnap.exists()) {
           const restaurantData = restaurantSnap.data();
           setRestaurantName(restaurantData.name || "Unknown Restaurant");
+          setRestaurantData(restaurantData);
         } else {
           setError("Restaurant not found at this campus.");
           setLoading(false);
@@ -154,6 +156,9 @@ const MenuPage = () => {
                     photoURL={item.photoURL}
                     description={item.description}
                     campusId={selectedCampus?.id}
+                    openTime={restaurantData?.openTime}
+                    closeTime={restaurantData?.closeTime}
+                    is24x7={restaurantData?.is24x7}
                   />
                 </div>
               ))

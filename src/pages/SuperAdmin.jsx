@@ -23,6 +23,37 @@ import "../styles/SuperAdmin.css";
 
 const SuperAdmin = () => {
   const { userData } = useAuth();
+
+  // Helper functions for time conversion
+  const convertTo24Hour = (time12h) => {
+    if (!time12h) return "10:00";
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    hours = parseInt(hours);
+    
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    } else if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  const convertTo12Hour = (time24h) => {
+    if (!time24h) return "10:00 AM";
+    const [hours, minutes] = time24h.split(':');
+    let hour = parseInt(hours);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    
+    if (hour === 0) {
+      hour = 12;
+    } else if (hour > 12) {
+      hour -= 12;
+    }
+    
+    return `${hour}:${minutes} ${period}`;
+  };
   const [universities, setUniversities] = useState([]);
   const [campuses, setCampuses] = useState([]);
   const [users, setUsers] = useState([]);
@@ -37,7 +68,17 @@ const SuperAdmin = () => {
   // Form states
   const [universityForm, setUniversityForm] = useState({ name: "", id: null });
   const [campusForm, setCampusForm] = useState({ name: "", universityId: "", id: null });
-  const [restaurantForm, setRestaurantForm] = useState({ name: "", location: "", cuisine: "", universityId: "", campusId: "", id: null });
+  const [restaurantForm, setRestaurantForm] = useState({ 
+    name: "", 
+    location: "", 
+    cuisine: "", 
+    universityId: "", 
+    campusId: "", 
+    openTime: "10:00 AM",
+    closeTime: "10:00 PM",
+    is24x7: true,
+    id: null 
+  });
   const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null });
   const [martItemForm, setMartItemForm] = useState({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null });
   const [domainForm, setDomainForm] = useState({ name: "", domain: "", universityId: "", campusId: "", id: null });
@@ -437,15 +478,31 @@ const SuperAdmin = () => {
           name: restaurantForm.name,
           location: restaurantForm.location,
           cuisine: restaurantForm.cuisine,
+          openTime: restaurantForm.openTime || "10:00 AM",
+          closeTime: restaurantForm.closeTime || "10:00 PM",
+          is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
         });
       } else {
         await addDoc(collection(db, "universities", restaurantForm.universityId, "campuses", restaurantForm.campusId, "restaurants"), {
           name: restaurantForm.name,
           location: restaurantForm.location,
           cuisine: restaurantForm.cuisine,
+          openTime: restaurantForm.openTime || "10:00 AM",
+          closeTime: restaurantForm.closeTime || "10:00 PM",
+          is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
         });
       }
-      setRestaurantForm({ name: "", location: "", cuisine: "", universityId: "", campusId: "", id: null });
+      setRestaurantForm({ 
+        name: "", 
+        location: "", 
+        cuisine: "", 
+        universityId: "", 
+        campusId: "", 
+        openTime: "10:00 AM",
+        closeTime: "10:00 PM",
+        is24x7: true,
+        id: null 
+      });
       fetchAllData();
     } catch (err) {
       setError("Failed to save restaurant");
@@ -456,7 +513,12 @@ const SuperAdmin = () => {
   };
 
   const handleRestaurantEdit = (restaurant) => {
-    setRestaurantForm(restaurant);
+    setRestaurantForm({
+      ...restaurant,
+      openTime: restaurant.openTime || "10:00 AM",
+      closeTime: restaurant.closeTime || "10:00 PM",
+      is24x7: restaurant.is24x7 !== undefined ? restaurant.is24x7 : true,
+    });
   };
 
   const handleRestaurantDelete = async (restaurant) => {
@@ -1439,15 +1501,15 @@ const SuperAdmin = () => {
                                   {user.role === "user" ? "Basic User" : 
                                    user.role === "campusAdmin" ? "Campus Admin" : "Super Admin"}
                                 </span>
-                                <select
-                                  className="form-select form-select-sm"
-                                  value={user.role || "user"}
-                                  onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                                >
-                                  <option value="user">User</option>
-                                  <option value="campusAdmin">Campus Admin</option>
-                                  <option value="superAdmin">Super Admin</option>
-                                </select>
+                              <select
+                                className="form-select form-select-sm"
+                                value={user.role || "user"}
+                                onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                              >
+                                <option value="user">User</option>
+                                <option value="campusAdmin">Campus Admin</option>
+                                <option value="superAdmin">Super Admin</option>
+                              </select>
                               </div>
                             </td>
                             <td>
@@ -1620,6 +1682,48 @@ const SuperAdmin = () => {
                               required
                             />
                           </div>
+                        </div>
+                        
+                        {/* Restaurant Timing Fields */}
+                        <div className="row g-3 mt-2">
+                          <div className="col-md-3">
+                            <label className="form-label">Opening Time</label>
+                            <input
+                              type="time"
+                              className="form-control"
+                              value={convertTo24Hour(restaurantForm.openTime || "10:00 AM")}
+                              onChange={(e) => setRestaurantForm({...restaurantForm, openTime: convertTo12Hour(e.target.value)})}
+                              disabled={restaurantForm.is24x7}
+                            />
+                          </div>
+                          <div className="col-md-3">
+                            <label className="form-label">Closing Time</label>
+                            <input
+                              type="time"
+                              className="form-control"
+                              value={convertTo24Hour(restaurantForm.closeTime || "10:00 PM")}
+                              onChange={(e) => setRestaurantForm({...restaurantForm, closeTime: convertTo12Hour(e.target.value)})}
+                              disabled={restaurantForm.is24x7}
+                            />
+                          </div>
+                          <div className="col-md-3">
+                            <label className="form-label">Operating Hours</label>
+                            <div className="form-check form-switch">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id="is24x7"
+                                checked={restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true}
+                                onChange={(e) => setRestaurantForm({...restaurantForm, is24x7: e.target.checked})}
+                              />
+                              <label className="form-check-label" htmlFor="is24x7">
+                                24/7 Open
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="row g-3 mt-2">
                           <div className="col-12">
                             <button type="submit" className="btn btn-primary me-2">
                               {restaurantForm.id ? "Update Restaurant" : "Add Restaurant"}

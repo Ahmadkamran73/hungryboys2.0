@@ -23,7 +23,7 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   // Add an item to the cart with authentication and campus check
-  const addToCart = (item, restaurantName, itemCampusId = null) => {
+  const addToCart = (item, restaurantName, itemCampusId = null, restaurantData = null) => {
     // Check if user is authenticated
     if (!user) {
       // Redirect to login page
@@ -56,6 +56,7 @@ export const CartProvider = ({ children }) => {
             quantity: 1,
             restaurantName: restaurantName,
             campusId: itemCampusId || userData?.campusId,
+            restaurantData: restaurantData,
           },
         ];
       }

@@ -1,9 +1,13 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
+import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import "../styles/MenuItemCard.css";
 
-const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId }) => {
+const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId, openTime, closeTime, is24x7 }) => {
   const { addToCart, cartItems, incrementItem, decrementItem } = useCart();
+  
+  const isOpen = isRestaurantOpen({ openTime, closeTime, is24x7 });
+  const nextOpeningTime = getNextOpeningTime({ openTime, closeTime, is24x7 });
 
   // Find the item using name + restaurantName combination
   const cartItem = cartItems.find(
@@ -33,7 +37,16 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
         <div className="menu-price">Rs {price}</div>
 
         <div className="menu-cart-section">
-          {quantity > 0 ? (
+          {!isOpen ? (
+            <button
+              className="menu-add-btn"
+              disabled
+              style={{ opacity: 0.6, cursor: 'not-allowed' }}
+              title={nextOpeningTime ? `Restaurant opens at ${nextOpeningTime}` : 'Restaurant is currently closed'}
+            >
+              Closed
+            </button>
+          ) : quantity > 0 ? (
             <>
               <button
                 className="menu-counter-btn"
@@ -52,7 +65,7 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
           ) : (
             <button
               className="menu-add-btn"
-              onClick={() => addToCart({ name, price }, restaurantName, campusId)}
+              onClick={() => addToCart({ name, price }, restaurantName, campusId, { openTime, closeTime, is24x7 })}
             >
               + Add to Bucket
             </button>

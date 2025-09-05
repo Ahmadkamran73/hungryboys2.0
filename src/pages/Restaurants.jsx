@@ -152,6 +152,9 @@ const Restaurants = () => {
                   name={rest.name}
                   location={rest.location}
                   cuisine={rest.cuisine}
+                  openTime={rest.openTime}
+                  closeTime={rest.closeTime}
+                  is24x7={rest.is24x7}
                 />
               </div>
             ))}
