@@ -328,6 +328,81 @@ const CampusAdmin = () => {
     );
   };
 
+  // Bulk delete functions for CampusAdmin
+  const handleBulkDeleteMenuItems = async () => {
+    if (!selectedRestaurant) return;
+    
+    showConfirmationDialog(
+      "Delete All Menu Items",
+      `Are you sure you want to delete ALL ${menuItems.length} menu items from "${selectedRestaurant.name}"? This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const deletePromises = menuItems.map(item =>
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", selectedRestaurant.id, "menuItems", item.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchMenuItems(selectedRestaurant.id);
+        } catch (err) {
+          setError("Failed to delete menu items");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
+  const handleBulkDeleteRestaurants = async () => {
+    showConfirmationDialog(
+      "Delete All Restaurants",
+      `Are you sure you want to delete ALL ${restaurants.length} restaurants from this campus? This will also delete all their menu items. This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const deletePromises = restaurants.map(restaurant =>
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", restaurant.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchData();
+        } catch (err) {
+          setError("Failed to delete restaurants");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
+  const handleBulkDeleteMartItems = async () => {
+    showConfirmationDialog(
+      "Delete All Mart Items",
+      `Are you sure you want to delete ALL ${martItems.length} mart items from this campus? This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const deletePromises = martItems.map(item =>
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "martItems", item.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchData();
+        } catch (err) {
+          setError("Failed to delete mart items");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
   // Mart item management
   const handleMartItemSubmit = async (e) => {
     e.preventDefault();
@@ -566,6 +641,20 @@ const CampusAdmin = () => {
                     ))}
                   </div>
 
+                  {/* Bulk Actions for Restaurants */}
+                  {restaurants.length > 0 && (
+                    <div className="mb-4">
+                      <button 
+                        className="btn btn-warning"
+                        onClick={handleBulkDeleteRestaurants}
+                        title="Delete all restaurants from this campus"
+                      >
+                        <i className="fas fa-trash-alt me-1"></i>
+                        Clear All Restaurants ({restaurants.length})
+                      </button>
+                    </div>
+                  )}
+
                   {/* Menu Items Section */}
                   {selectedRestaurant && (
                     <div className="mt-5">
@@ -621,6 +710,20 @@ const CampusAdmin = () => {
                           </form>
                         </div>
                       </div>
+
+                      {/* Bulk Actions for Menu Items */}
+                      {menuItems.length > 0 && (
+                        <div className="mb-4">
+                          <button 
+                            className="btn btn-warning"
+                            onClick={handleBulkDeleteMenuItems}
+                            title="Delete all menu items from this restaurant"
+                          >
+                            <i className="fas fa-trash-alt me-1"></i>
+                            Clear All Menu Items ({menuItems.length})
+                          </button>
+                        </div>
+                      )}
 
                       {/* Menu Items List */}
                       <div className="row">
@@ -743,6 +846,20 @@ const CampusAdmin = () => {
                       </form>
                     </div>
                   </div>
+
+                  {/* Bulk Actions for Mart Items */}
+                  {martItems.length > 0 && (
+                    <div className="mb-4">
+                      <button 
+                        className="btn btn-warning"
+                        onClick={handleBulkDeleteMartItems}
+                        title="Delete all mart items from this campus"
+                      >
+                        <i className="fas fa-trash-alt me-1"></i>
+                        Clear All Mart Items ({martItems.length})
+                      </button>
+                    </div>
+                  )}
 
                   {/* Mart Items List */}
                   <div className="row">

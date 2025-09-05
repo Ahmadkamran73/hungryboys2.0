@@ -597,6 +597,145 @@ const SuperAdmin = () => {
     );
   };
 
+  // Bulk delete functions
+  const handleBulkDeleteMenuItems = async (restaurant) => {
+    const menuItemsCount = allMenuItems.filter(item => 
+      item.universityId === restaurant.universityId && 
+      item.campusId === restaurant.campusId && 
+      item.restaurantId === restaurant.id
+    ).length;
+
+    showConfirmationDialog(
+      "Delete All Menu Items",
+      `Are you sure you want to delete ALL ${menuItemsCount} menu items from "${restaurant.name}"? This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const menuItemsToDelete = allMenuItems.filter(item => 
+            item.universityId === restaurant.universityId && 
+            item.campusId === restaurant.campusId && 
+            item.restaurantId === restaurant.id
+          );
+
+          const deletePromises = menuItemsToDelete.map(item =>
+            deleteDoc(doc(db, "universities", item.universityId, "campuses", item.campusId, "restaurants", item.restaurantId, "menuItems", item.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchAllData();
+        } catch (err) {
+          setError("Failed to delete menu items");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
+  const handleBulkDeleteUsers = async (campus) => {
+    const usersCount = users.filter(user => 
+      user.universityId === campus.universityId && 
+      user.campusId === campus.id
+    ).length;
+
+    showConfirmationDialog(
+      "Delete All Campus Users",
+      `Are you sure you want to delete ALL ${usersCount} users from "${campus.name}" campus? This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const usersToDelete = users.filter(user => 
+            user.universityId === campus.universityId && 
+            user.campusId === campus.id
+          );
+
+          const deletePromises = usersToDelete.map(user =>
+            deleteDoc(doc(db, "users", user.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchAllData();
+        } catch (err) {
+          setError("Failed to delete users");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
+  const handleBulkDeleteRestaurants = async (campus) => {
+    const restaurantsCount = allRestaurants.filter(restaurant => 
+      restaurant.universityId === campus.universityId && 
+      restaurant.campusId === campus.id
+    ).length;
+
+    showConfirmationDialog(
+      "Delete All Campus Restaurants",
+      `Are you sure you want to delete ALL ${restaurantsCount} restaurants from "${campus.name}" campus? This will also delete all their menu items. This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const restaurantsToDelete = allRestaurants.filter(restaurant => 
+            restaurant.universityId === campus.universityId && 
+            restaurant.campusId === campus.id
+          );
+
+          const deletePromises = restaurantsToDelete.map(restaurant =>
+            deleteDoc(doc(db, "universities", restaurant.universityId, "campuses", restaurant.campusId, "restaurants", restaurant.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchAllData();
+        } catch (err) {
+          setError("Failed to delete restaurants");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
+  const handleBulkDeleteMartItems = async (campus) => {
+    const martItemsCount = allMartItems.filter(item => 
+      item.universityId === campus.universityId && 
+      item.campusId === campus.id
+    ).length;
+
+    showConfirmationDialog(
+      "Delete All Campus Mart Items",
+      `Are you sure you want to delete ALL ${martItemsCount} mart items from "${campus.name}" campus? This action cannot be undone.`,
+      async () => {
+        setLoading(true);
+        try {
+          const martItemsToDelete = allMartItems.filter(item => 
+            item.universityId === campus.universityId && 
+            item.campusId === campus.id
+          );
+
+          const deletePromises = martItemsToDelete.map(item =>
+            deleteDoc(doc(db, "universities", item.universityId, "campuses", item.campusId, "martItems", item.id))
+          );
+
+          await Promise.all(deletePromises);
+          fetchAllData();
+        } catch (err) {
+          setError("Failed to delete mart items");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      "danger"
+    );
+  };
+
   // Mart item management
   const handleMartItemSubmit = async (e) => {
     e.preventDefault();
@@ -1158,11 +1297,34 @@ const SuperAdmin = () => {
                                             Edit
                                           </button>
                                           <button 
-                                            className="btn btn-sm btn-outline-danger"
+                                            className="btn btn-sm btn-outline-danger me-1"
                                             onClick={() => handleCampusDelete(campus)}
                                           >
                                             Delete
-                              </button>
+                                          </button>
+                                          <div className="btn-group-vertical d-inline-block">
+                                            <button 
+                                              className="btn btn-sm btn-outline-warning mb-1"
+                                              onClick={() => handleBulkDeleteUsers(campus)}
+                                              title="Delete all users from this campus"
+                                            >
+                                              Clear Users
+                                            </button>
+                                            <button 
+                                              className="btn btn-sm btn-outline-warning mb-1"
+                                              onClick={() => handleBulkDeleteRestaurants(campus)}
+                                              title="Delete all restaurants from this campus"
+                                            >
+                                              Clear Restaurants
+                                            </button>
+                                            <button 
+                                              className="btn btn-sm btn-outline-warning"
+                                              onClick={() => handleBulkDeleteMartItems(campus)}
+                                              title="Delete all mart items from this campus"
+                                            >
+                                              Clear Mart Items
+                                            </button>
+                                          </div>
                             </div>
                                       </li>
                                     ))}
@@ -1773,6 +1935,13 @@ const SuperAdmin = () => {
                                   onClick={() => handleRestaurantDelete(restaurant)}
                                 >
                                   Delete
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning"
+                                  onClick={() => handleBulkDeleteMenuItems(restaurant)}
+                                  title="Delete all menu items from this restaurant"
+                                >
+                                  Clear Menu
                                 </button>
 
                       </div>
