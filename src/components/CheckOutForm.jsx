@@ -77,7 +77,7 @@ const CheckOutForm = () => {
 
   const isEmailValid = (email) => email.endsWith("@cfd.nu.edu.pk");
 
-  const deliveryCharge = form.persons * 130;
+  const deliveryCharge = form.persons * 150;
   const itemTotal = getTotalCost();
   const grandTotal = itemTotal + deliveryCharge;
 
@@ -321,7 +321,7 @@ const CheckOutForm = () => {
             <input type="number" className="form-control text-center dark-input" name="persons" value={form.persons} onChange={handleChange} min="1" required />
             <button type="button" className="btn btn-danger" onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}>+</button>
           </div>
-          <small className="text">Each delivery is Rs 130 per person</small>
+          <small className="text">Each delivery is Rs 150 per person</small>
         </div>
 
         {/* Special Instructions */}
