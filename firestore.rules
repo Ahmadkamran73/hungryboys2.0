@@ -39,6 +39,12 @@ service cloud.firestore {
           allow read: if true;
           allow write: if isSuperAdmin() || isCampusAdmin(universityId, campusId);
         }
+
+        // Campus settings (delivery charges, payment details)
+        match /settings/{settingId} {
+          allow read: if true;
+          allow write: if isSuperAdmin();
+        }
       }
     }
 

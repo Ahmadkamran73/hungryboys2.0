@@ -63,6 +63,7 @@ const ORDER_COLUMNS = [
   'room',
   'phone',
   'email',
+  'gender',
   'persons',
   'deliveryCharge',
   'itemTotal',
@@ -72,7 +73,11 @@ const ORDER_COLUMNS = [
   'accountTitle',
   'bankName',
   'screenshotURL',
-  'Special Instructions'
+  'Special Instructions',
+  'maleOrders',
+  'maleOrderDetails',
+  'femaleOrders',
+  'femaleOrderDetails'
 ];
 
 /**
@@ -118,6 +123,37 @@ export const createSheetTab = async (universityName, campusName) => {
     return response.data;
   } catch (error) {
     handleAPIError(error, 'createSheetTab');
+  }
+};
+
+/**
+ * Recreate (or force-update) campus sheet headers using backend recreate endpoint
+ * @param {string} tabName - Sanitized tab name (e.g. University_Campus)
+ * @returns {Promise<Object>} - Response from backend API
+ */
+export const recreateCampusSheet = async (tabName) => {
+  if (!isBackendConfigured()) {
+    throwConfigError();
+  }
+
+  try {
+    const response = await axios.post(`${BACKEND_BASE_URL}/api/sheets/recreate-campus/${encodeURIComponent(tabName)}`);
+    return response.data;
+  } catch (error) {
+    // If the production backend uses a different shape (e.g. expects tabName in body)
+    // try a fallback: POST to /api/sheets/recreate-campus with JSON body { tabName }.
+    if (error && error.response && error.response.status === 404) {
+      try {
+        const fallback = await axios.post(`${BACKEND_BASE_URL}/api/sheets/recreate-campus`, { tabName }, { headers: { 'Content-Type': 'application/json' } });
+        return fallback.data;
+      } catch (err2) {
+        // If fallback also fails, surface original error handling below
+        console.error('recreateCampusSheet fallback failed:', err2);
+        handleAPIError(error, 'recreateCampusSheet');
+      }
+    } else {
+      handleAPIError(error, 'recreateCampusSheet');
+    }
   }
 };
 
@@ -256,6 +292,7 @@ export const submitOrderToSheet = async (orderData, universityName, campusName) 
       orderData.room || '',
       orderData.phone,
       orderData.email,
+      orderData.gender,
       orderData.persons,
       orderData.deliveryCharge,
       orderData.itemTotal,
@@ -267,6 +304,15 @@ export const submitOrderToSheet = async (orderData, universityName, campusName) 
       orderData.screenshotURL,
       orderData.specialInstruction || ''
     ];
+
+    // Add gender-specific columns: maleOrders, maleOrderDetails, femaleOrders, femaleOrderDetails
+    // Populate the appropriate fields based on order gender so sheet columns are not left empty.
+    const maleOrders = orderData.gender && String(orderData.gender).toLowerCase() === 'male' ? (orderData.persons || 1) : '';
+    const maleOrderDetails = orderData.gender && String(orderData.gender).toLowerCase() === 'male' ? (orderData.cartItems || '') : '';
+    const femaleOrders = orderData.gender && String(orderData.gender).toLowerCase() === 'female' ? (orderData.persons || 1) : '';
+    const femaleOrderDetails = orderData.gender && String(orderData.gender).toLowerCase() === 'female' ? (orderData.cartItems || '') : '';
+
+    orderRow.push(maleOrders, maleOrderDetails, femaleOrders, femaleOrderDetails);
 
     // Submit to campus-specific sheet
     const tabName = sanitizeTabName(`${universityName}_${campusName}`);

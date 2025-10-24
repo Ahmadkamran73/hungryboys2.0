@@ -17,8 +17,9 @@ import { auth } from "../firebase";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
-import { createSheetTab, deleteSheetTab, createMasterSheet } from "../utils/googleSheets";
+import { createSheetTab, deleteSheetTab, createMasterSheet, recreateCampusSheet, sanitizeTabName } from "../utils/googleSheets";
 import SuperAdminDashboard from "../components/SuperAdminDashboard";
+import CampusSettingsManager from "../components/CampusSettingsManager";
 import "../styles/SuperAdmin.css";
 
 const SuperAdmin = () => {
@@ -345,7 +346,17 @@ const SuperAdmin = () => {
         // Create Google Sheets tab for the new campus
         try {
           await createSheetTab(university.name, campusForm.name);
-  
+
+          // Sometimes the initial create can miss new columns due to propagation/timing.
+          // Force a recreate (idempotent) to ensure all headers (gender/male/female) exist.
+          try {
+            const tabName = sanitizeTabName(`${university.name}_${campusForm.name}`);
+            await recreateCampusSheet(tabName);
+          } catch (recErr) {
+            // Non-fatal: log and continue (campus was created in Firestore regardless)
+            console.warn('recreateCampusSheet failed (non-fatal):', recErr);
+          }
+
         } catch (sheetsError) {
           console.error('Failed to create Google Sheets tab:', sheetsError);
           setError(`Campus created but failed to create Google Sheets tab: ${sheetsError.message}`);
@@ -1057,6 +1068,14 @@ const SuperAdmin = () => {
                   onClick={() => setActiveTab("domains")}
                 >
                   Domain Management
+                </button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button
+                  className={`nav-link ${activeTab === "campusSettings" ? "active" : ""}`}
+                  onClick={() => setActiveTab("campusSettings")}
+                >
+                  🏢 Campus Settings
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -2566,6 +2585,13 @@ const SuperAdmin = () => {
                       <p>No domains configured yet.</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Campus Settings Tab */}
+              {activeTab === "campusSettings" && (
+                <div className="tab-pane fade show active">
+                  <CampusSettingsManager />
                 </div>
               )}
 

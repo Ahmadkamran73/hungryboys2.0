@@ -9,6 +9,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { handleError } from "../utils/errorHandler";
 import { submitOrderToSheet } from "../utils/googleSheets";
 import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
+import { getCampusSettings } from "../utils/campusSettings";
 import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
@@ -22,6 +23,7 @@ const CheckOutForm = () => {
     room: "",
     phone: "",
     email: "",
+    gender: "male", // Default to male
     persons: 1,
     paymentMethod: "Online Payment",
     accountTitle: "",
@@ -35,6 +37,12 @@ const CheckOutForm = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [campusSettings, setCampusSettings] = useState({
+    deliveryChargePerPerson: 150,
+    accountTitle: "Maratib Ali",
+    bankName: "SadaPay",
+    accountNumber: "03330374616"
+  });
 
   // Auto-fill email, firstName, lastName when user is logged in
   useEffect(() => {
@@ -45,6 +53,40 @@ const CheckOutForm = () => {
       lastName: userData?.lastName || prev.lastName,
     }));
   }, [user, userData]);
+
+  // Fetch campus settings when campus is selected
+  useEffect(() => {
+    const loadCampusSettings = async () => {
+      if (!selectedCampus?.id) return;
+      
+      try {
+        const settings = await getCampusSettings(selectedCampus);
+        setCampusSettings(settings);
+      } catch (err) {
+        console.warn('Failed to fetch campus settings, using defaults:', err);
+        // Keep default settings if fetch fails
+      }
+    };
+
+    loadCampusSettings();
+  }, [selectedCampus]);
+
+  // Refresh settings when component mounts (in case settings were updated)
+  useEffect(() => {
+    const refreshSettings = async () => {
+      if (!selectedCampus?.id) return;
+      
+      try {
+        const settings = await getCampusSettings(selectedCampus);
+        setCampusSettings(settings);
+      } catch (err) {
+        console.warn('Failed to refresh campus settings:', err);
+      }
+    };
+
+    // Refresh settings on component mount
+    refreshSettings();
+  }, []);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -77,7 +119,7 @@ const CheckOutForm = () => {
 
   const isEmailValid = (email) => email.endsWith("@cfd.nu.edu.pk");
 
-  const deliveryCharge = form.persons * 150;
+  const deliveryCharge = form.persons * campusSettings.deliveryChargePerPerson;
   const itemTotal = getTotalCost();
   const grandTotal = itemTotal + deliveryCharge;
 
@@ -140,6 +182,7 @@ const CheckOutForm = () => {
       lastName,
       phone,
       email,
+      gender,
       accountTitle,
       bankName,
     } = form;
@@ -149,7 +192,7 @@ const CheckOutForm = () => {
       return;
     }
 
-    if (!firstName || !lastName || !phone || !email) {
+    if (!firstName || !lastName || !phone || !email || !gender) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -313,6 +356,43 @@ const CheckOutForm = () => {
           />
         </div>
 
+        {/* Gender Selection */}
+        <div className="col-12">
+          <label className="form-label">Gender *</label>
+          <div className="d-flex gap-4">
+            <div className="form-check">
+              <input 
+                className="form-check-input" 
+                type="radio" 
+                name="gender" 
+                id="male" 
+                value="male" 
+                checked={form.gender === "male"} 
+                onChange={handleChange}
+                required
+              />
+              <label className="form-check-label text-white" htmlFor="male">
+                Male
+              </label>
+            </div>
+            <div className="form-check">
+              <input 
+                className="form-check-input" 
+                type="radio" 
+                name="gender" 
+                id="female" 
+                value="female" 
+                checked={form.gender === "female"} 
+                onChange={handleChange}
+                required
+              />
+              <label className="form-check-label text-white" htmlFor="female">
+                Female
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Persons */}
         <div className="col-12">
           <label className="form-label">Number of Persons *</label>
@@ -321,7 +401,7 @@ const CheckOutForm = () => {
             <input type="number" className="form-control text-center dark-input" name="persons" value={form.persons} onChange={handleChange} min="1" required />
             <button type="button" className="btn btn-danger" onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}>+</button>
           </div>
-          <small className="text">Each delivery is Rs 150 per person</small>
+          <small className="text">Each delivery is Rs {campusSettings.deliveryChargePerPerson} per person</small>
         </div>
 
         {/* Special Instructions */}
@@ -340,10 +420,29 @@ const CheckOutForm = () => {
         {/* Payment Instructions */}
         <input type="hidden" name="paymentMethod" value="Online Payment" />
         <div className="col-12 text-white border p-3 rounded" style={{ backgroundColor: "#222" }}>
-          <strong>Pay to:</strong><br />
-          Account Title: Maratib Ali<br />
-          Bank: SadaPay<br />
-          Account Number: 03330374616
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <strong>Pay to:</strong>
+            <button 
+              type="button" 
+              className="btn btn-sm btn-outline-light"
+              onClick={async () => {
+                if (selectedCampus?.id) {
+                  try {
+                    const settings = await getCampusSettings(selectedCampus);
+                    setCampusSettings(settings);
+                  } catch (err) {
+                    console.warn('Failed to refresh settings:', err);
+                  }
+                }
+              }}
+              title="Refresh payment details"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+          Account Title: {campusSettings.accountTitle}<br />
+          Bank: {campusSettings.bankName}<br />
+          Account Number: {campusSettings.accountNumber}
         </div>
 
         {/* Online Payment Info */}
