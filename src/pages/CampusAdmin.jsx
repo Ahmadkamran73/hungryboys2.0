@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
+import BulkMenuImport from "../components/BulkMenuImport";
 import { handleError } from "../utils/errorHandler";
 import CampusAdminDashboard from "../components/CampusAdminDashboard";
 import "../styles/CampusAdmin.css";
@@ -766,6 +767,15 @@ const CampusAdmin = () => {
                           </div>
                         ))}
                       </div>
+
+                      {/* Bulk Import */}
+                      <BulkMenuImport
+                        universityId={universityId}
+                        campusId={campusId}
+                        restaurantId={selectedRestaurant.id}
+                        restaurants={restaurants}
+                        onComplete={() => fetchMenuItems(selectedRestaurant.id)}
+                      />
                     </div>
                   )}
                 </div>

@@ -7,7 +7,6 @@ import axios from "axios";
 import imageCompression from "browser-image-compression";
 import ReCAPTCHA from "react-google-recaptcha";
 import { handleError } from "../utils/errorHandler";
-import { submitOrderToSheet } from "../utils/googleSheets";
 import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import { getCampusSettings } from "../utils/campusSettings";
 import "../styles/CheckOutForm.css";
@@ -22,7 +21,7 @@ const CheckOutForm = () => {
     lastName: "",
     room: "",
     phone: "",
-    email: "",
+    email: user?.email || "", // Autofill with user's email
     gender: "male", // Default to male
     persons: 1,
     paymentMethod: "Online Payment",
@@ -88,6 +87,16 @@ const CheckOutForm = () => {
     refreshSettings();
   }, []);
 
+  // Update email when user changes
+  useEffect(() => {
+    if (user?.email) {
+      setForm(prev => ({
+        ...prev,
+        email: user.email
+      }));
+    }
+  }, [user?.email]);
+
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -117,7 +126,7 @@ const CheckOutForm = () => {
     }));
   };
 
-  const isEmailValid = (email) => email.endsWith("@cfd.nu.edu.pk");
+  // Email validation removed - any valid email format is accepted
 
   const deliveryCharge = form.persons * campusSettings.deliveryChargePerPerson;
   const itemTotal = getTotalCost();
@@ -202,10 +211,7 @@ const CheckOutForm = () => {
       return;
     }
 
-    if (!isEmailValid(email)) {
-      setError("Email must end with @cfd.nu.edu.pk");
-      return;
-    }
+    // Email domain validation removed - any valid email is accepted
 
     // Check if university and campus are selected
     if (!selectedUniversity || !selectedCampus) {
@@ -272,16 +278,13 @@ const CheckOutForm = () => {
         return;
       }
 
-      // Submit to Google Sheets
-      await submitOrderToSheet(order, selectedUniversity.name, selectedCampus.name);
-      
-      // Also submit to backend API for backup/notification purposes
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-        await axios.post(`${backendUrl}/submit-order`, order);
-      } catch (apiError) {
-        console.warn('Backend API submission failed, but order was saved to Google Sheets:', apiError);
-      }
+      // Submit to backend API (which handles both campus-specific sheet and Master sheet)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+      await axios.post(`${backendUrl}/submit-order`, {
+        ...order,
+        universityName: selectedUniversity.name,
+        campusName: selectedCampus.name
+      });
       
       clearCart();
       setSubmitted(true);
@@ -345,13 +348,13 @@ const CheckOutForm = () => {
           />
         </div>
         <div className="col-12">
-          <label className="form-label">Email Address (@cfd.nu.edu.pk) *</label>
+          <label className="form-label">Email Address *</label>
           <input 
             type="email" 
             className="form-control dark-input" 
             name="email" 
             value={form.email} 
-            readOnly 
+            onChange={handleChange}
             required 
           />
         </div>

@@ -58,9 +58,25 @@ function Login() {
         setError("User profile not found. Please contact support.");
       }
     } catch (err) {
-      const handledError = handleError(err, 'Login - signIn');
-      setError(handledError.message);
-      console.error("Login error:", handledError);
+      console.error("Login error:", err);
+      
+      // Handle specific Firebase Auth errors
+      if (err.code === 'auth/user-not-found') {
+        setError("No account found with this email address. Please check your email or sign up for a new account.");
+      } else if (err.code === 'auth/wrong-password') {
+        setError("Incorrect password. Please try again.");
+      } else if (err.code === 'auth/invalid-email') {
+        setError("Invalid email address. Please enter a valid email.");
+      } else if (err.code === 'auth/user-disabled') {
+        setError("This account has been disabled. Please contact support.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("Too many failed login attempts. Please try again later.");
+      } else if (err.code === 'auth/network-request-failed') {
+        setError("Network error. Please check your internet connection and try again.");
+      } else {
+        const handledError = handleError(err, 'Login - signIn');
+        setError(handledError.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -81,16 +97,37 @@ function Login() {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(resetEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      console.log('Sending password reset email to:', resetEmail);
       await sendPasswordResetEmail(auth, resetEmail);
-      setSuccess("Password reset email sent! Please check your inbox.");
+      setSuccess("Password reset email sent! Please check your inbox and spam folder.");
       setResetEmail("");
+      setRecaptchaToken("");
     } catch (err) {
-      const handledError = handleError(err, 'Login - passwordReset');
-      setError(handledError.message);
-      console.error("Password reset error:", handledError);
+      console.error("Password reset error:", err);
+      
+      // Handle specific Firebase Auth errors
+      if (err.code === 'auth/user-not-found') {
+        setError("No account found with this email address. Please check your email or sign up for a new account.");
+      } else if (err.code === 'auth/invalid-email') {
+        setError("Invalid email address. Please enter a valid email.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("Too many password reset attempts. Please try again later.");
+      } else if (err.code === 'auth/network-request-failed') {
+        setError("Network error. Please check your internet connection and try again.");
+      } else {
+        const handledError = handleError(err, 'Login - passwordReset');
+        setError(handledError.message);
+      }
     } finally {
       setLoading(false);
     }

@@ -103,13 +103,23 @@ function Signup() {
 
   const checkEmailExists = async (email) => {
     try {
+      console.log('Checking if email exists:', email);
+      
+      // Check in Firestore users collection
       const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
+      const q = query(usersRef, where("email", "==", email.toLowerCase().trim()));
       const querySnapshot = await getDocs(q);
-      return !querySnapshot.empty;
+      
+      const existsInFirestore = !querySnapshot.empty;
+      console.log('Email exists in Firestore:', existsInFirestore);
+      
+      // Also check if email is already registered in Firebase Auth
+      // We can't directly check Firebase Auth, but we can catch the error during signup
+      return existsInFirestore;
     } catch (error) {
       const handledError = handleError(error, 'Signup - checkEmailExists');
       console.error("Error checking email:", handledError);
+      // If there's an error checking, assume it doesn't exist to allow signup attempt
       return false;
     }
   };
@@ -217,9 +227,21 @@ function Signup() {
       }, 3000);
 
     } catch (error) {
-      const handledError = handleError(error, 'Signup - createAccount');
-      setError(handledError.message);
-      console.error("Signup error:", handledError);
+      console.error("Signup error:", error);
+      
+      // Handle specific Firebase Auth errors
+      if (error.code === 'auth/email-already-in-use') {
+        setError("An account with this email already exists. Please use a different email or try logging in.");
+      } else if (error.code === 'auth/weak-password') {
+        setError("Password is too weak. Please choose a stronger password.");
+      } else if (error.code === 'auth/invalid-email') {
+        setError("Invalid email address. Please enter a valid email.");
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setError("Email/password accounts are not enabled. Please contact support.");
+      } else {
+        const handledError = handleError(error, 'Signup - createAccount');
+        setError(handledError.message);
+      }
     } finally {
       setLoading(false);
     }

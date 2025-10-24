@@ -20,6 +20,7 @@ import { handleError } from "../utils/errorHandler";
 import { createSheetTab, deleteSheetTab, createMasterSheet, recreateCampusSheet, sanitizeTabName } from "../utils/googleSheets";
 import SuperAdminDashboard from "../components/SuperAdminDashboard";
 import CampusSettingsManager from "../components/CampusSettingsManager";
+import BulkMenuImport from "../components/BulkMenuImport";
 import "../styles/SuperAdmin.css";
 
 const SuperAdmin = () => {
@@ -108,8 +109,7 @@ const SuperAdmin = () => {
     if (userData && userData.role === "superAdmin") {
       fetchAllData();
       // Create master sheet if it doesn't exist
-      createMasterSheet().catch(err => {
-        console.warn('Failed to create master sheet:', err);
+      createMasterSheet().catch(() => {
         // Don't show error to user as this is optional functionality
       });
     } else {
@@ -171,7 +171,7 @@ const SuperAdmin = () => {
             }));
             allCampuses.push(...campusesData);
           } catch (campusErr) {
-            console.error(`Error fetching campuses for university ${university.id}:`, campusErr);
+            // Error fetching campuses is non-fatal, continue with other campuses
           }
         }
         setCampuses(allCampuses);
@@ -216,11 +216,11 @@ const SuperAdmin = () => {
                 }));
                 allMenuItemsData.push(...menuItemsData);
               } catch (menuErr) {
-                console.error(`Error fetching menu items for restaurant ${restaurant.id}:`, menuErr);
+                // Error fetching menu items is non-fatal, continue with other items
               }
             }
           } catch (restaurantErr) {
-            console.error(`Error fetching restaurants for campus ${campus.id}:`, restaurantErr);
+            // Error fetching restaurants is non-fatal, continue with other restaurants
           }
         }
         setAllRestaurants(allRestaurantsData);
@@ -241,7 +241,7 @@ const SuperAdmin = () => {
             }));
             allMartItemsData.push(...martItemsData);
           } catch (martErr) {
-            console.error(`Error fetching mart items for campus ${campus.id}:`, martErr);
+            // Error fetching mart items is non-fatal, continue with other items
           }
         }
         setAllMartItems(allMartItemsData);
@@ -257,7 +257,6 @@ const SuperAdmin = () => {
     } catch (err) {
         const handledError = handleError(err, 'SuperAdmin - fetchAllData');
         setError(handledError.message);
-        console.error("Error in fetchAllData:", handledError);
       }
     };
 
@@ -266,7 +265,6 @@ const SuperAdmin = () => {
     } catch (err) {
       const handledError = handleError(err, 'SuperAdmin - fetchAllData (timeout)');
       setError(handledError.message);
-      console.error("Error in fetchAllData (with timeout):", handledError);
     } finally {
       setLoading(false);
     }
@@ -353,12 +351,10 @@ const SuperAdmin = () => {
             const tabName = sanitizeTabName(`${university.name}_${campusForm.name}`);
             await recreateCampusSheet(tabName);
           } catch (recErr) {
-            // Non-fatal: log and continue (campus was created in Firestore regardless)
-            console.warn('recreateCampusSheet failed (non-fatal):', recErr);
+            // Non-fatal: continue (campus was created in Firestore regardless)
           }
 
         } catch (sheetsError) {
-          console.error('Failed to create Google Sheets tab:', sheetsError);
           setError(`Campus created but failed to create Google Sheets tab: ${sheetsError.message}`);
         }
       }
@@ -391,7 +387,6 @@ const SuperAdmin = () => {
             await deleteSheetTab(campus.universityName, campus.name);
     
           } catch (sheetsError) {
-            console.error('Failed to delete Google Sheets tab:', sheetsError);
             setError(`Campus deleted but failed to delete Google Sheets tab: ${sheetsError.message}`);
           }
           
@@ -422,6 +417,13 @@ const SuperAdmin = () => {
 
   const handleUserDelete = async (userId) => {
     const user = users.find(u => u.id === userId);
+    
+    // Prevent super admin from deleting their own profile
+    if (user?.role === "superAdmin" && user.id === userData?.uid) {
+      setError("You cannot delete your own profile.");
+      return;
+    }
+    
     showConfirmationDialog(
       "Delete User",
       `Are you sure you want to delete user "${user?.firstName} ${user?.lastName}" (${user?.email})? This action cannot be undone.`,
@@ -646,10 +648,18 @@ const SuperAdmin = () => {
   };
 
   const handleBulkDeleteUsers = async (campus) => {
-    const usersCount = users.filter(user => 
+    const usersToDelete = users.filter(user => 
       user.universityId === campus.universityId && 
-      user.campusId === campus.id
-    ).length;
+      user.campusId === campus.id &&
+      !(user.role === "superAdmin" && user.id === userData?.uid) // Exclude super admin's own profile
+    );
+    
+    const usersCount = usersToDelete.length;
+
+    if (usersCount === 0) {
+      setError("No users available to delete from this campus.");
+      return;
+    }
 
     showConfirmationDialog(
       "Delete All Campus Users",
@@ -657,11 +667,6 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const usersToDelete = users.filter(user => 
-            user.universityId === campus.universityId && 
-            user.campusId === campus.id
-          );
-
           const deletePromises = usersToDelete.map(user =>
             deleteDoc(doc(db, "users", user.id))
           );
@@ -2398,6 +2403,15 @@ const SuperAdmin = () => {
                       </form>
                     </div>
                   </div>
+
+                  {/* Bulk Import for selected university/campus/restaurant */}
+                  <BulkMenuImport
+                    universityId={menuForm.universityId}
+                    campusId={menuForm.campusId}
+                    restaurantId={menuForm.restaurantId}
+                    restaurants={allRestaurants.filter(r => r.universityId === menuForm.universityId && r.campusId === menuForm.campusId)}
+                    onComplete={() => fetchAllData()}
+                  />
 
                   {/* Menu Items List */}
                   <div className="row">
