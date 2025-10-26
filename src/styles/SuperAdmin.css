@@ -76,10 +76,13 @@
 
 .super-admin-page .table {
   color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .super-admin-page .table thead th {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
   font-weight: 600;
@@ -123,6 +126,9 @@
 /* Ensure all table content is visible */
 .super-admin-page .table-responsive {
   color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 8px;
 }
 
 .super-admin-page .table-responsive .table {
@@ -132,6 +138,13 @@
 .super-admin-page .table-responsive .table th,
 .super-admin-page .table-responsive .table td {
   color: #ffffff;
+}
+
+/* Ensure table sections never render as white */
+.super-admin-page .table thead,
+.super-admin-page .table tbody,
+.super-admin-page .table tfoot {
+  background-color: transparent;
 }
 
 /* Override Bootstrap table classes for dark theme */
@@ -148,6 +161,12 @@
 .super-admin-page .table-striped > tbody > tr:hover > td {
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+/* Card header darkening for contrast on white themes */
+.super-admin-page .card-header {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Ensure all text in table cells is visible */

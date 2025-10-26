@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebase";
+import { api } from "../utils/api";
 import { useUniversity } from "../context/UniversityContext";
 import RestaurantCard from "../components/RestaurantCard";
 import SearchBar from "../components/SearchBar";
@@ -29,20 +28,16 @@ const Restaurants = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch restaurants for the selected campus
-        const restaurantsRef = collection(
-          db, 
-          "universities", 
-          selectedUniversity.id, 
-          "campuses", 
-          selectedCampus.id, 
-          "restaurants"
-        );
-        
-        const querySnapshot = await getDocs(restaurantsRef);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+        // Fetch restaurants for the selected campus from backend API
+        const resp = await api.get('/api/restaurants', { params: { campusId: selectedCampus.id } });
+        const data = (resp.data || []).map(r => ({
+          id: r.id,
+          name: r.name,
+          location: r.location,
+          cuisine: r.cuisine,
+          openTime: r.openTime,
+          closeTime: r.closeTime,
+          is24x7: r.is24x7
         }));
         
         setRestaurants(data);

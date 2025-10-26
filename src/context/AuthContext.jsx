@@ -35,7 +35,6 @@ export const AuthProvider = ({ children }) => {
             setUserData(userDoc.data());
           } else {
             setUserData(null);
-            console.warn("User document not found for:", firebaseUser.uid);
           }
         } catch (error) {
           const handledError = handleError(error, 'AuthContext - fetchUserData');

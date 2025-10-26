@@ -59,10 +59,9 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
+        const settings = await getCampusSettings(selectedCampus, user);
         setCampusSettings(settings);
       } catch (err) {
-        console.warn('Failed to fetch campus settings, using defaults:', err);
         // Keep default settings if fetch fails
       }
     };
@@ -76,10 +75,10 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
+        const settings = await getCampusSettings(selectedCampus, user);
         setCampusSettings(settings);
       } catch (err) {
-        console.warn('Failed to refresh campus settings:', err);
+        // ignore refresh failures
       }
     };
 
@@ -213,9 +212,21 @@ const CheckOutForm = () => {
 
     // Email domain validation removed - any valid email is accepted
 
+    // Require auth for checkout
+    if (!user) {
+      setError("Please log in to place an order.");
+      return;
+    }
+
     // Check if university and campus are selected
     if (!selectedUniversity || !selectedCampus) {
       setError("Please select your university and campus from the navigation bar.");
+      return;
+    }
+
+    // Enforce campus restriction early on the client (server will also enforce)
+    if (userData?.campusId && selectedCampus?.id && userData.campusId !== selectedCampus.id) {
+      setError("You can only place orders from your assigned campus. Please switch back to your campus in the navbar.");
       return;
     }
 
@@ -243,15 +254,25 @@ const CheckOutForm = () => {
       return;
     }
 
+    // Derive the set of restaurants present in the cart for filtering later
+    const restaurantNames = Array.from(new Set((cartItems || []).map(i => i.restaurantName).filter(Boolean)));
+
     const order = {
       ...form,
       itemTotal,
       deliveryCharge,
       grandTotal,
       screenshotURL: uploadedURL,
-      cartItems: formatCartItems(cartItems),
+      cartItems: cartItems, // Send raw array for backend processing
+      cartItemsFormatted: formatCartItems(cartItems), // Formatted string for display
+      restaurantNames,
       timestamp: formatDate(new Date().toISOString()),
       recaptchaToken,
+      // Include campus/university identifiers for the backend
+      campusId: selectedCampus?.id,
+      universityId: selectedUniversity?.id,
+      campusName: selectedCampus?.name,
+      universityName: selectedUniversity?.name
     };
 
     try {
@@ -278,12 +299,11 @@ const CheckOutForm = () => {
         return;
       }
 
-      // Submit to backend API (which handles both campus-specific sheet and Master sheet)
+      // Submit to new secure Orders API with Firebase ID token
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-      await axios.post(`${backendUrl}/submit-order`, {
-        ...order,
-        universityName: selectedUniversity.name,
-        campusName: selectedCampus.name
+      const idToken = await user.getIdToken();
+      await axios.post(`${backendUrl}/api/orders`, order, {
+        headers: { Authorization: `Bearer ${idToken}` }
       });
       
       clearCart();
@@ -431,10 +451,10 @@ const CheckOutForm = () => {
               onClick={async () => {
                 if (selectedCampus?.id) {
                   try {
-                    const settings = await getCampusSettings(selectedCampus);
+                    const settings = await getCampusSettings(selectedCampus, user);
                     setCampusSettings(settings);
                   } catch (err) {
-                    console.warn('Failed to refresh settings:', err);
+                    // ignore refresh failures
                   }
                 }
               }}

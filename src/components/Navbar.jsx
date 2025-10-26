@@ -125,6 +125,13 @@ function Navbar() {
                 </Link>
               </li>
             )}
+            {userData?.role === "restaurantManager" && (
+              <li className="nav-item">
+                <Link className="nav-link fw-bold text-white" to="/restaurant-manager">
+                  Restaurant Manager
+                </Link>
+              </li>
+            )}
           </ul>
           
           {/* Auth Links */}
@@ -145,6 +152,7 @@ function Navbar() {
                       <small className="text-muted">
                         {userData?.role === "superAdmin" ? "Super Admin" : 
                          userData?.role === "campusAdmin" ? "Campus Admin" : 
+                         userData?.role === "restaurantManager" ? "Restaurant Manager" :
                          "User"}
                       </small>
                     </span>

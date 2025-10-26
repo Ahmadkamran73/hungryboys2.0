@@ -12,6 +12,7 @@ import Checkout from '../pages/Checkout';
 import Admin from '../pages/Admin';
 import SuperAdmin from '../pages/SuperAdmin';
 import CampusAdmin from '../pages/CampusAdmin';
+import RestaurantManager from '../pages/RestaurantManager';
 import Unauthorized from '../pages/Unauthorized';
 import Demo from '../pages/Demo';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -68,6 +69,15 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path="/restaurant-manager"
+          element={
+            <ProtectedRoute requiredRole="restaurantManager">
+              <RestaurantManager />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Legacy admin route - redirect based on role */}
         <Route
           path="/admin"
@@ -77,6 +87,8 @@ function AppRoutes() {
                 <Navigate to="/super-admin" replace />
               ) : userData?.role === "campusAdmin" ? (
                 <Navigate to={`/admin/${userData.universityId}/${userData.campusId}`} replace />
+              ) : userData?.role === "restaurantManager" ? (
+                <Navigate to="/restaurant-manager" replace />
               ) : (
                 <Navigate to="/home" replace />
               )}

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { api } from "../utils/api";
 import { useUniversity } from "../context/UniversityContext";
 import MartItemCard from "../components/MartItemCard";
 import SearchBar from "../components/SearchBar";
@@ -30,20 +29,16 @@ const MartItems = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch mart items for the selected campus
-        const martItemsRef = collection(
-          db, 
-          "universities", 
-          selectedUniversity.id, 
-          "campuses", 
-          selectedCampus.id, 
-          "martItems"
-        );
-        
-        const querySnapshot = await getDocs(martItemsRef);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+        // Fetch mart items from backend API
+        const resp = await api.get('/api/mart-items', { params: { campusId: selectedCampus.id } });
+        const data = (resp.data || []).map(x => ({
+          id: x.id,
+          name: x.name,
+          price: x.price,
+          description: x.description,
+          category: x.category,
+          stock: x.stock,
+          photoURL: x.photoURL
         }));
         
         setMartItems(data);

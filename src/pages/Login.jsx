@@ -49,6 +49,8 @@ function Login() {
           navigate("/super-admin");
         } else if (userData.role === "campusAdmin") {
           navigate(`/admin/${userData.universityId}/${userData.campusId}`);
+        } else if (userData.role === "restaurantManager") {
+          navigate("/restaurant-manager");
         } else if (userData.role === "user") {
           navigate("/home");
         } else {
@@ -107,7 +109,6 @@ function Login() {
     setLoading(true);
 
     try {
-      console.log('Sending password reset email to:', resetEmail);
       await sendPasswordResetEmail(auth, resetEmail);
       setSuccess("Password reset email sent! Please check your inbox and spam folder.");
       setResetEmail("");

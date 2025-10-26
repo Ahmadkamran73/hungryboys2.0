@@ -3,7 +3,7 @@ import { useCart } from "../context/CartContext";
 import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import "../styles/MenuItemCard.css";
 
-const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId, openTime, closeTime, is24x7 }) => {
+const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId, restaurantId, openTime, closeTime, is24x7 }) => {
   const { addToCart, cartItems, incrementItem, decrementItem } = useCart();
   
   const isOpen = isRestaurantOpen({ openTime, closeTime, is24x7 });
@@ -65,7 +65,7 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
           ) : (
             <button
               className="menu-add-btn"
-              onClick={() => addToCart({ name, price }, restaurantName, campusId, { openTime, closeTime, is24x7 })}
+              onClick={() => addToCart({ name, price }, restaurantName, campusId, { restaurantId, openTime, closeTime, is24x7 })}
             >
               + Add to Bucket
             </button>

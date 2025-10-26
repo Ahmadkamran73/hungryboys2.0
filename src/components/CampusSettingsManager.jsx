@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  setDoc,
-  query,
-  where 
-} from "firebase/firestore";
-import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import { api, authHeaders } from "../utils/api";
 import LoadingSpinner from "./LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
 import "../styles/CampusSettingsManager.css";
 
 const CampusSettingsManager = () => {
-  const { userData } = useAuth();
+  const { user, userData } = useAuth();
   const [universities, setUniversities] = useState([]);
   const [campuses, setCampuses] = useState([]);
   const [campusSettings, setCampusSettings] = useState({});
@@ -39,30 +30,16 @@ const CampusSettingsManager = () => {
     try {
       setLoading(true);
       
-      // Fetch universities
-      const universitiesSnapshot = await getDocs(collection(db, "universities"));
-      const universitiesData = universitiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setUniversities(universitiesData);
+      // Fetch universities from MongoDB
+      const universitiesResponse = await api.get('/api/universities');
+      setUniversities(universitiesResponse.data);
 
-      // Fetch all campuses
-      const allCampuses = [];
-      for (const university of universitiesData) {
-        const campusesSnapshot = await getDocs(collection(db, "universities", university.id, "campuses"));
-        const campusesData = campusesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          universityId: university.id,
-          universityName: university.name,
-          ...doc.data()
-        }));
-        allCampuses.push(...campusesData);
-      }
-      setCampuses(allCampuses);
+      // Fetch campuses from MongoDB
+      const campusesResponse = await api.get('/api/campuses');
+      setCampuses(campusesResponse.data);
 
-      // Fetch campus settings
-      await fetchCampusSettings(allCampuses);
+      // Fetch all campus settings from MongoDB
+      await fetchCampusSettings();
 
     } catch (err) {
       const handledError = handleError(err, 'CampusSettingsManager - fetchData');
@@ -72,43 +49,24 @@ const CampusSettingsManager = () => {
     }
   };
 
-  const fetchCampusSettings = async (allCampuses) => {
+  const fetchCampusSettings = async () => {
     try {
-      const settings = {};
+      if (!user) return;
       
-      for (const campus of allCampuses) {
-        try {
-          const settingsDoc = await getDocs(collection(db, "universities", campus.universityId, "campuses", campus.id, "settings"));
-          if (!settingsDoc.empty) {
-            const settingData = settingsDoc.docs[0].data();
-            settings[campus.id] = {
-              id: settingsDoc.docs[0].id,
-              ...settingData
-            };
-          } else {
-            // Set default settings if none exist
-            settings[campus.id] = {
-              deliveryChargePerPerson: 150,
-              accountTitle: "Maratib Ali",
-              bankName: "SadaPay",
-              accountNumber: "03330374616"
-            };
-          }
-        } catch (err) {
-          console.warn(`Failed to fetch settings for campus ${campus.name}:`, err);
-          // Set default settings on error
-          settings[campus.id] = {
-            deliveryChargePerPerson: 150,
-            accountTitle: "Maratib Ali",
-            bankName: "SadaPay",
-            accountNumber: "03330374616"
-          };
-        }
-      }
+      // Fetch all campus settings from MongoDB
+      const response = await api.get('/api/campus-settings', {
+        headers: await authHeaders(user)
+      });
+      
+      const settings = {};
+      response.data.forEach(setting => {
+        settings[setting.campusId] = setting;
+      });
       
       setCampusSettings(settings);
     } catch (err) {
       console.error('Error fetching campus settings:', err);
+      // Don't show error to user, just use empty settings
     }
   };
 
@@ -166,21 +124,23 @@ const CampusSettingsManager = () => {
         return;
       }
 
-      // Save to Firestore
-      const settingsRef = doc(db, "universities", campus.universityId, "campuses", campus.id, "settings", "payment");
-      await setDoc(settingsRef, {
+      // Save to MongoDB via API
+      const settingsData = {
+        campusId: selectedCampus,
         deliveryChargePerPerson: parseInt(editingSettings.deliveryChargePerPerson),
         accountTitle: editingSettings.accountTitle.trim(),
         bankName: editingSettings.bankName.trim(),
-        accountNumber: editingSettings.accountNumber.trim(),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userData.email
+        accountNumber: editingSettings.accountNumber.trim()
+      };
+
+      await api.post('/api/campus-settings', settingsData, {
+        headers: await authHeaders(user)
       });
 
       // Update local state
       setCampusSettings(prev => ({
         ...prev,
-        [selectedCampus]: editingSettings
+        [selectedCampus]: settingsData
       }));
 
       setSuccess(`Settings saved successfully for ${campus.name}`);

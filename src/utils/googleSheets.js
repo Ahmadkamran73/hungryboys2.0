@@ -1,3 +1,49 @@
+// Google Sheets integration has been removed from the project.
+// This module remains only as a stub to avoid import errors.
+
+export const getAllSheetTabs = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const createSheetTab = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const deleteSheetTab = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const getOrdersFromSheet = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const appendOrdersToSheet = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const createMasterSheet = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const recreateMasterSheet = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export const recreateCampusSheet = async () => {
+  throw new Error('Google Sheets integration has been removed');
+};
+
+export default {
+  getAllSheetTabs,
+  createSheetTab,
+  deleteSheetTab,
+  getOrdersFromSheet,
+  appendOrdersToSheet,
+  createMasterSheet,
+  recreateMasterSheet,
+  recreateCampusSheet,
+};
+// Legacy implementation (removed)
 // Google Sheets API utilities for campus-specific order management
 import axios from 'axios';
 
@@ -9,7 +55,6 @@ const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4
 // Check if backend is configured
 const isBackendConfigured = () => {
   if (!BACKEND_BASE_URL) {
-    console.warn('Backend not configured: VITE_BACKEND_URL is missing');
     return false;
   }
   return true;
@@ -85,7 +130,7 @@ const ORDER_COLUMNS = [
  * @param {string} name - The name to sanitize
  * @returns {string} - Sanitized name
  */
-export const sanitizeTabName = (name) => {
+const REMOVED_sanitizeTabName = (name) => {
   return name
     .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
     .replace(/\s+/g, '_') // Replace spaces with underscores
@@ -100,7 +145,7 @@ export const sanitizeTabName = (name) => {
  * @param {string} campusName - Campus name
  * @returns {Promise<Object>} - Response from backend API
  */
-export const createSheetTab = async (universityName, campusName) => {
+const REMOVED_createSheetTab = async (universityName, campusName) => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -131,7 +176,7 @@ export const createSheetTab = async (universityName, campusName) => {
  * @param {string} tabName - Sanitized tab name (e.g. University_Campus)
  * @returns {Promise<Object>} - Response from backend API
  */
-export const recreateCampusSheet = async (tabName) => {
+const REMOVED_recreateCampusSheet = async (tabName) => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -163,7 +208,7 @@ export const recreateCampusSheet = async (tabName) => {
  * @param {string} campusName - Campus name
  * @returns {Promise<Object>} - Response from backend API
  */
-export const deleteSheetTab = async (universityName, campusName) => {
+const REMOVED_deleteSheetTab = async (universityName, campusName) => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -193,7 +238,7 @@ export const deleteSheetTab = async (universityName, campusName) => {
  * Get all sheet tabs from the spreadsheet
  * @returns {Promise<Array>} - Array of sheet names
  */
-export const getAllSheetTabs = async () => {
+const REMOVED_getAllSheetTabs = async () => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -212,7 +257,7 @@ export const getAllSheetTabs = async () => {
  * @param {number} maxRows - Maximum number of rows to fetch (default: 100)
  * @returns {Promise<Array>} - Array of orders
  */
-export const getOrdersFromSheet = async (sheetName, maxRows = 100) => {
+const REMOVED_getOrdersFromSheet = async (sheetName, maxRows = 100) => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -237,7 +282,7 @@ export const getOrdersFromSheet = async (sheetName, maxRows = 100) => {
  * @param {string} campusName - Campus name
  * @returns {Promise<boolean>} - True if sheet exists
  */
-export const sheetTabExists = async (universityName, campusName) => {
+const REMOVED_sheetTabExists = async (universityName, campusName) => {
   if (!isBackendConfigured()) {
     return false;
   }
@@ -256,7 +301,7 @@ export const sheetTabExists = async (universityName, campusName) => {
  * Create master sheet if it doesn't exist
  * @returns {Promise<Object>} - Response from backend API
  */
-export const createMasterSheet = async () => {
+const REMOVED_createMasterSheet = async () => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -277,7 +322,7 @@ export const createMasterSheet = async () => {
  * @param {string} campusName - Campus name
  * @returns {Promise<Object>} - Response from backend API
  */
-export const submitOrderToSheet = async (orderData, universityName, campusName) => {
+const REMOVED_submitOrderToSheet = async (orderData, universityName, campusName) => {
   if (!isBackendConfigured()) {
     throwConfigError();
   }
@@ -335,13 +380,13 @@ export const submitOrderToSheet = async (orderData, universityName, campusName) 
   }
 };
 
-export default {
-  createSheetTab,
-  deleteSheetTab,
-  submitOrderToSheet,
-  getAllSheetTabs,
-  getOrdersFromSheet,
-  sheetTabExists,
-  createMasterSheet,
-  sanitizeTabName
-}; 
+const REMOVED_EXPORTS = {
+  REMOVED_createSheetTab,
+  REMOVED_deleteSheetTab,
+  REMOVED_submitOrderToSheet,
+  REMOVED_getAllSheetTabs,
+  REMOVED_getOrdersFromSheet,
+  REMOVED_sheetTabExists,
+  REMOVED_createMasterSheet,
+  REMOVED_sanitizeTabName
+};

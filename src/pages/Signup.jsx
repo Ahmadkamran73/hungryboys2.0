@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useUniversity } from "../context/UniversityContext";
 import ReCAPTCHA from "react-google-recaptcha";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
+import { api } from "../utils/api";
 import "../styles/Signup.css";
 
 function Signup() {
@@ -21,7 +22,6 @@ function Signup() {
   });
   const [availableUniversities, setAvailableUniversities] = useState([]);
   const [availableCampuses, setAvailableCampuses] = useState([]);
-  const [availableDomains, setAvailableDomains] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -31,46 +31,19 @@ function Signup() {
   
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  // Fetch available universities and campuses from Firestore
+  // Fetch available universities and campuses from backend (MongoDB)
   useEffect(() => {
     const fetchUniversitiesAndCampuses = async () => {
       try {
-        // Fetch universities
-        const universitiesRef = collection(db, "universities");
-        const universitiesSnapshot = await getDocs(universitiesRef);
-        const universities = universitiesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        // Universities
+        const uniRes = await api.get('/api/universities');
+        const universities = Array.isArray(uniRes.data) ? uniRes.data : [];
         setAvailableUniversities(universities);
 
-        // Fetch all campuses for all universities
-        const allCampuses = [];
-        for (const university of universities) {
-          try {
-            const campusesRef = collection(db, "universities", university.id, "campuses");
-            const campusesSnapshot = await getDocs(campusesRef);
-            const campuses = campusesSnapshot.docs.map(doc => ({
-              id: doc.id,
-              universityId: university.id,
-              universityName: university.name,
-              ...doc.data()
-            }));
-            allCampuses.push(...campuses);
-          } catch (campusErr) {
-            console.error(`Error fetching campuses for university ${university.id}:`, campusErr);
-          }
-        }
-        setAvailableCampuses(allCampuses);
-
-        // Fetch domains
-        const domainsRef = collection(db, "allowedDomains");
-        const domainsSnapshot = await getDocs(domainsRef);
-        const domains = domainsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setAvailableDomains(domains);
+        // Campuses (fetch all once and filter by university client-side)
+        const campusRes = await api.get('/api/campuses');
+        const campuses = Array.isArray(campusRes.data) ? campusRes.data : [];
+        setAvailableCampuses(campuses);
       } catch (error) {
         const handledError = handleError(error, 'Signup - fetchUniversitiesAndCampuses');
         console.error("Error fetching universities and campuses:", handledError);
@@ -89,39 +62,13 @@ function Signup() {
   };
 
   const validateEmail = (email) => {
-    // Check if email matches any allowed domain for the selected campus
-    const selectedCampus = availableCampuses.find(c => c.id === formData.selectedCampus);
-    if (!selectedCampus) return false;
-    
-    // Fetch domains for this campus
-    const campusDomains = availableDomains.filter(d => 
-      d.universityId === selectedCampus.universityId && d.campusId === selectedCampus.id
-    );
-    
-    return campusDomains.some(domain => email.endsWith(domain.domain));
+    // Only allow Gmail addresses
+    return email.toLowerCase().endsWith('@gmail.com');
   };
 
-  const checkEmailExists = async (email) => {
-    try {
-      console.log('Checking if email exists:', email);
-      
-      // Check in Firestore users collection
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email.toLowerCase().trim()));
-      const querySnapshot = await getDocs(q);
-      
-      const existsInFirestore = !querySnapshot.empty;
-      console.log('Email exists in Firestore:', existsInFirestore);
-      
-      // Also check if email is already registered in Firebase Auth
-      // We can't directly check Firebase Auth, but we can catch the error during signup
-      return existsInFirestore;
-    } catch (error) {
-      const handledError = handleError(error, 'Signup - checkEmailExists');
-      console.error("Error checking email:", handledError);
-      // If there's an error checking, assume it doesn't exist to allow signup attempt
-      return false;
-    }
+  // Skip Firestore pre-checks to avoid permission errors; rely on Firebase Auth
+  const checkEmailExists = async (_email) => {
+    return false;
   };
 
   const handleSignup = async (e) => {
@@ -136,12 +83,7 @@ function Signup() {
     }
 
     if (!validateEmail(formData.email)) {
-      const selectedCampus = availableCampuses.find(c => c.id === formData.selectedCampus);
-      const campusDomains = availableDomains.filter(d => 
-        d.universityId === selectedCampus?.universityId && d.campusId === selectedCampus?.id
-      );
-      const domainList = campusDomains.map(d => d.domain).join(", ");
-      setError(`Email must end with one of the allowed domains for this campus: ${domainList}`);
+      setError("Please use a Gmail address (@gmail.com) to sign up.");
       return;
     }
 
@@ -163,13 +105,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      // Check if email already exists
-      const emailExists = await checkEmailExists(formData.email);
-      if (emailExists) {
-        setError("An account with this email already exists.");
-        setLoading(false);
-        return;
-      }
+      // Skip Firestore pre-check; rely on Firebase Auth to throw auth/email-already-in-use
 
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
@@ -356,12 +292,12 @@ function Signup() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Enter your university email"
+                    placeholder="Enter your Gmail address"
                     required
                   />
-                  {formData.selectedCampus && formData.email && !validateEmail(formData.email) && (
+                  {formData.email && !validateEmail(formData.email) && (
                     <div className="text-danger small mt-1">
-                      Email must end with one of the allowed domains for this campus
+                      Please use a Gmail address (@gmail.com)
                     </div>
                   )}
                 </div>

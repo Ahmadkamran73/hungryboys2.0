@@ -55,6 +55,7 @@ export const CartProvider = ({ children }) => {
             price: item.price,
             quantity: 1,
             restaurantName: restaurantName,
+            restaurantId: restaurantData?.restaurantId,
             campusId: itemCampusId || userData?.campusId,
             restaurantData: restaurantData,
           },
