@@ -8,6 +8,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
 import "../styles/Signup.css";
+import logo from "../assets/logo.png";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -276,7 +277,7 @@ function Signup() {
           <div className="auth-side-content">
             <div className="auth-logo-container">
               <img 
-                src="/logo.png" 
+                src={logo} 
                 alt="Hungry Boys Logo" 
                 className="auth-logo-icon"
               />

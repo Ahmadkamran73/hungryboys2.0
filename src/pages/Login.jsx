@@ -7,6 +7,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
 import "../styles/Login.css";
+import logo from "../assets/logo.png";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -143,7 +144,7 @@ function Login() {
           <div className="auth-branding">
             <div className="auth-logo-container">
               <img 
-                src="/logo.png" 
+                src={logo} 
                 alt="Hungry Boys Logo" 
                 className="auth-logo-icon"
               />
