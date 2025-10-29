@@ -1,342 +1,686 @@
-/* Super Admin Dashboard Styles */
+/* SuperAdmin.css - Modern Professional Design */
+
+/* ==================== Color Palette ==================== */
+:root {
+  /* Primary Colors - Indigo (professional, trustworthy) */
+  --sa-primary: #4F46E5;
+  --sa-primary-light: #6366F1;
+  --sa-primary-dark: #4338CA;
+  --sa-primary-bg: #EEF2FF;
+  
+  /* Neutral Colors - Light Theme */
+  --sa-bg: #F9FAFB;
+  --sa-bg-secondary: #F3F4F6;
+  --sa-surface: #FFFFFF;
+  --sa-border: #E5E7EB;
+  --sa-text: #111827;
+  --sa-text-secondary: #6B7280;
+  --sa-text-muted: #9CA3AF;
+  
+  /* Semantic Colors */
+  --sa-success: #10B981;
+  --sa-success-light: #D1FAE5;
+  --sa-success-dark: #059669;
+  --sa-warning: #F59E0B;
+  --sa-warning-light: #FEF3C7;
+  --sa-warning-dark: #D97706;
+  --sa-danger: #EF4444;
+  --sa-danger-light: #FEE2E2;
+  --sa-danger-dark: #DC2626;
+  --sa-info: #3B82F6;
+  --sa-info-light: #DBEAFE;
+  --sa-info-dark: #2563EB;
+  
+  /* Shadows */
+  --sa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --sa-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --sa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --sa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --sa-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Overrides */
+  --sa-bg: #111827;
+  --sa-bg-secondary: #1F2937;
+  --sa-surface: #1F2937;
+  --sa-border: #374151;
+  --sa-text: #F9FAFB;
+  --sa-text-secondary: #D1D5DB;
+  --sa-text-muted: #9CA3AF;
+  --sa-primary-bg: #312E81;
+}
+
+/* ==================== Base Layout ==================== */
 .super-admin-page {
-  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
   min-height: 100vh;
+  background: var(--sa-bg);
   padding: 2rem 0;
-  color: #ffffff;
-  overflow-x: hidden;
-  max-width: 100vw;
+  /* Use navbar height variable so layout adapts if navbar size changes */
+  padding-top: calc(var(--navbar-height, 70px) + 1rem);
+  color: var(--sa-text);
 }
 
-/* Create New User section - white text */
-.super-admin-page .card .card-header h5,
-.super-admin-page .card .form-label {
-  color: #ffffff !important;
-  font-weight: 600;
+.super-admin-page .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
+/* ==================== Typography ==================== */
 .super-admin-page h1 {
-  color: #ffffff;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  color: var(--sa-text);
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 2.25rem;
+  letter-spacing: -0.025em;
 }
 
 .super-admin-page h3 {
-  color: #ffffff;
-  font-weight: 500;
+  color: var(--sa-text);
+  font-weight: 600;
   margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
+.super-admin-page h5 {
+  color: var(--sa-text);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0;
+}
+
+.super-admin-page h6 {
+  color: var(--sa-text);
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.super-admin-page p {
+  color: var(--sa-text-secondary);
+  line-height: 1.5;
+}
+
+.super-admin-page .text-muted {
+  color: var(--sa-text-muted) !important;
+}
+
+/* ==================== Navigation Tabs ==================== */
 .super-admin-page .nav-tabs {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid var(--sa-border);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
 .super-admin-page .nav-tabs .nav-link {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sa-text-secondary);
   border: none;
   background: transparent;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.3s ease;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
 }
 
 .super-admin-page .nav-tabs .nav-link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-}
-
-.super-admin-page .nav-tabs .nav-link.active {
-  color: #ffffff;
-  background: rgba(220, 53, 69, 0.2);
-  border: none;
-  border-bottom: 3px solid #dc3545;
-}
-
-.super-admin-page .card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.super-admin-page .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.super-admin-page .card-title {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.super-admin-page .card-text {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.super-admin-page .table {
-  color: #ffffff;
-}
-
-.super-admin-page .table thead th {
-  background: rgba(255, 255, 255, 0.1);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.super-admin-page .table tbody tr {
-  background: rgba(255, 255, 255, 0.05);
-  transition: background 0.3s ease;
-}
-
-.super-admin-page .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.super-admin-page .table tbody td {
-  border-color: rgba(255, 255, 255, 0.1);
-  vertical-align: middle;
-  color: #ffffff;
-}
-
-/* Ensure form select elements in tables are visible */
-.super-admin-page .table .form-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  border-radius: 5px;
-}
-
-.super-admin-page .table .form-select:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-  color: #ffffff;
-}
-
-.super-admin-page .table .form-select option {
-  background: #2d2d2d;
-  color: #ffffff;
-}
-
-/* Ensure all table content is visible */
-.super-admin-page .table-responsive {
-  color: #ffffff;
-}
-
-.super-admin-page .table-responsive .table {
-  color: #ffffff;
-}
-
-.super-admin-page .table-responsive .table th,
-.super-admin-page .table-responsive .table td {
-  color: #ffffff;
-}
-
-/* Override Bootstrap table classes for dark theme */
-.super-admin-page .table-striped > tbody > tr:nth-of-type(odd) > td {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-}
-
-.super-admin-page .table-striped > tbody > tr:nth-of-type(even) > td {
-  background-color: rgba(255, 255, 255, 0.02);
-  color: #ffffff;
-}
-
-.super-admin-page .table-striped > tbody > tr:hover > td {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-/* Ensure all text in table cells is visible */
-.super-admin-page .table td,
-.super-admin-page .table th {
-  color: #ffffff !important;
-}
-
-/* Ensure small text and other elements in tables are visible */
-.super-admin-page .table small,
-.super-admin-page .table .small {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* Ensure buttons in tables are properly styled */
-.super-admin-page .table .btn {
-  color: #ffffff;
-}
-
-.super-admin-page .table .btn-outline-danger {
-  color: #dc3545;
-  border-color: #dc3545;
-}
-
-.super-admin-page .table .btn-outline-danger:hover {
-  background: #dc3545;
-  color: #ffffff;
-}
-
-.super-admin-page .form-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff !important;
-  border-radius: 5px;
-  font-weight: 500;
-}
-
-.super-admin-page .form-select:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-  color: #ffffff !important;
-}
-
-.super-admin-page .form-select option {
-  background: #2d2d2d !important;
-  color: #ffffff !important;
-  font-weight: 500;
-}
-
-/* Ensure dropdown text is visible in all states */
-.super-admin-page .form-select:not([size]):not([multiple]) {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
-}
-
-/* Override Bootstrap's default dropdown styling */
-.super-admin-page select.form-select,
-.super-admin-page select.form-control {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 5px !important;
-  font-weight: 500 !important;
-}
-
-.super-admin-page select.form-select:focus,
-.super-admin-page select.form-control:focus {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: #dc3545 !important;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
-  color: #ffffff !important;
-}
-
-.super-admin-page select.form-select option,
-.super-admin-page select.form-control option {
-  color: #ffffff !important;
-  background-color: #2d2d2d !important;
-  font-weight: 500 !important;
-}
-
-.super-admin-page select.form-select option:hover,
-.super-admin-page select.form-control option:hover {
-  background-color: #dc3545 !important;
-}
-
-/* Ensure dropdown arrow is visible */
-.super-admin-page select.form-select:not([size]):not([multiple]),
-.super-admin-page select.form-control:not([size]):not([multiple]) {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 0.75rem center !important;
-  background-size: 16px 12px !important;
-}
-
-.super-admin-page .btn {
-  border-radius: 5px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.super-admin-page .btn-outline-primary {
-  color: #0d6efd;
-  border-color: #0d6efd;
-}
-
-.super-admin-page .btn-outline-primary:hover {
-  background: #0d6efd;
-  border-color: #0d6efd;
-  color: #ffffff;
-}
-
-.super-admin-page .btn-outline-danger {
-  color: #dc3545;
-  border-color: #dc3545;
-}
-
-.super-admin-page .btn-outline-danger:hover {
-  background: #dc3545;
-  border-color: #dc3545;
-  color: #ffffff;
-}
-
-.super-admin-page .badge {
-  font-size: 0.8rem;
-  padding: 0.5rem 0.75rem;
-}
-
-.super-admin-page .list-group {
+  color: var(--sa-primary);
+  border-bottom-color: var(--sa-primary-light);
   background: transparent;
 }
 
-.super-admin-page .list-group-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+.super-admin-page .nav-tabs .nav-link.active {
+  color: var(--sa-primary);
+  background: transparent;
+  border-bottom-color: var(--sa-primary);
+  font-weight: 600;
 }
 
-.super-admin-page .list-group-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+/* ==================== Cards ==================== */
+.super-admin-page .card {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  box-shadow: var(--sa-shadow);
+  transition: all 0.2s ease;
+  color: var(--sa-text);
+  overflow: hidden;
 }
 
-.super-admin-page .alert {
-  border: none;
-  border-radius: 8px;
+.super-admin-page .card:hover {
+  box-shadow: var(--sa-shadow-md);
+}
+
+.super-admin-page .card-header {
+  background: var(--sa-surface);
+  border-bottom: 1px solid var(--sa-border);
+  color: var(--sa-text);
+  font-weight: 600;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+
+.super-admin-page .card-header h5 {
+  margin: 0;
+  color: var(--sa-text);
+}
+
+.super-admin-page .card-body {
+  padding: 1.5rem;
+  color: var(--sa-text);
+}
+
+.super-admin-page .card-title {
+  font-weight: 600;
+  color: var(--sa-text);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.super-admin-page .card-text {
+  color: var(--sa-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ==================== Statistics Cards (System Overview) ==================== */
+.super-admin-page .stats-card {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--sa-shadow);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.super-admin-page .stats-card:hover {
+  box-shadow: var(--sa-shadow-md);
+  transform: translateY(-2px);
+}
+
+.super-admin-page .stats-card .card-body {
+  padding: 0;
+}
+
+.super-admin-page .stats-card .card-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--sa-primary), var(--sa-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.super-admin-page .stats-card .card-text {
+  color: var(--sa-text-secondary);
   font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.super-admin-page .alert-danger {
-  background: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
-  border-left: 4px solid #dc3545;
+/* Different accent colors for each stat */
+.super-admin-page .stats-card.stat-primary .card-title {
+  background: linear-gradient(135deg, #4F46E5, #6366F1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Statistics cards */
+.super-admin-page .stats-card.stat-success .card-title {
+  background: linear-gradient(135deg, #10B981, #34D399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.super-admin-page .stats-card.stat-info .card-title {
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.super-admin-page .stats-card.stat-warning .card-title {
+  background: linear-gradient(135deg, #F59E0B, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.super-admin-page .stats-card.stat-secondary .card-title {
+  background: linear-gradient(135deg, #6B7280, #9CA3AF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Remove Bootstrap's default colored card backgrounds */
 .super-admin-page .card.bg-primary,
 .super-admin-page .card.bg-success,
 .super-admin-page .card.bg-warning,
-.super-admin-page .card.bg-info {
-  border: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.super-admin-page .card.bg-primary:hover,
-.super-admin-page .card.bg-success:hover,
-.super-admin-page .card.bg-warning:hover,
-.super-admin-page .card.bg-info:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+.super-admin-page .card.bg-info,
+.super-admin-page .card.bg-secondary,
+.super-admin-page .card.bg-dark {
+  background: var(--sa-surface) !important;
+  border: 1px solid var(--sa-border);
+  color: var(--sa-text) !important;
 }
 
 .super-admin-page .card.bg-primary .card-title,
 .super-admin-page .card.bg-success .card-title,
 .super-admin-page .card.bg-warning .card-title,
-.super-admin-page .card.bg-info .card-title {
+.super-admin-page .card.bg-info .card-title,
+.super-admin-page .card.bg-secondary .card-title,
+.super-admin-page .card.bg-dark .card-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
-/* Image styling for mart items */
+.super-admin-page .card.bg-primary .card-text,
+.super-admin-page .card.bg-success .card-text,
+.super-admin-page .card.bg-warning .card-text,
+.super-admin-page .card.bg-info .card-text,
+.super-admin-page .card.bg-secondary .card-text,
+.super-admin-page .card.bg-dark .card-text {
+  color: var(--sa-text-secondary) !important;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* ==================== Forms ==================== */
+.super-admin-page .form-label {
+  color: var(--sa-text);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.super-admin-page .form-control,
+.super-admin-page .form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  color: var(--sa-text);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.super-admin-page .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px 10px;
+  padding-right: 2rem;
+}
+
+.super-admin-page .form-control:focus,
+.super-admin-page .form-select:focus {
+  background: var(--sa-surface);
+  border-color: var(--sa-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  color: var(--sa-text);
+  outline: none;
+}
+
+.super-admin-page .form-select:focus {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+}
+
+.super-admin-page .form-control::placeholder {
+  color: var(--sa-text-muted);
+}
+
+.super-admin-page select.form-select option,
+.super-admin-page select.form-control option {
+  color: var(--sa-text);
+  background-color: var(--sa-surface);
+}
+
+[data-theme="dark"] .super-admin-page .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FFFFFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px 10px;
+}
+
+/* ==================== Buttons ==================== */
+.super-admin-page .btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  border: none;
+}
+
+.super-admin-page .btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+/* Primary Button */
+.super-admin-page .btn-primary {
+  background: var(--sa-primary);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-primary:hover {
+  background: var(--sa-primary-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Success Button */
+.super-admin-page .btn-success {
+  background: var(--sa-success);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-success:hover {
+  background: var(--sa-success-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Warning Button */
+.super-admin-page .btn-warning {
+  background: var(--sa-warning);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-warning:hover {
+  background: var(--sa-warning-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Danger Button */
+.super-admin-page .btn-danger {
+  background: var(--sa-danger);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-danger:hover {
+  background: var(--sa-danger-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Info Button */
+.super-admin-page .btn-info {
+  background: var(--sa-info);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-info:hover {
+  background: var(--sa-info-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Secondary Button */
+.super-admin-page .btn-secondary {
+  background: var(--sa-bg-secondary);
+  color: var(--sa-text);
+  border: 1px solid var(--sa-border);
+}
+
+.super-admin-page .btn-secondary:hover {
+  background: var(--sa-border);
+  color: var(--sa-text);
+  transform: translateY(-1px);
+  box-shadow: var(--sa-shadow-md);
+}
+
+/* Outline Buttons */
+.super-admin-page .btn-outline-primary {
+  color: var(--sa-primary);
+  border: 1px solid var(--sa-primary);
+  background: transparent;
+}
+
+.super-admin-page .btn-outline-primary:hover {
+  background: var(--sa-primary);
+  border-color: var(--sa-primary);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-outline-danger {
+  color: var(--sa-danger);
+  border: 1px solid var(--sa-danger);
+  background: transparent;
+}
+
+.super-admin-page .btn-outline-danger:hover {
+  background: var(--sa-danger);
+  border-color: var(--sa-danger);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-outline-warning {
+  color: var(--sa-warning);
+  border: 1px solid var(--sa-warning);
+  background: transparent;
+}
+
+.super-admin-page .btn-outline-warning:hover {
+  background: var(--sa-warning);
+  border-color: var(--sa-warning);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-outline-secondary {
+  color: var(--sa-text-secondary);
+  border: 1px solid var(--sa-border);
+  background: transparent;
+}
+
+.super-admin-page .btn-outline-secondary:hover {
+  background: var(--sa-bg-secondary);
+  border-color: var(--sa-border);
+  color: var(--sa-text);
+}
+
+/* ==================== Badges ==================== */
+.super-admin-page .badge {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.super-admin-page .badge.bg-primary {
+  background: var(--sa-primary) !important;
+  color: #ffffff;
+}
+
+.super-admin-page .badge.bg-success {
+  background: var(--sa-success) !important;
+  color: #ffffff;
+}
+
+.super-admin-page .badge.bg-warning {
+  background: var(--sa-warning) !important;
+  color: #ffffff;
+}
+
+.super-admin-page .badge.bg-danger {
+  background: var(--sa-danger) !important;
+  color: #ffffff;
+}
+
+.super-admin-page .badge.bg-info {
+  background: var(--sa-info) !important;
+  color: #ffffff;
+}
+
+.super-admin-page .badge.bg-secondary {
+  background: var(--sa-text-muted) !important;
+  color: #ffffff;
+}
+
+/* ==================== List Groups ==================== */
+.super-admin-page .list-group {
+  background: transparent;
+}
+
+.super-admin-page .list-group-item {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  color: var(--sa-text);
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.super-admin-page .list-group-item:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.super-admin-page .list-group-item:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.super-admin-page .list-group-item:hover {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .list-group-flush .list-group-item {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
+/* ==================== Tables ==================== */
+.super-admin-page .table {
+  color: var(--sa-text);
+  background: var(--sa-surface);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.super-admin-page .table thead th {
+  background: var(--sa-bg-secondary);
+  border-bottom: 2px solid var(--sa-border);
+  color: var(--sa-text);
+  font-weight: 600;
+  padding: 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .table tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--sa-border);
+  color: var(--sa-text);
+  vertical-align: middle;
+  background: var(--sa-surface);
+}
+
+.super-admin-page .table tbody tr {
+  background: var(--sa-surface);
+  transition: background 0.2s ease;
+}
+
+.super-admin-page .table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.super-admin-page .table tbody tr:hover {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .table tbody tr:hover td {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .table-responsive {
+  border-radius: 8px;
+  box-shadow: var(--sa-shadow);
+  background: var(--sa-surface);
+}
+
+/* ==================== Alerts ==================== */
+.super-admin-page .alert {
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid;
+}
+
+.super-admin-page .alert-danger {
+  background: var(--sa-danger-light);
+  color: var(--sa-danger-dark);
+  border-left-color: var(--sa-danger);
+}
+
+.super-admin-page .alert-warning {
+  background: var(--sa-warning-light);
+  color: var(--sa-warning-dark);
+  border-left-color: var(--sa-warning);
+}
+
+.super-admin-page .alert-success {
+  background: var(--sa-success-light);
+  color: var(--sa-success-dark);
+  border-left-color: var(--sa-success);
+}
+
+.super-admin-page .alert-info {
+  background: var(--sa-info-light);
+  color: var(--sa-info-dark);
+  border-left-color: var(--sa-info);
+}
+
+/* Dark Mode Alert Overrides */
+[data-theme="dark"] .super-admin-page .alert-info {
+  background: #1E3A5F !important;
+  color: #93C5FD !important;
+  border-left-color: #3B82F6 !important;
+}
+
+[data-theme="dark"] .super-admin-page .alert-success {
+  background: #1A3A2E !important;
+  color: #6EE7B7 !important;
+  border-left-color: #10B981 !important;
+}
+
+[data-theme="dark"] .super-admin-page .alert-warning {
+  background: #3A2E1A !important;
+  color: #FCD34D !important;
+  border-left-color: #F59E0B !important;
+}
+
+[data-theme="dark"] .super-admin-page .alert-danger {
+  background: #3A1A1A !important;
+  color: #FCA5A5 !important;
+  border-left-color: #EF4444 !important;
+}
+
+/* ==================== Image Styling ==================== */
 .super-admin-page .card-img-top {
   height: 150px;
   object-fit: cover;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
   transition: transform 0.3s ease;
 }
 
@@ -344,41 +688,974 @@
   transform: scale(1.05);
 }
 
-/* Make cards more compact */
-.super-admin-page .card {
-  min-height: auto;
-  max-width: 100%;
+/* ==================== Restaurant Cards ==================== */
+.super-admin-page .restaurant-card {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--sa-shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.super-admin-page .restaurant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sa-shadow-lg);
+  border-color: var(--sa-primary);
+}
+
+.super-admin-page .restaurant-card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--sa-border);
+  background: linear-gradient(135deg, var(--sa-surface) 0%, var(--sa-bg-secondary) 100%);
+}
+
+.super-admin-page .restaurant-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--sa-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.super-admin-page .restaurant-card-subtitle {
+  font-size: 0.875rem;
+  color: var(--sa-text-secondary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.super-admin-page .restaurant-card-body {
+  padding: 1.25rem 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.super-admin-page .restaurant-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.super-admin-page .badge-university {
+  background: linear-gradient(135deg, #4F46E5, #6366F1) !important;
+  color: #ffffff !important;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .badge-campus {
+  background: linear-gradient(135deg, #10B981, #34D399) !important;
+  color: #ffffff !important;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .restaurant-timing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sa-text-secondary);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--sa-bg-secondary);
+  border-radius: 6px;
+}
+
+.super-admin-page .restaurant-timing svg {
+  flex-shrink: 0;
+}
+
+.super-admin-page .restaurant-id {
+  color: var(--sa-text-muted);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.super-admin-page .restaurant-card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--sa-border);
+  background: var(--sa-bg-secondary);
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.super-admin-page .btn-restaurant {
+  flex: 1;
+  min-width: 70px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.super-admin-page .btn-edit {
+  background: var(--sa-primary);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-edit:hover {
+  background: var(--sa-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+}
+
+.super-admin-page .btn-delete {
+  background: var(--sa-danger);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-delete:hover {
+  background: var(--sa-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.super-admin-page .btn-clear {
+  background: var(--sa-warning);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-clear:hover {
+  background: var(--sa-warning-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Dark Mode Restaurant Cards */
+[data-theme="dark"] .super-admin-page .restaurant-card {
+  background: #1F2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .super-admin-page .restaurant-card:hover {
+  border-color: #6366F1;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3), 0 4px 6px -2px rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="dark"] .super-admin-page .restaurant-card-header {
+  background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .super-admin-page .restaurant-timing {
+  background: #111827;
+}
+
+[data-theme="dark"] .super-admin-page .restaurant-card-footer {
+  background: #111827;
+  border-top-color: #374151;
+}
+
+/* Responsive Restaurant Cards */
+@media (max-width: 768px) {
+  .super-admin-page .restaurant-card-footer {
+    flex-direction: column;
+  }
+  
+  .super-admin-page .btn-restaurant {
+    width: 100%;
+  }
+}
+
+/* ==================== Mart Items Cards ==================== */
+.super-admin-page .mart-item-card {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--sa-shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.super-admin-page .mart-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sa-shadow-lg);
+  border-color: var(--sa-success);
+}
+
+.super-admin-page .mart-item-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .mart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.super-admin-page .mart-item-card:hover .mart-item-image img {
+  transform: scale(1.05);
+}
+
+.super-admin-page .stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+}
+
+.super-admin-page .low-stock {
+  background: rgba(245, 158, 11, 0.9);
+  color: #ffffff;
+}
+
+.super-admin-page .out-of-stock {
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+}
+
+.super-admin-page .mart-item-body {
+  padding: 1.25rem 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.super-admin-page .mart-item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--sa-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.super-admin-page .mart-item-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sa-success);
+  margin: 0;
+}
+
+.super-admin-page .mart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.super-admin-page .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--sa-bg-secondary);
+  border-radius: 6px;
+}
+
+.super-admin-page .info-label {
+  font-size: 0.8125rem;
+  color: var(--sa-text-secondary);
+  font-weight: 500;
+}
+
+.super-admin-page .info-value {
+  font-size: 0.875rem;
+  color: var(--sa-text);
+  font-weight: 600;
+}
+
+.super-admin-page .stock-low {
+  color: var(--sa-warning) !important;
+}
+
+.super-admin-page .stock-good {
+  color: var(--sa-success) !important;
+}
+
+.super-admin-page .mart-item-description {
+  font-size: 0.875rem;
+  color: var(--sa-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.super-admin-page .card-body {
-  padding: 1rem;
+.super-admin-page .mart-item-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.super-admin-page .card-title {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+.super-admin-page .mart-item-id {
+  color: var(--sa-text-muted);
+  font-size: 0.75rem;
+  font-family: monospace;
 }
 
-.super-admin-page .card-text {
+.super-admin-page .mart-item-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--sa-border);
+  background: var(--sa-bg-secondary);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.super-admin-page .btn-mart-item {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
   font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.super-admin-page .btn-mart-item.btn-edit {
+  background: var(--sa-success);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-mart-item.btn-edit:hover {
+  background: var(--sa-success-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.super-admin-page .btn-mart-item.btn-delete {
+  background: var(--sa-danger);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-mart-item.btn-delete:hover {
+  background: var(--sa-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* ==================== Menu Items Cards ==================== */
+.super-admin-page .menu-item-card {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--sa-shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.super-admin-page .menu-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sa-shadow-lg);
+  border-color: var(--sa-info);
+}
+
+.super-admin-page .menu-item-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .menu-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.super-admin-page .menu-item-card:hover .menu-item-image img {
+  transform: scale(1.05);
+}
+
+.super-admin-page .menu-item-body {
+  padding: 1.25rem 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.super-admin-page .menu-item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--sa-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.super-admin-page .menu-item-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sa-info);
+  margin: 0;
+}
+
+.super-admin-page .menu-item-description {
+  font-size: 0.875rem;
+  color: var(--sa-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.super-admin-page .menu-item-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.super-admin-page .badge-restaurant {
+  background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+  color: #ffffff !important;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .menu-item-id {
+  color: var(--sa-text-muted);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.super-admin-page .menu-item-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--sa-border);
+  background: var(--sa-bg-secondary);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.super-admin-page .btn-menu-item {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.super-admin-page .btn-menu-item.btn-edit {
+  background: var(--sa-info);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-menu-item.btn-edit:hover {
+  background: var(--sa-info-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.super-admin-page .btn-menu-item.btn-delete {
+  background: var(--sa-danger);
+  color: #ffffff;
+}
+
+.super-admin-page .btn-menu-item.btn-delete:hover {
+  background: var(--sa-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Dark Mode for Mart and Menu Items */
+[data-theme="dark"] .super-admin-page .mart-item-card,
+[data-theme="dark"] .super-admin-page .menu-item-card {
+  background: #1F2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .super-admin-page .mart-item-card:hover {
+  border-color: #34D399;
+  box-shadow: 0 10px 15px -3px rgba(52, 211, 153, 0.3), 0 4px 6px -2px rgba(52, 211, 153, 0.2);
+}
+
+[data-theme="dark"] .super-admin-page .menu-item-card:hover {
+  border-color: #60A5FA;
+  box-shadow: 0 10px 15px -3px rgba(96, 165, 250, 0.3), 0 4px 6px -2px rgba(96, 165, 250, 0.2);
+}
+
+[data-theme="dark"] .super-admin-page .mart-item-image,
+[data-theme="dark"] .super-admin-page .menu-item-image {
+  background: #111827;
+}
+
+[data-theme="dark"] .super-admin-page .info-row {
+  background: #111827;
+}
+
+[data-theme="dark"] .super-admin-page .mart-item-footer,
+[data-theme="dark"] .super-admin-page .menu-item-footer {
+  background: #111827;
+  border-top-color: #374151;
+}
+
+/* Responsive Mart and Menu Items */
+@media (max-width: 768px) {
+  .super-admin-page .mart-item-footer,
+  .super-admin-page .menu-item-footer {
+    flex-direction: column;
+  }
+  
+  .super-admin-page .btn-mart-item,
+  .super-admin-page .btn-menu-item {
+    width: 100%;
+  }
+  
+  .super-admin-page .mart-item-image,
+  .super-admin-page .menu-item-image {
+    height: 180px;
+  }
+}
+
+/* ==================== Modern Admin Cards (Mart Item Style) ==================== */
+/* Universities, Campuses, Restaurants, Menu Items Cards */
+
+.super-admin-page .admin-card,
+.super-admin-page .university-card,
+.super-admin-page .campus-card,
+.super-admin-page .restaurant-card,
+.super-admin-page .menu-card {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.super-admin-page .admin-card:hover,
+.super-admin-page .university-card:hover,
+.super-admin-page .campus-card:hover,
+.super-admin-page .restaurant-card:hover,
+.super-admin-page .menu-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .super-admin-page .admin-card,
+[data-theme="dark"] .super-admin-page .university-card,
+[data-theme="dark"] .super-admin-page .campus-card,
+[data-theme="dark"] .super-admin-page .restaurant-card,
+[data-theme="dark"] .super-admin-page .menu-card {
+  background: #1a2332;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .super-admin-page .admin-card:hover,
+[data-theme="dark"] .super-admin-page .university-card:hover,
+[data-theme="dark"] .super-admin-page .campus-card:hover,
+[data-theme="dark"] .super-admin-page .restaurant-card:hover,
+[data-theme="dark"] .super-admin-page .menu-card:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+
+/* Card Content */
+.super-admin-page .admin-card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Card Title/Name */
+.super-admin-page .card-title,
+.super-admin-page .admin-card-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .super-admin-page .card-title,
+[data-theme="dark"] .super-admin-page .admin-card-name {
+  color: #FFFFFF;
+}
+
+/* Card Info Row */
+.super-admin-page .admin-card-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #F8FAFC;
+  border-radius: 8px;
   margin-bottom: 0.5rem;
 }
 
-/* Responsive card adjustments */
+[data-theme="dark"] .super-admin-page .admin-card-info-row {
+  background: #0f172a;
+}
+
+.super-admin-page .admin-card-info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .admin-card-info-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+[data-theme="dark"] .super-admin-page .admin-card-info-label {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .super-admin-page .admin-card-info-value {
+  color: #FFFFFF;
+}
+
+/* Price Badge (for menu items) */
+.super-admin-page .admin-price-badge {
+  display: inline-block;
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ED573;
+  padding: 0.375rem 0.875rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .super-admin-page .admin-price-badge {
+  background: rgba(46, 213, 115, 0.2);
+  color: #5FE18A;
+}
+
+/* Category/Status Badges */
+.super-admin-page .admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-page .admin-badge.badge-primary {
+  background: rgba(79, 70, 229, 0.15);
+  color: #4F46E5;
+}
+
+.super-admin-page .admin-badge.badge-success {
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ED573;
+}
+
+.super-admin-page .admin-badge.badge-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+[data-theme="dark"] .super-admin-page .admin-badge.badge-primary {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818CF8;
+}
+
+[data-theme="dark"] .super-admin-page .admin-badge.badge-success {
+  background: rgba(46, 213, 115, 0.2);
+  color: #5FE18A;
+}
+
+[data-theme="dark"] .super-admin-page .admin-badge.badge-info {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60A5FA;
+}
+
+/* Action Buttons Container */
+.super-admin-page .action-buttons,
+.super-admin-page .admin-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #E2E8F0;
+  background: #F8FAFC;
+}
+
+[data-theme="dark"] .super-admin-page .action-buttons,
+[data-theme="dark"] .super-admin-page .admin-card-actions {
+  border-top-color: #334155;
+  background: #0f172a;
+}
+
+/* Edit Button */
+.super-admin-page .btn-edit,
+.super-admin-page .action-buttons .btn-primary,
+.super-admin-page .admin-card-actions .btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #2ED573;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.super-admin-page .btn-edit:hover,
+.super-admin-page .action-buttons .btn-primary:hover,
+.super-admin-page .admin-card-actions .btn-primary:hover {
+  background: #26B863;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.35);
+}
+
+/* Delete Button */
+.super-admin-page .btn-delete,
+.super-admin-page .action-buttons .btn-danger,
+.super-admin-page .admin-card-actions .btn-danger {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #EF4444;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.super-admin-page .btn-delete:hover,
+.super-admin-page .action-buttons .btn-danger:hover,
+.super-admin-page .admin-card-actions .btn-danger:hover {
+  background: #DC2626;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+/* Campus List inside University Cards */
+.super-admin-page .campus-list {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.super-admin-page .campus-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: #F1F5F9;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.super-admin-page .campus-item:hover {
+  background: #E2E8F0;
+}
+
+[data-theme="dark"] .super-admin-page .campus-item {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .super-admin-page .campus-item:hover {
+  background: #1e293b;
+}
+
+.super-admin-page .campus-item span {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--sa-text);
+}
+
+/* Additional Action Buttons (Warning/Clear buttons) */
+.super-admin-page .btn-outline-warning {
+  background: transparent;
+  color: #F59E0B;
+  border: 2px solid #F59E0B;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.super-admin-page .btn-outline-warning:hover {
+  background: #F59E0B;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+[data-theme="dark"] .super-admin-page .btn-outline-warning {
+  color: #FCD34D;
+  border-color: #FCD34D;
+}
+
+[data-theme="dark"] .super-admin-page .btn-outline-warning:hover {
+  background: #FCD34D;
+  color: #1A1A1A;
+}
+
+/* Small text styling */
+.super-admin-page .text-muted.small {
+  font-size: 0.75rem;
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .super-admin-page .text-muted.small {
+  color: #64748B;
+}
+
+/* ==================== Responsive Design ==================== */
 @media (max-width: 1200px) {
   .super-admin-page .card-img-top {
     height: 140px;
   }
+  
+  .super-admin-page .role-badge-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .super-admin-page .role-select {
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
+  .super-admin-page {
+    padding: 1rem 0;
+    padding-top: calc(var(--navbar-height, 60px) + 0.5rem); /* Adjust for mobile navbar */
+  }
+  
+  .super-admin-page .container {
+    padding: 0 1rem;
+  }
+  
+  .super-admin-page h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .super-admin-page h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .super-admin-page .nav-tabs {
+    flex-direction: column;
+    border-bottom: none;
+    gap: 0.5rem;
+  }
+  
+  .super-admin-page .nav-tabs .nav-link {
+    border-radius: 12px;
+    margin-bottom: 0;
+    border: 2px solid var(--sa-border);
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--sa-surface);
+    box-shadow: var(--sa-shadow-sm);
+  }
+  
+  .super-admin-page .nav-tabs .nav-link:hover {
+    border-color: var(--sa-primary-light);
+    transform: translateX(4px);
+    box-shadow: var(--sa-shadow);
+  }
+  
+  .super-admin-page .nav-tabs .nav-link.active {
+    background: var(--sa-primary);
+    border-color: var(--sa-primary);
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--sa-shadow-md);
+    transform: translateX(4px);
+  }
+  
   .super-admin-page .card-img-top {
     height: 120px;
   }
   
   .super-admin-page .card-body {
-    padding: 0.75rem;
+    padding: 1rem;
   }
   
   .super-admin-page .card-title {
@@ -388,88 +1665,405 @@
   .super-admin-page .card-text {
     font-size: 0.8rem;
   }
+  
+  .super-admin-page .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .super-admin-page .stats-card .card-title {
+    font-size: 2rem;
+  }
+  
+  /* Stack table cells on mobile */
+  .super-admin-page .table thead {
+    display: none;
+  }
+  
+  .super-admin-page .table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--sa-border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--sa-surface);
+  }
+  
+  .super-admin-page .table tbody tr:hover {
+    background: var(--sa-bg-secondary);
+  }
+  
+  .super-admin-page .table tbody td {
+    display: block;
+    text-align: left;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--sa-border);
+  }
+  
+  .super-admin-page .table tbody td:last-child {
+    border-bottom: none;
+  }
+  
+  .super-admin-page .table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: block;
+    color: var(--sa-text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  
+  .super-admin-page .role-badge-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 576px) {
+  .super-admin-page {
+    padding-top: calc(var(--navbar-height, 56px) + 0.5rem); /* Adjust for smaller mobile navbar */
+  }
+  
   .super-admin-page .card-img-top {
     height: 100px;
   }
+  
+  .super-admin-page h1 {
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+  }
+  
+  .super-admin-page h3 {
+    font-size: 1.1rem;
+  }
+  
+  .super-admin-page .stats-card .card-title {
+    font-size: 1.75rem;
+  }
+  
+  .super-admin-page .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .super-admin-page .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .super-admin-page .university-card .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .super-admin-page .university-card .action-buttons .btn {
+    width: 100%;
+  }
+  
+  /* Better action button groups on mobile */
+  .super-admin-page .table tbody td .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .super-admin-page .table tbody td .btn-group .btn {
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* Form inputs on mobile */
+  .super-admin-page .form-control,
+  .super-admin-page .form-select {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
 }
 
-/* Form styling */
-.super-admin-page .form-control {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  border-radius: 5px;
-  transition: all 0.3s ease;
+/* ==================== Loading States ==================== */
+.super-admin-page .loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--sa-text-muted);
 }
 
-.super-admin-page .form-control:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-  color: #ffffff;
+/* ==================== Empty States ==================== */
+.super-admin-page .empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--sa-text-muted);
 }
 
-.super-admin-page .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+.super-admin-page .empty-state p {
+  color: var(--sa-text-muted);
+  margin-bottom: 1rem;
 }
 
-/* Quick actions grid */
-.super-admin-page .d-grid.gap-2 .btn {
-  margin-bottom: 0.5rem;
-  padding: 0.75rem 1rem;
+/* ==================== User Management Table ==================== */
+.super-admin-page .table-responsive {
+  background: var(--sa-surface);
+  border-radius: 12px;
+  box-shadow: var(--sa-shadow);
+  overflow: hidden;
+}
+
+.super-admin-page .table {
+  margin-bottom: 0;
+  background: var(--sa-surface);
+}
+
+.super-admin-page .table thead {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  color: var(--sa-text);
+  padding: 1rem;
+  border-bottom: 2px solid var(--sa-border);
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .table tbody tr {
+  transition: all 0.2s ease;
+  background: var(--sa-surface);
+}
+
+.super-admin-page .table tbody tr:hover {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .table tbody tr:hover td {
+  background: transparent;
+}
+
+.super-admin-page .table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: var(--sa-text);
+  border-bottom: 1px solid var(--sa-border);
+  background: transparent;
   font-weight: 500;
 }
 
-/* Override Bootstrap text-muted for dark themes */
-.super-admin-page .text-muted {
-  color: rgba(255, 255, 255, 0.7) !important;
+/* Ensure text is always visible */
+.super-admin-page .table tbody td,
+.super-admin-page .table thead th {
+  color: var(--sa-text) !important;
 }
 
-/* Ensure all headings are visible */
-.super-admin-page h1,
-.super-admin-page h2,
-.super-admin-page h3,
-.super-admin-page h4,
-.super-admin-page h5,
-.super-admin-page h6 {
+[data-theme="dark"] .super-admin-page .table tbody td,
+[data-theme="dark"] .super-admin-page .table thead th {
+  color: #F9FAFB !important;
+}
+
+[data-theme="dark"] .super-admin-page .table tbody tr {
+  background: #1F2937 !important;
+}
+
+[data-theme="dark"] .super-admin-page .table tbody tr:hover {
+  background: #374151 !important;
+}
+
+[data-theme="dark"] .super-admin-page .table-responsive {
+  background: #1F2937 !important;
+}
+
+[data-theme="dark"] .super-admin-page .table thead {
+  background: #111827 !important;
+}
+
+[data-theme="dark"] .super-admin-page .table thead th {
+  background: #111827 !important;
+  color: #F9FAFB !important;
+}
+
+/* Role Badge Styling */
+.super-admin-page .role-badge-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.super-admin-page .role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Role Colors */
+.super-admin-page .role-badge.role-basic-user {
+  background: #E5E7EB !important;
+  color: #374151 !important;
+}
+
+[data-theme="dark"] .super-admin-page .role-badge.role-basic-user {
+  background: #4B5563 !important;
+  color: #F3F4F6 !important;
+}
+
+.super-admin-page .role-badge.role-campus-admin {
+  background: #FEF3C7 !important;
+  color: #92400E !important;
+}
+
+[data-theme="dark"] .super-admin-page .role-badge.role-campus-admin {
+  background: #F59E0B !important;
+  color: #FFFFFF !important;
+}
+
+.super-admin-page .role-badge.role-restaurant-manager {
+  background: #DBEAFE !important;
+  color: #1E40AF !important;
+}
+
+[data-theme="dark"] .super-admin-page .role-badge.role-restaurant-manager {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+.super-admin-page .role-badge.role-super-admin {
+  background: #FEE2E2 !important;
+  color: #991B1B !important;
+}
+
+[data-theme="dark"] .super-admin-page .role-badge.role-super-admin {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+/* Role Dropdown Styling */
+.super-admin-page .role-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 160px;
+  font-size: 0.8125rem;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  color: var(--sa-text);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234B5563' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 14px 10px;
+}
+
+[data-theme="dark"] .super-admin-page .role-select {
+  background: #374151 !important;
+  color: #F9FAFB !important;
+  border: 1px solid #4B5563 !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23F9FAFB' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+}
+
+[data-theme="dark"] .super-admin-page .role-select option {
+  background: #374151 !important;
+  color: #F9FAFB !important;
+}
+
+/* University and Campus Badges in Table */
+.super-admin-page .table .badge.bg-primary {
+  background: var(--sa-primary) !important;
   color: #ffffff;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
 }
 
-/* Ensure all paragraphs are visible */
-.super-admin-page p {
-  color: rgba(255, 255, 255, 0.9);
+.super-admin-page .table .badge.bg-info {
+  background: var(--sa-info) !important;
+  color: #ffffff;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .super-admin-page {
-    padding: 1rem 0;
-  }
-  
-  .super-admin-page .nav-tabs .nav-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  .super-admin-page .table-responsive {
-    font-size: 0.9rem;
-  }
+/* Collapsible Header Styling */
+.super-admin-page .collapsible-header {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--sa-surface);
 }
 
-@media (max-width: 576px) {
-  .super-admin-page h1 {
-    font-size: 1.8rem;
-  }
-  
-  .super-admin-page .nav-tabs {
-    flex-direction: column;
-  }
-  
-  .super-admin-page .nav-tabs .nav-link {
-    border-radius: 5px;
-    margin-bottom: 0.5rem;
-  }
-} 
+.super-admin-page .collapsible-header:hover {
+  background: var(--sa-bg-secondary);
+}
+
+.super-admin-page .collapsible-header .badge.bg-secondary {
+  background: var(--sa-text-muted) !important;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Quick Search Bar Styling */
+.super-admin-page .quick-search-input {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.super-admin-page .quick-search-input:focus {
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+[data-theme="dark"] .super-admin-page .form-control::placeholder {
+  color: #9CA3AF;
+}
+
+/* ==================== Utility Classes ==================== */
+.super-admin-page .text-center {
+  text-align: center;
+}
+
+.super-admin-page .mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.super-admin-page .mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.super-admin-page .mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.super-admin-page .w-100 {
+  width: 100%;
+}
+
+.super-admin-page .d-flex {
+  display: flex;
+}
+
+.super-admin-page .justify-content-between {
+  justify-content: space-between;
+}
+
+.super-admin-page .justify-content-end {
+  justify-content: flex-end;
+}
+
+.super-admin-page .align-items-center {
+  align-items: center;
+}
+
+.super-admin-page .gap-2 {
+  gap: 0.5rem;
+}
+
+.super-admin-page .d-grid {
+  display: grid;
+}

@@ -1,30 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  addDoc,
-  setDoc,
-  query,
-  where 
-} from "firebase/firestore";
-import { db } from "../firebase";
+﻿import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { db } from "../firebase";
+import { doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
-import { createSheetTab, deleteSheetTab, createMasterSheet, recreateCampusSheet, sanitizeTabName } from "../utils/googleSheets";
-import SuperAdminDashboard from "../components/SuperAdminDashboard";
+// import SuperAdminDashboard from "../components/SuperAdminDashboard"; // Removed: Google Sheets dashboard
 import CampusSettingsManager from "../components/CampusSettingsManager";
 import BulkMenuImport from "../components/BulkMenuImport";
+import SuperAdminOrdersPanel from "../components/SuperAdminOrdersPanel";
+import { api, authHeaders } from "../utils/api";
 import "../styles/SuperAdmin.css";
 
 const SuperAdmin = () => {
-  const { userData } = useAuth();
+  const { user, userData } = useAuth();
 
   // Helper functions for time conversion
   const convertTo24Hour = (time12h) => {
@@ -83,8 +72,7 @@ const SuperAdmin = () => {
   });
   const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null });
   const [martItemForm, setMartItemForm] = useState({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null });
-  const [domainForm, setDomainForm] = useState({ name: "", domain: "", universityId: "", campusId: "", id: null });
-  const [userForm, setUserForm] = useState({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", id: null });
+  const [userForm, setUserForm] = useState({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null });
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedCampus, setSelectedCampus] = useState(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
@@ -95,6 +83,12 @@ const SuperAdmin = () => {
   const [filterRestaurant, setFilterRestaurant] = useState("");
   const [filterUserRole, setFilterUserRole] = useState("");
   const [searchUser, setSearchUser] = useState("");
+  
+  // User list collapse state
+  const [isUserListOpen, setIsUserListOpen] = useState(false);
+
+  // Orders dropdown state
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
 
   // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState({
@@ -108,10 +102,6 @@ const SuperAdmin = () => {
   useEffect(() => {
     if (userData && userData.role === "superAdmin") {
       fetchAllData();
-      // Create master sheet if it doesn't exist
-      createMasterSheet().catch(() => {
-        // Don't show error to user as this is optional functionality
-      });
     } else {
       setError("Access denied. Super Admin privileges required.");
       setLoading(false);
@@ -151,32 +141,22 @@ const SuperAdmin = () => {
     const fetchDataPromise = async () => {
       try {
         // Fetch universities
-        const universitiesSnapshot = await getDocs(collection(db, "universities"));
-        const universitiesData = universitiesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const universitiesResponse = await api.get('/api/universities');
+        const universitiesData = universitiesResponse.data;
         setUniversities(universitiesData);
 
         // Fetch all campuses
-        const allCampuses = [];
-        for (const university of universitiesData) {
-          try {
-            const campusesSnapshot = await getDocs(collection(db, "universities", university.id, "campuses"));
-            const campusesData = campusesSnapshot.docs.map(doc => ({
-              id: doc.id,
-              universityId: university.id,
-              universityName: university.name,
-              ...doc.data()
-            }));
-            allCampuses.push(...campusesData);
-          } catch (campusErr) {
-            // Error fetching campuses is non-fatal, continue with other campuses
-          }
-        }
+        const campusesResponse = await api.get('/api/campuses');
+        const allCampuses = campusesResponse.data.map(campus => {
+          const university = universitiesData.find(u => u.id === campus.universityId);
+          return {
+            ...campus,
+            universityName: university?.name || ''
+          };
+        });
         setCampuses(allCampuses);
 
-        // Fetch users
+        // Fetch users from Firestore (still using Firestore for users)
         const usersSnapshot = await getDocs(collection(db, "users"));
         const usersData = usersSnapshot.docs.map(doc => ({
           id: doc.id,
@@ -184,75 +164,44 @@ const SuperAdmin = () => {
         }));
         setUsers(usersData);
 
-        // Fetch all restaurants and menu items
-        const allRestaurantsData = [];
-        const allMenuItemsData = [];
-        for (const campus of allCampuses) {
-          try {
-            const restaurantsSnapshot = await getDocs(collection(db, "universities", campus.universityId, "campuses", campus.id, "restaurants"));
-            const restaurantsData = restaurantsSnapshot.docs.map(doc => ({
-              id: doc.id,
-              campusId: campus.id,
-              campusName: campus.name,
-              universityId: campus.universityId,
-              universityName: campus.universityName,
-              ...doc.data()
-            }));
-            allRestaurantsData.push(...restaurantsData);
-
-            // Fetch menu items for each restaurant
-            for (const restaurant of restaurantsData) {
-              try {
-                const menuItemsSnapshot = await getDocs(collection(db, "universities", campus.universityId, "campuses", campus.id, "restaurants", restaurant.id, "menuItems"));
-                const menuItemsData = menuItemsSnapshot.docs.map(doc => ({
-                  id: doc.id,
-                  restaurantId: restaurant.id,
-                  restaurantName: restaurant.name,
-                  campusId: campus.id,
-                  campusName: campus.name,
-                  universityId: campus.universityId,
-                  universityName: campus.universityName,
-                  ...doc.data()
-                }));
-                allMenuItemsData.push(...menuItemsData);
-              } catch (menuErr) {
-                // Error fetching menu items is non-fatal, continue with other items
-              }
-            }
-          } catch (restaurantErr) {
-            // Error fetching restaurants is non-fatal, continue with other restaurants
-          }
-        }
+        // Fetch all restaurants
+        const restaurantsResponse = await api.get('/api/restaurants');
+        const allRestaurantsData = restaurantsResponse.data.map(restaurant => {
+          const campus = allCampuses.find(c => c.id === restaurant.campusId);
+          return {
+            ...restaurant,
+            campusName: campus?.name || '',
+            universityName: campus?.universityName || ''
+          };
+        });
         setAllRestaurants(allRestaurantsData);
+
+        // Fetch all menu items
+        const menuItemsResponse = await api.get('/api/menu-items');
+        const allMenuItemsData = menuItemsResponse.data.map(menuItem => {
+          const restaurant = allRestaurantsData.find(r => r.id === menuItem.restaurantId);
+          return {
+            ...menuItem,
+            restaurantName: restaurant?.name || '',
+            campusId: restaurant?.campusId || '',
+            campusName: restaurant?.campusName || '',
+            universityId: restaurant?.universityId || '',
+            universityName: restaurant?.universityName || ''
+          };
+        });
         setAllMenuItems(allMenuItemsData);
 
         // Fetch all mart items
-        const allMartItemsData = [];
-        for (const campus of allCampuses) {
-          try {
-            const martItemsSnapshot = await getDocs(collection(db, "universities", campus.universityId, "campuses", campus.id, "martItems"));
-            const martItemsData = martItemsSnapshot.docs.map(doc => ({
-              id: doc.id,
-              campusId: campus.id,
-              campusName: campus.name,
-              universityId: campus.universityId,
-              universityName: campus.universityName,
-              ...doc.data()
-            }));
-            allMartItemsData.push(...martItemsData);
-          } catch (martErr) {
-            // Error fetching mart items is non-fatal, continue with other items
-          }
-        }
+        const martItemsResponse = await api.get('/api/mart-items');
+        const allMartItemsData = martItemsResponse.data.map(martItem => {
+          const campus = allCampuses.find(c => c.id === martItem.campusId);
+          return {
+            ...martItem,
+            campusName: campus?.name || '',
+            universityName: campus?.universityName || ''
+          };
+        });
         setAllMartItems(allMartItemsData);
-
-        // Fetch domains
-        const domainsSnapshot = await getDocs(collection(db, "allowedDomains"));
-        const domainsData = domainsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setDomains(domainsData);
 
     } catch (err) {
         const handledError = handleError(err, 'SuperAdmin - fetchAllData');
@@ -275,20 +224,26 @@ const SuperAdmin = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (!user) {
+        setError("User not authenticated");
+        setLoading(false);
+        return;
+      }
+      const headers = await authHeaders(user);
       if (universityForm.id) {
-        await updateDoc(doc(db, "universities", universityForm.id), {
+        await api.patch(`/api/universities/${universityForm.id}`, {
           name: universityForm.name,
-        });
+        }, { headers });
       } else {
-        await addDoc(collection(db, "universities"), {
+        await api.post('/api/universities', {
           name: universityForm.name,
-        });
+        }, { headers });
       }
       setUniversityForm({ name: "", id: null });
       fetchAllData();
     } catch (err) {
-      setError("Failed to save university");
-      console.error(err);
+      setError("Failed to save university: " + (err.response?.data?.error || err.message));
+      console.error("Error saving university:", err);
     } finally {
       setLoading(false);
     }
@@ -306,7 +261,8 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          await deleteDoc(doc(db, "universities", id));
+          const headers = await authHeaders(user);
+          await api.delete(`/api/universities/${id}`, { headers });
           fetchAllData();
         } catch (err) {
           setError("Failed to delete university");
@@ -329,34 +285,19 @@ const SuperAdmin = () => {
     setLoading(true);
     try {
       const university = universities.find(u => u.id === campusForm.universityId);
+      const headers = await authHeaders(user);
       
       if (campusForm.id) {
         // Update existing campus
-        await updateDoc(doc(db, "universities", campusForm.universityId, "campuses", campusForm.id), {
+        await api.patch(`/api/campuses/${campusForm.id}`, {
           name: campusForm.name,
-        });
+        }, { headers });
       } else {
         // Create new campus
-        const campusDoc = await addDoc(collection(db, "universities", campusForm.universityId, "campuses"), {
+        await api.post('/api/campuses', {
           name: campusForm.name,
-        });
-        
-        // Create Google Sheets tab for the new campus
-        try {
-          await createSheetTab(university.name, campusForm.name);
-
-          // Sometimes the initial create can miss new columns due to propagation/timing.
-          // Force a recreate (idempotent) to ensure all headers (gender/male/female) exist.
-          try {
-            const tabName = sanitizeTabName(`${university.name}_${campusForm.name}`);
-            await recreateCampusSheet(tabName);
-          } catch (recErr) {
-            // Non-fatal: continue (campus was created in Firestore regardless)
-          }
-
-        } catch (sheetsError) {
-          setError(`Campus created but failed to create Google Sheets tab: ${sheetsError.message}`);
-        }
+          universityId: campusForm.universityId,
+        }, { headers });
       }
       setCampusForm({ name: "", universityId: "", id: null });
       fetchAllData();
@@ -375,20 +316,13 @@ const SuperAdmin = () => {
   const handleCampusDelete = async (campus) => {
     showConfirmationDialog(
       "Delete Campus",
-      `Are you sure you want to delete "${campus.name}" campus? This will also delete all its restaurants, menu items, mart items, and the corresponding Google Sheets tab. This action cannot be undone.`,
+      `Are you sure you want to delete "${campus.name}" campus? This will also delete all its restaurants, menu items, and mart items. This action cannot be undone.`,
       async () => {
         setLoading(true);
         try {
-          // Delete from Firestore
-          await deleteDoc(doc(db, "universities", campus.universityId, "campuses", campus.id));
-          
-          // Delete Google Sheets tab
-          try {
-            await deleteSheetTab(campus.universityName, campus.name);
-    
-          } catch (sheetsError) {
-            setError(`Campus deleted but failed to delete Google Sheets tab: ${sheetsError.message}`);
-          }
+          const headers = await authHeaders(user);
+          // Delete from MongoDB
+          await api.delete(`/api/campuses/${campus.id}`, { headers });
           
           fetchAllData();
         } catch (err) {
@@ -413,6 +347,27 @@ const SuperAdmin = () => {
       setError("Failed to update user role");
       console.error(err);
     }
+  };
+
+  const handleUserEdit = (user) => {
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Populate the form with user data
+    setUserForm({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      password: "", // Don't populate password for security
+      role: user.role || "user",
+      universityId: user.universityId || "",
+      campusId: user.campusId || "",
+      restaurantId: user.restaurantId || "",
+      id: user.id
+    });
+    
+    // Switch to users tab if not already there
+    setActiveTab("users");
   };
 
   const handleUserDelete = async (userId) => {
@@ -440,20 +395,27 @@ const SuperAdmin = () => {
     );
   };
 
-  // User creation
+  // User creation/update
   const handleUserSubmit = async (e) => {
     e.preventDefault();
     if (!userForm.universityId || !userForm.campusId) {
       setError("Please select university and campus");
       return;
     }
+    if (userForm.role === 'restaurantManager' && !userForm.restaurantId) {
+      setError("Please select a restaurant for restaurant manager");
+      return;
+    }
+    
+    // If editing (has id), check if password is required
+    if (!userForm.id && !userForm.password) {
+      setError("Password is required for new users");
+      return;
+    }
+    
     setLoading(true);
     try {
-      // Create Firebase Auth user
-      const userCredential = await createUserWithEmailAndPassword(auth, userForm.email, userForm.password);
-      const firebaseUser = userCredential.user;
-      // Create Firestore user document
-      const newUser = {
+      const userData = {
         firstName: userForm.firstName,
         lastName: userForm.lastName,
         email: userForm.email,
@@ -462,15 +424,40 @@ const SuperAdmin = () => {
         campusId: userForm.campusId,
         universityName: universities.find(u => u.id === userForm.universityId)?.name,
         campusName: campuses.find(c => c.id === userForm.campusId)?.name,
-        createdAt: new Date().toISOString(),
-        uid: firebaseUser.uid,
       };
-      await setDoc(doc(db, "users", firebaseUser.uid), newUser);
-      setUserForm({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", id: null });
+      
+      // Add password only for new users or if provided for update
+      if (!userForm.id || userForm.password) {
+        userData.password = userForm.password;
+      }
+      
+      // Add restaurant data for restaurant managers
+      if (userForm.role === 'restaurantManager') {
+        userData.restaurantId = userForm.restaurantId;
+        userData.restaurantName = allRestaurants.find(r => r.id === userForm.restaurantId)?.name;
+      } else {
+        // Remove restaurant data if role changed from restaurant manager
+        userData.restaurantId = null;
+        userData.restaurantName = null;
+      }
+      
+      const headers = await authHeaders(user);
+      
+      if (userForm.id) {
+        // Update existing user in Firestore
+        const userRef = doc(db, "users", userForm.id);
+        await updateDoc(userRef, userData);
+        alert("User updated successfully!");
+      } else {
+        // Create new user via backend API
+        await api.post('/api/users', userData, { headers });
+        alert("User created successfully! The user can now sign in with the provided email and password.");
+      }
+      
+      setUserForm({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null });
       fetchAllData();
-      alert("User created successfully! The user can now sign in with the provided email and password.");
     } catch (err) {
-      setError("Failed to create user: " + (err.message || err.code));
+      setError(`Failed to ${userForm.id ? 'update' : 'create'} user: ` + (err.response?.data?.error || err.message || err.code));
       console.error(err);
     } finally {
       setLoading(false);
@@ -486,24 +473,27 @@ const SuperAdmin = () => {
     }
     setLoading(true);
     try {
+      const headers = await authHeaders(user);
       if (restaurantForm.id) {
-        await updateDoc(doc(db, "universities", restaurantForm.universityId, "campuses", restaurantForm.campusId, "restaurants", restaurantForm.id), {
+        await api.patch(`/api/restaurants/${restaurantForm.id}`, {
           name: restaurantForm.name,
           location: restaurantForm.location,
           cuisine: restaurantForm.cuisine,
           openTime: restaurantForm.openTime || "10:00 AM",
           closeTime: restaurantForm.closeTime || "10:00 PM",
           is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
-        });
+        }, { headers });
       } else {
-        await addDoc(collection(db, "universities", restaurantForm.universityId, "campuses", restaurantForm.campusId, "restaurants"), {
+        await api.post('/api/restaurants', {
+          campusId: restaurantForm.campusId,
+          universityId: restaurantForm.universityId,
           name: restaurantForm.name,
           location: restaurantForm.location,
           cuisine: restaurantForm.cuisine,
           openTime: restaurantForm.openTime || "10:00 AM",
           closeTime: restaurantForm.closeTime || "10:00 PM",
           is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
-        });
+        }, { headers });
       }
       setRestaurantForm({ 
         name: "", 
@@ -541,7 +531,8 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          await deleteDoc(doc(db, "universities", restaurant.universityId, "campuses", restaurant.campusId, "restaurants", restaurant.id));
+          const headers = await authHeaders(user);
+          await api.delete(`/api/restaurants/${restaurant.id}`, { headers });
           fetchAllData();
         } catch (err) {
           setError("Failed to delete restaurant");
@@ -563,24 +554,28 @@ const SuperAdmin = () => {
     }
     setLoading(true);
     try {
+      const headers = await authHeaders(user);
       if (menuForm.id) {
-        await updateDoc(doc(db, "universities", menuForm.universityId, "campuses", menuForm.campusId, "restaurants", menuForm.restaurantId, "menuItems", menuForm.id), {
+        await api.patch(`/api/menu-items/${menuForm.id}`, {
           name: menuForm.name,
           price: parseFloat(menuForm.price),
           description: menuForm.description,
-        });
+        }, { headers });
       } else {
-        await addDoc(collection(db, "universities", menuForm.universityId, "campuses", menuForm.campusId, "restaurants", menuForm.restaurantId, "menuItems"), {
+        await api.post('/api/menu-items', {
+          restaurantId: menuForm.restaurantId,
+          campusId: menuForm.campusId,
           name: menuForm.name,
           price: parseFloat(menuForm.price),
           description: menuForm.description,
-        });
+        }, { headers });
       }
       setMenuForm({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null });
       fetchAllData();
     } catch (err) {
-      setError("Failed to save menu item");
-      console.error(err);
+      const msg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Unknown error';
+      setError("Failed to save menu item: " + msg);
+      console.error('Menu save failed', err?.response?.data || err);
     } finally {
       setLoading(false);
     }
@@ -597,7 +592,8 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          await deleteDoc(doc(db, "universities", menu.universityId, "campuses", menu.campusId, "restaurants", menu.restaurantId, "menuItems", menu.id));
+          const headers = await authHeaders(user);
+          await api.delete(`/api/menu-items/${menu.id}`, { headers });
           fetchAllData();
         } catch (err) {
           setError("Failed to delete menu item");
@@ -624,6 +620,7 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
+          const headers = await authHeaders(user);
           const menuItemsToDelete = allMenuItems.filter(item => 
             item.universityId === restaurant.universityId && 
             item.campusId === restaurant.campusId && 
@@ -631,7 +628,7 @@ const SuperAdmin = () => {
           );
 
           const deletePromises = menuItemsToDelete.map(item =>
-            deleteDoc(doc(db, "universities", item.universityId, "campuses", item.campusId, "restaurants", item.restaurantId, "menuItems", item.id))
+            api.delete(`/api/menu-items/${item.id}`, { headers })
           );
 
           await Promise.all(deletePromises);
@@ -696,13 +693,14 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
+          const headers = await authHeaders(user);
           const restaurantsToDelete = allRestaurants.filter(restaurant => 
             restaurant.universityId === campus.universityId && 
             restaurant.campusId === campus.id
           );
 
           const deletePromises = restaurantsToDelete.map(restaurant =>
-            deleteDoc(doc(db, "universities", restaurant.universityId, "campuses", restaurant.campusId, "restaurants", restaurant.id))
+            api.delete(`/api/restaurants/${restaurant.id}`, { headers })
           );
 
           await Promise.all(deletePromises);
@@ -730,13 +728,14 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
+          const headers = await authHeaders(user);
           const martItemsToDelete = allMartItems.filter(item => 
             item.universityId === campus.universityId && 
             item.campusId === campus.id
           );
 
           const deletePromises = martItemsToDelete.map(item =>
-            deleteDoc(doc(db, "universities", item.universityId, "campuses", item.campusId, "martItems", item.id))
+            api.delete(`/api/mart-items/${item.id}`, { headers })
           );
 
           await Promise.all(deletePromises);
@@ -761,22 +760,24 @@ const SuperAdmin = () => {
     }
     setLoading(true);
     try {
+      const headers = await authHeaders(user);
       if (martItemForm.id) {
-        await updateDoc(doc(db, "universities", martItemForm.universityId, "campuses", martItemForm.campusId, "martItems", martItemForm.id), {
+        await api.patch(`/api/mart-items/${martItemForm.id}`, {
           name: martItemForm.name,
           price: parseFloat(martItemForm.price),
           description: martItemForm.description,
           category: martItemForm.category,
           stock: parseInt(martItemForm.stock),
-        });
+        }, { headers });
       } else {
-        await addDoc(collection(db, "universities", martItemForm.universityId, "campuses", martItemForm.campusId, "martItems"), {
+        await api.post('/api/mart-items', {
+          campusId: martItemForm.campusId,
           name: martItemForm.name,
           price: parseFloat(martItemForm.price),
           description: martItemForm.description,
           category: martItemForm.category,
           stock: parseInt(martItemForm.stock),
-        });
+        }, { headers });
       }
       setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null });
       fetchAllData();
@@ -799,72 +800,11 @@ const SuperAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          await deleteDoc(doc(db, "universities", item.universityId, "campuses", item.campusId, "martItems", item.id));
+          const headers = await authHeaders(user);
+          await api.delete(`/api/mart-items/${item.id}`, { headers });
           fetchAllData();
         } catch (err) {
           setError("Failed to delete mart item");
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      },
-      "danger"
-    );
-  };
-
-  // Domain management
-  const handleDomainSubmit = async (e) => {
-    e.preventDefault();
-    if (!domainForm.universityId || !domainForm.campusId) {
-      setError("Please select a university and campus");
-      return;
-    }
-    setLoading(true);
-    try {
-      if (domainForm.id) {
-        await updateDoc(doc(db, "allowedDomains", domainForm.id), {
-          name: domainForm.name,
-          domain: domainForm.domain.startsWith('@') ? domainForm.domain : `@${domainForm.domain}`,
-          universityId: domainForm.universityId,
-          campusId: domainForm.campusId,
-        });
-      } else {
-        await addDoc(collection(db, "allowedDomains"), {
-          name: domainForm.name,
-          domain: domainForm.domain.startsWith('@') ? domainForm.domain : `@${domainForm.domain}`,
-          universityId: domainForm.universityId,
-          campusId: domainForm.campusId,
-        });
-      }
-      setDomainForm({ name: "", domain: "", universityId: "", campusId: "", id: null });
-      fetchAllData();
-    } catch (err) {
-      setError("Failed to save domain");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDomainEdit = (domain) => {
-    setDomainForm({
-      ...domain,
-      campusId: domain.campusId || ""
-    });
-  };
-
-  const handleDomainDelete = async (id) => {
-    const domain = domains.find(d => d.id === id);
-    showConfirmationDialog(
-      "Delete Domain",
-      `Are you sure you want to delete domain "${domain?.name}" (${domain?.domain})? This action cannot be undone.`,
-      async () => {
-        setLoading(true);
-        try {
-          await deleteDoc(doc(db, "allowedDomains", id));
-          fetchAllData();
-        } catch (err) {
-          setError("Failed to delete domain");
           console.error(err);
         } finally {
           setLoading(false);
@@ -959,6 +899,7 @@ const SuperAdmin = () => {
     const totalUsers = users.length;
     const campusAdmins = users.filter(u => u.role === "campusAdmin").length;
     const superAdmins = users.filter(u => u.role === "superAdmin").length;
+    const restaurantManagers = users.filter(u => u.role === "restaurantManager").length;
     const regularUsers = users.filter(u => u.role === "user").length;
 
     return {
@@ -969,6 +910,7 @@ const SuperAdmin = () => {
       totalUsers,
       campusAdmins,
       superAdmins,
+      restaurantManagers,
       regularUsers
     };
   };
@@ -1069,14 +1011,6 @@ const SuperAdmin = () => {
               </li>
               <li className="nav-item" role="presentation">
                 <button
-                  className={`nav-link ${activeTab === "domains" ? "active" : ""}`}
-                  onClick={() => setActiveTab("domains")}
-                >
-                  Domain Management
-                </button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button
                   className={`nav-link ${activeTab === "campusSettings" ? "active" : ""}`}
                   onClick={() => setActiveTab("campusSettings")}
                 >
@@ -1085,10 +1019,10 @@ const SuperAdmin = () => {
               </li>
               <li className="nav-item" role="presentation">
                 <button
-                  className={`nav-link ${activeTab === "dashboard" ? "active" : ""}`}
-                  onClick={() => setActiveTab("dashboard")}
+                  className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
+                  onClick={() => setActiveTab("orders")}
                 >
-                  📊 Order Dashboard
+                  💎 Orders Dashboard
                 </button>
               </li>
             </ul>
@@ -1292,91 +1226,125 @@ const SuperAdmin = () => {
                     {universities.map(university => {
                       const universityCampuses = campuses.filter(c => c.universityId === university.id);
                       return (
-                                              <div key={university.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
-                          <div className="card-body">
-                            <h5 className="card-title">{university.name}</h5>
-                            <p className="card-text text-muted">
-                              ID: {university.id}
-                            </p>
-                              <div className="mb-3">
-                              <span className="badge bg-primary">
-                                  {universityCampuses.length} Campuses
-                              </span>
+                        <div key={university.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
+                          <div className="university-card">
+                            <div className="admin-card-content">
+                              <h5 className="card-title">{university.name}</h5>
+                              <p className="text-muted small mb-3">
+                                ID: {university.id.substring(0, 15)}...
+                              </p>
+                              
+                              <div className="admin-card-info-row">
+                                <span className="admin-card-info-label">Campuses</span>
+                                <span className="admin-card-info-value">{universityCampuses.length} {universityCampuses.length === 1 ? 'Campus' : 'Campuses'}</span>
                               </div>
                               
-                              {/* Campuses for this university */}
-                              <div className="mb-3">
-                                <h6>Campuses:</h6>
-                                {universityCampuses.length > 0 ? (
-                                  <ul className="list-group list-group-flush">
+                              {/* Campuses List */}
+                              {universityCampuses.length > 0 && (
+                                <div className="mt-3">
+                                  <h6 className="text-muted small mb-2">Campuses:</h6>
+                                  <div className="campus-list">
                                     {universityCampuses.map(campus => (
-                                      <li key={campus.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                      <div key={campus.id} className="campus-item">
                                         <span>{campus.name}</span>
-                                        <div>
-                                          <button 
-                                            className="btn btn-sm btn-outline-primary me-1"
-                                            onClick={() => handleCampusEdit(campus)}
-                                          >
-                                            Edit
-                                          </button>
-                                          <button 
-                                            className="btn btn-sm btn-outline-danger me-1"
-                                            onClick={() => handleCampusDelete(campus)}
-                                          >
-                                            Delete
-                                          </button>
-                                          <div className="btn-group-vertical d-inline-block">
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning mb-1"
-                                              onClick={() => handleBulkDeleteUsers(campus)}
-                                              title="Delete all users from this campus"
-                                            >
-                                              Clear Users
-                                            </button>
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning mb-1"
-                                              onClick={() => handleBulkDeleteRestaurants(campus)}
-                                              title="Delete all restaurants from this campus"
-                                            >
-                                              Clear Restaurants
-                                            </button>
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning"
-                                              onClick={() => handleBulkDeleteMartItems(campus)}
-                                              title="Delete all mart items from this campus"
-                                            >
-                                              Clear Mart Items
-                                            </button>
-                                          </div>
-                            </div>
-                                      </li>
+                                      </div>
                                     ))}
-                                  </ul>
-                                ) : (
-                                  <p className="text-muted">No campuses yet</p>
-                                )}
-                          </div>
-                              
-                              <div className="d-flex justify-content-between">
-                                <button 
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => handleUniversityEdit(university)}
-                                >
-                                  Edit University
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleUniversityDelete(university.id)}
-                                >
-                                  Delete University
-                                </button>
-                        </div>
-                      </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="action-buttons">
+                              <button 
+                                className="btn-edit"
+                                onClick={() => handleUniversityEdit(university)}
+                                title="Edit University"
+                              >
+                                EDIT
+                              </button>
+                              <button 
+                                className="btn-delete"
+                                onClick={() => handleUniversityDelete(university.id)}
+                                title="Delete University"
+                              >
+                                DELETE
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
+                  </div>
+                  
+                  {/* Campuses Management Section */}
+                  <div className="mt-5">
+                    <h4 className="mb-4">All Campuses</h4>
+                    <div className="row">
+                      {campuses.map(campus => {
+                        const university = universities.find(u => u.id === campus.universityId);
+                        return (
+                          <div key={campus.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
+                            <div className="campus-card">
+                              <div className="admin-card-content">
+                                <h5 className="card-title">{campus.name}</h5>
+                                <p className="text-muted small mb-3">
+                                  ID: {campus.id.substring(0, 15)}...
+                                </p>
+                                
+                                <div className="admin-card-info-row">
+                                  <span className="admin-card-info-label">University</span>
+                                  <span className="admin-card-info-value">{university?.name || 'N/A'}</span>
+                                </div>
+                              </div>
+                              
+                              {/* Action Buttons */}
+                              <div className="action-buttons">
+                                <button 
+                                  className="btn-edit"
+                                  onClick={() => handleCampusEdit(campus)}
+                                  title="Edit Campus"
+                                >
+                                  EDIT
+                                </button>
+                                <button 
+                                  className="btn-delete"
+                                  onClick={() => handleCampusDelete(campus)}
+                                  title="Delete Campus"
+                                >
+                                  DELETE
+                                </button>
+                              </div>
+                              
+                              {/* Additional Actions Dropdown */}
+                              <div className="admin-card-actions" style={{borderTop: '1px solid #E2E8F0', paddingTop: '0.75rem', marginTop: '0.5rem'}}>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100 mb-2"
+                                  onClick={() => handleBulkDeleteUsers(campus)}
+                                  title="Delete all users from this campus"
+                                >
+                                  CLEAR USERS
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100 mb-2"
+                                  onClick={() => handleBulkDeleteRestaurants(campus)}
+                                  title="Delete all restaurants from this campus"
+                                >
+                                  CLEAR RESTAURANTS
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100"
+                                  onClick={() => handleBulkDeleteMartItems(campus)}
+                                  title="Delete all mart items from this campus"
+                                >
+                                  CLEAR MART ITEMS
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1413,6 +1381,7 @@ const SuperAdmin = () => {
                             <option value="">All Roles</option>
                             <option value="user">Basic User</option>
                             <option value="campusAdmin">Campus Admin</option>
+                            <option value="restaurantManager">Restaurant Manager</option>
                             <option value="superAdmin">Super Admin</option>
                           </select>
                         </div>
@@ -1485,6 +1454,14 @@ const SuperAdmin = () => {
                       </div>
                     </div>
                     <div className="col-md-3 mb-3">
+                      <div className="card text-center bg-info text-white">
+                        <div className="card-body">
+                          <h4 className="card-title">{users.filter(u => u.role === "restaurantManager").length}</h4>
+                          <p className="card-text">Restaurant Managers</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-3">
                       <div className="card text-center bg-danger text-white">
                         <div className="card-body">
                           <h4 className="card-title">{users.filter(u => u.role === "superAdmin").length}</h4>
@@ -1492,7 +1469,10 @@ const SuperAdmin = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="col-md-3 mb-3">
+                  </div>
+                  
+                  <div className="row mb-4">
+                    <div className="col-md-12 mb-3">
                       <div className="card text-center bg-success text-white">
                         <div className="card-body">
                           <h4 className="card-title">{getFilteredUsers().length}</h4>
@@ -1528,6 +1508,12 @@ const SuperAdmin = () => {
                           Campus Admins ({users.filter(u => u.role === "campusAdmin").length})
                         </button>
                         <button 
+                          className={`btn ${filterUserRole === "restaurantManager" ? "btn-primary" : "btn-outline-primary"}`}
+                          onClick={() => setFilterUserRole("restaurantManager")}
+                        >
+                          Restaurant Managers ({users.filter(u => u.role === "restaurantManager").length})
+                        </button>
+                        <button 
                           className={`btn ${filterUserRole === "superAdmin" ? "btn-primary" : "btn-outline-primary"}`}
                           onClick={() => setFilterUserRole("superAdmin")}
                         >
@@ -1537,10 +1523,19 @@ const SuperAdmin = () => {
                     </div>
                   </div>
                   
-                  {/* Create User Form */}
+                  {/* Create/Edit User Form */}
                   <div className="card mb-4">
-                    <div className="card-header">
-                      <h5 className="mb-0">Create New User</h5>
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                      <h5 className="mb-0">{userForm.id ? 'Edit User' : 'Create New User'}</h5>
+                      {userForm.id && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setUserForm({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null })}
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
                     </div>
                     <div className="card-body">
                       <form onSubmit={handleUserSubmit} className="row g-3">
@@ -1578,12 +1573,12 @@ const SuperAdmin = () => {
                           />
                         </div>
                         <div className="col-md-3">
-                          <label className="form-label">Password</label>
+                          <label className="form-label">Password {userForm.id && <small className="text-muted">(leave blank to keep current)</small>}</label>
                           <input
                             type="password"
                             className="form-control"
-                            placeholder="Password"
-                            required
+                            placeholder={userForm.id ? "Leave blank to keep current" : "Password"}
+                            required={!userForm.id}
                             value={userForm.password}
                             onChange={(e) => setUserForm({...userForm, password: e.target.value})}
                           />
@@ -1597,6 +1592,7 @@ const SuperAdmin = () => {
                           >
                             <option value="user">User</option>
                             <option value="campusAdmin">Campus Admin</option>
+                            <option value="restaurantManager">Restaurant Manager</option>
                             <option value="superAdmin">Super Admin</option>
                           </select>
                         </div>
@@ -1606,7 +1602,7 @@ const SuperAdmin = () => {
                             className="form-select"
                             value={userForm.universityId}
                             onChange={(e) => {
-                              setUserForm({...userForm, universityId: e.target.value, campusId: ""});
+                              setUserForm({...userForm, universityId: e.target.value, campusId: "", restaurantId: ""});
                             }}
                             required
                           >
@@ -1621,7 +1617,7 @@ const SuperAdmin = () => {
                           <select
                             className="form-select"
                             value={userForm.campusId}
-                            onChange={(e) => setUserForm({...userForm, campusId: e.target.value})}
+                            onChange={(e) => setUserForm({...userForm, campusId: e.target.value, restaurantId: ""})}
                             required
                             disabled={!userForm.universityId}
                           >
@@ -1631,14 +1627,89 @@ const SuperAdmin = () => {
                             ))}
                           </select>
                         </div>
-                        <div className="col-md-4 d-flex align-items-end">
+                        {userForm.role === 'restaurantManager' && (
+                          <div className="col-md-4">
+                            <label className="form-label">Restaurant</label>
+                            <select
+                              className="form-select"
+                              value={userForm.restaurantId || ""}
+                              onChange={(e) => setUserForm({...userForm, restaurantId: e.target.value})}
+                              required
+                              disabled={!userForm.campusId}
+                            >
+                              <option value="">Select Restaurant</option>
+                              {getRestaurantsForCampus(userForm.campusId).map(restaurant => (
+                                <option key={restaurant.id} value={restaurant.id}>{restaurant.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div className={`${userForm.role === 'restaurantManager' ? 'col-md-8' : 'col-md-4'} d-flex align-items-end`}>
                           <button type="submit" className="btn btn-primary w-100">
-                            Create User
+                            {userForm.id ? 'Update User' : 'Create User'}
                           </button>
                         </div>
                       </form>
                     </div>
                   </div>
+
+                  {/* Collapsible User List Header */}
+                  <div className="card mb-3">
+                    <div 
+                      className="card-header collapsible-header d-flex justify-content-between align-items-center"
+                      onClick={() => setIsUserListOpen(!isUserListOpen)}
+                    >
+                      <h5 className="mb-0">
+                        All Users ({getFilteredUsers().length})
+                      </h5>
+                      <span className="badge bg-secondary">
+                        {isUserListOpen ? '▼ Close' : '▶ Open'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {isUserListOpen && (
+                  <>
+                    {/* Quick Search Bar */}
+                    <div className="card mb-3">
+                      <div className="card-body">
+                        <div className="row g-3">
+                          <div className="col-md-6">
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="🔍 Quick search by name or email..."
+                              value={searchUser}
+                              onChange={(e) => setSearchUser(e.target.value)}
+                            />
+                          </div>
+                          <div className="col-md-3">
+                            <select
+                              className="form-select"
+                              value={filterUserRole}
+                              onChange={(e) => setFilterUserRole(e.target.value)}
+                            >
+                              <option value="">All Roles</option>
+                              <option value="user">Basic User</option>
+                              <option value="campusAdmin">Campus Admin</option>
+                              <option value="restaurantManager">Restaurant Manager</option>
+                              <option value="superAdmin">Super Admin</option>
+                            </select>
+                          </div>
+                          <div className="col-md-3">
+                            <button 
+                              className="btn btn-outline-secondary w-100"
+                              onClick={() => {
+                                setSearchUser("");
+                                setFilterUserRole("");
+                              }}
+                            >
+                              Clear Filters
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                   <div className="table-responsive">
                     {/* Filter Status */}
@@ -1679,21 +1750,25 @@ const SuperAdmin = () => {
                             <td>{user.firstName} {user.lastName}</td>
                             <td>{user.email}</td>
                             <td>
-                              <div className="d-flex align-items-center gap-2">
-                                <span className={`badge ${
-                                  user.role === "superAdmin" ? "bg-danger" : 
-                                  user.role === "campusAdmin" ? "bg-warning" : "bg-secondary"
+                              <div className="role-badge-container">
+                                <span className={`role-badge ${
+                                  user.role === "superAdmin" ? "role-super-admin" : 
+                                  user.role === "campusAdmin" ? "role-campus-admin" : 
+                                  user.role === "restaurantManager" ? "role-restaurant-manager" : "role-basic-user"
                                 }`}>
                                   {user.role === "user" ? "Basic User" : 
-                                   user.role === "campusAdmin" ? "Campus Admin" : "Super Admin"}
+                                   user.role === "campusAdmin" ? "Campus Admin" : 
+                                   user.role === "restaurantManager" ? "Restaurant Mgr" : 
+                                   user.role === "superAdmin" ? "Super Admin" : "Basic User"}
                                 </span>
                               <select
-                                className="form-select form-select-sm"
+                                className="form-select form-select-sm role-select"
                                 value={user.role || "user"}
                                 onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
                               >
                                 <option value="user">User</option>
                                 <option value="campusAdmin">Campus Admin</option>
+                                <option value="restaurantManager">Restaurant Manager</option>
                                 <option value="superAdmin">Super Admin</option>
                               </select>
                               </div>
@@ -1717,6 +1792,12 @@ const SuperAdmin = () => {
                             </td>
                             <td>
                               <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => handleUserEdit(user)}
+                              >
+                                Edit
+                              </button>
+                              <button
                                 className="btn btn-sm btn-outline-danger"
                                 onClick={() => handleUserDelete(user.id)}
                                 disabled={user.role === "superAdmin" && user.id === userData?.uid}
@@ -1730,6 +1811,8 @@ const SuperAdmin = () => {
                       </tbody>
                     </table>
                   </div>
+                  </>
+                  )}
                 </div>
               )}
 
@@ -1932,44 +2015,54 @@ const SuperAdmin = () => {
                   {/* Restaurants List */}
                   <div className="row">
                     {getFilteredRestaurants().map(restaurant => (
-                      <div key={`${restaurant.universityId}-${restaurant.campusId}-${restaurant.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
-                        <div className="card-body">
-                            <h5 className="card-title">{restaurant.name}</h5>
-                            <p className="card-text text-muted">
+                      <div key={`${restaurant.universityId}-${restaurant.campusId}-${restaurant.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="restaurant-card">
+                          <div className="restaurant-card-header">
+                            <h5 className="restaurant-card-title">{restaurant.name}</h5>
+                            <p className="restaurant-card-subtitle">
                               {restaurant.location} • {restaurant.cuisine}
                             </p>
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{restaurant.universityName}</span>
-                              <span className="badge bg-secondary">{restaurant.campusName}</span>
-                        </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {restaurant.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleRestaurantEdit(restaurant)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleRestaurantDelete(restaurant)}
-                                >
-                                  Delete
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-warning"
-                                  onClick={() => handleBulkDeleteMenuItems(restaurant)}
-                                  title="Delete all menu items from this restaurant"
-                                >
-                                  Clear Menu
-                                </button>
-
-                      </div>
-                    </div>
+                          </div>
+                          
+                          <div className="restaurant-card-body">
+                            <div className="restaurant-badges">
+                              <span className="badge badge-university">{restaurant.universityName}</span>
+                              <span className="badge badge-campus">{restaurant.campusName}</span>
+                            </div>
+                            
+                            <div className="restaurant-timing">
+                              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                              </svg>
+                              <span>{restaurant.is24x7 ? '24/7 Open' : `${restaurant.openTime} - ${restaurant.closeTime}`}</span>
+                            </div>
+                            
+                            <div className="restaurant-id">
+                              <small>ID: {restaurant.id.substring(0, 8)}...</small>
+                            </div>
+                          </div>
+                          
+                          <div className="restaurant-card-footer">
+                            <button 
+                              className="btn-restaurant btn-edit"
+                              onClick={() => handleRestaurantEdit(restaurant)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-restaurant btn-delete"
+                              onClick={() => handleRestaurantDelete(restaurant)}
+                            >
+                              Delete
+                            </button>
+                            <button 
+                              className="btn-restaurant btn-clear"
+                              onClick={() => handleBulkDeleteMenuItems(restaurant)}
+                              title="Delete all menu items from this restaurant"
+                            >
+                              Clear Menu
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2160,54 +2253,71 @@ const SuperAdmin = () => {
                   {/* Mart Items List */}
                   <div className="row">
                     {getFilteredMartItems().map(item => (
-                      <div key={`${item.universityId}-${item.campusId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
+                      <div key={`${item.universityId}-${item.campusId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="mart-item-card">
                           {item.photoURL && (
-                            <img 
-                              src={item.photoURL} 
-                              className="card-img-top" 
-                              alt={item.name}
-                              style={{ height: "200px", objectFit: "cover" }}
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <div className="card-body">
-                            <h5 className="card-title">{item.name}</h5>
-                            <p className="card-text">₹{item.price}</p>
-                            <p className="card-text text-muted">
-                              Category: {item.category}
-                            </p>
-                            <p className="card-text text-muted">
-                              Stock: {item.stock}
-                            </p>
-                            {item.description && (
-                              <p className="card-text text-muted small">{item.description}</p>
-                            )}
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{item.universityName}</span>
-                              <span className="badge bg-secondary">{item.campusName}</span>
+                            <div className="mart-item-image">
+                              <img 
+                                src={item.photoURL} 
+                                alt={item.name}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.style.display = 'none';
+                                }}
+                              />
+                              {item.stock <= 5 && item.stock > 0 && (
+                                <div className="stock-badge low-stock">Low Stock</div>
+                              )}
+                              {item.stock === 0 && (
+                                <div className="stock-badge out-of-stock">Out of Stock</div>
+                              )}
                             </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {item.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleMartItemEdit(item)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleMartItemDelete(item)}
-                                >
-                                  Delete
-                                </button>
+                          )}
+                          
+                          <div className="mart-item-body">
+                            <h5 className="mart-item-title">{item.name}</h5>
+                            <div className="mart-item-price">₹{item.price}</div>
+                            
+                            <div className="mart-item-info">
+                              <div className="info-row">
+                                <span className="info-label">Category:</span>
+                                <span className="info-value">{item.category}</span>
+                              </div>
+                              <div className="info-row">
+                                <span className="info-label">Stock:</span>
+                                <span className={`info-value stock-${item.stock <= 5 ? 'low' : 'good'}`}>
+                                  {item.stock} units
+                                </span>
                               </div>
                             </div>
+                            
+                            {item.description && (
+                              <p className="mart-item-description">{item.description}</p>
+                            )}
+                            
+                            <div className="mart-item-badges">
+                              <span className="badge badge-university">{item.universityName}</span>
+                              <span className="badge badge-campus">{item.campusName}</span>
+                            </div>
+                            
+                            <div className="mart-item-id">
+                              <small>ID: {item.id.substring(0, 8)}...</small>
+                            </div>
+                          </div>
+                          
+                          <div className="mart-item-footer">
+                            <button 
+                              className="btn-mart-item btn-edit"
+                              onClick={() => handleMartItemEdit(item)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-mart-item btn-delete"
+                              onClick={() => handleMartItemDelete(item)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2416,49 +2526,53 @@ const SuperAdmin = () => {
                   {/* Menu Items List */}
                   <div className="row">
                     {getFilteredMenuItems().map(item => (
-                      <div key={`${item.universityId}-${item.campusId}-${item.restaurantId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
+                      <div key={`${item.universityId}-${item.campusId}-${item.restaurantId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="menu-item-card">
                           {item.photoURL && (
-                            <img 
-                              src={item.photoURL} 
-                              className="card-img-top" 
-                              alt={item.name}
-                              style={{ height: "200px", objectFit: "cover" }}
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }}
-                            />
+                            <div className="menu-item-image">
+                              <img 
+                                src={item.photoURL} 
+                                alt={item.name}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.style.display = 'none';
+                                }}
+                              />
+                            </div>
                           )}
-                          <div className="card-body">
-                            <h5 className="card-title">{item.name}</h5>
-                            <p className="card-text">₹{item.price}</p>
+                          
+                          <div className="menu-item-body">
+                            <h5 className="menu-item-title">{item.name}</h5>
+                            <div className="menu-item-price">₹{item.price}</div>
+                            
                             {item.description && (
-                              <p className="card-text text-muted small">{item.description}</p>
+                              <p className="menu-item-description">{item.description}</p>
                             )}
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{item.universityName}</span>
-                              <span className="badge bg-secondary me-1">{item.campusName}</span>
-                              <span className="badge bg-info">{item.restaurantName}</span>
+                            
+                            <div className="menu-item-badges">
+                              <span className="badge badge-university">{item.universityName}</span>
+                              <span className="badge badge-campus">{item.campusName}</span>
+                              <span className="badge badge-restaurant">{item.restaurantName}</span>
                             </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {item.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleMenuEdit(item)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleMenuDelete(item)}
-                                >
-                                  Delete
-                                </button>
-                              </div>
+                            
+                            <div className="menu-item-id">
+                              <small>ID: {item.id.substring(0, 8)}...</small>
                             </div>
+                          </div>
+                          
+                          <div className="menu-item-footer">
+                            <button 
+                              className="btn-menu-item btn-edit"
+                              onClick={() => handleMenuEdit(item)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-menu-item btn-delete"
+                              onClick={() => handleMenuDelete(item)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2472,136 +2586,6 @@ const SuperAdmin = () => {
                 </div>
               )}
 
-              {/* Domain Management Tab */}
-              {activeTab === "domains" && (
-                <div className="tab-pane fade show active">
-                  <h3>Domain Management</h3>
-                  <p className="text-muted mb-4">Manage allowed email domains for university signups</p>
-                  
-                  {/* Add Domain Form */}
-                  <div className="card mb-4">
-                    <div className="card-header">
-                      <h5 className="mb-0">Add/Edit Domain</h5>
-                    </div>
-                    <div className="card-body">
-                      <form onSubmit={handleDomainSubmit}>
-                        <div className="row g-3">
-                          <div className="col-md-3">
-                            <label className="form-label">University</label>
-                            <select
-                              className="form-select"
-                              value={domainForm.universityId}
-                              onChange={(e) => setDomainForm({...domainForm, universityId: e.target.value, campusId: ""})}
-                              required
-                            >
-                              <option value="">Select University</option>
-                              {universities.map(uni => (
-                                <option key={uni.id} value={uni.id}>{uni.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="col-md-3">
-                            <label className="form-label">Campus</label>
-                            <select
-                              className="form-select"
-                              value={domainForm.campusId}
-                              onChange={(e) => setDomainForm({...domainForm, campusId: e.target.value})}
-                              required
-                              disabled={!domainForm.universityId}
-                            >
-                              <option value="">Select Campus</option>
-                              {domainForm.universityId && getCampusesForUniversity(domainForm.universityId).map(campus => (
-                                <option key={campus.id} value={campus.id}>{campus.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="col-md-2">
-                            <label className="form-label">Domain Name</label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              placeholder="e.g., example.edu"
-                              value={domainForm.name}
-                              onChange={(e) => setDomainForm({...domainForm, name: e.target.value})}
-                              required
-                            />
-                          </div>
-                          <div className="col-md-2">
-                            <label className="form-label">Email Domain</label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              placeholder="e.g., @example.edu"
-                              value={domainForm.domain}
-                              onChange={(e) => setDomainForm({...domainForm, domain: e.target.value})}
-                              required
-                            />
-                          </div>
-                          <div className="col-md-2 d-flex align-items-end">
-                            <button type="submit" className="btn btn-primary me-2">
-                              {domainForm.id ? "Update" : "Add"} Domain
-                            </button>
-                            {domainForm.id && (
-                              <button 
-                                type="button" 
-                                className="btn btn-secondary"
-                                onClick={() => setDomainForm({ name: "", domain: "", universityId: "", campusId: "", id: null })}
-                              >
-                                Cancel
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-
-                  {/* Domains List */}
-                  <div className="table-responsive">
-                    <table className="table table-striped">
-                      <thead>
-                        <tr>
-                          <th>University</th>
-                          <th>Campus</th>
-                          <th>Domain Name</th>
-                          <th>Email Domain</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {domains.map(domain => (
-                          <tr key={domain.id}>
-                            <td>{universities.find(u => u.id === domain.universityId)?.name || "Unknown"}</td>
-                            <td>{campuses.find(c => c.id === domain.campusId)?.name || "Unknown"}</td>
-                            <td>{domain.name}</td>
-                            <td>{domain.domain}</td>
-                            <td>
-                              <button
-                                className="btn btn-sm btn-outline-primary me-2"
-                                onClick={() => handleDomainEdit(domain)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => handleDomainDelete(domain.id)}
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  {domains.length === 0 && (
-                    <div className="text-center text-muted">
-                      <p>No domains configured yet.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Campus Settings Tab */}
               {activeTab === "campusSettings" && (
                 <div className="tab-pane fade show active">
@@ -2609,10 +2593,30 @@ const SuperAdmin = () => {
                 </div>
               )}
 
-              {/* Order Dashboard Tab */}
-              {activeTab === "dashboard" && (
+              {/* Orders Dashboard Tab */}
+              {activeTab === "orders" && (
                 <div className="tab-pane fade show active">
-                  <SuperAdminDashboard />
+                  <div className="mb-4">
+                    <button
+                      className="btn btn-primary w-100 d-flex justify-content-between align-items-center"
+                      onClick={() => setIsOrdersOpen(!isOrdersOpen)}
+                      style={{
+                        backgroundColor: 'rgba(74, 85, 104, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        padding: '12px 20px',
+                        fontSize: '16px',
+                        fontWeight: '600'
+                      }}
+                    >
+                      <span>📦 All Orders</span>
+                      <span>{isOrdersOpen ? '▲' : '▼'}</span>
+                    </button>
+                    {isOrdersOpen && (
+                      <div className="mt-3">
+                        <SuperAdminOrdersPanel />
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

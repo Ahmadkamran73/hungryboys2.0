@@ -8,7 +8,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
 import "../styles/Signup.css";
-import logo from "../assets/logo.png";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -32,50 +31,46 @@ function Signup() {
   
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  // Fetch available universities and campuses from MongoDB API
+  // Fetch available universities and campuses from Firestore
   useEffect(() => {
     const fetchUniversitiesAndCampuses = async () => {
       try {
-        // Fetch universities from MongoDB API
-        const universitiesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'}/api/universities`);
-        if (!universitiesResponse.ok) {
-          throw new Error('Failed to fetch universities');
-        }
-        const universities = await universitiesResponse.json();
+        // Fetch universities
+        const universitiesRef = collection(db, "universities");
+        const universitiesSnapshot = await getDocs(universitiesRef);
+        const universities = universitiesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         setAvailableUniversities(universities);
 
-        // Fetch all campuses from MongoDB API
-        const campusesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'}/api/campuses`);
-        if (!campusesResponse.ok) {
-          throw new Error('Failed to fetch campuses');
+        // Fetch all campuses for all universities
+        const allCampuses = [];
+        for (const university of universities) {
+          try {
+            const campusesRef = collection(db, "universities", university.id, "campuses");
+            const campusesSnapshot = await getDocs(campusesRef);
+            const campuses = campusesSnapshot.docs.map(doc => ({
+              id: doc.id,
+              universityId: university.id,
+              universityName: university.name,
+              ...doc.data()
+            }));
+            allCampuses.push(...campuses);
+          } catch (campusErr) {
+            console.error(`Error fetching campuses for university ${university.id}:`, campusErr);
+          }
         }
-        const campuses = await campusesResponse.json();
-        
-        // Enhance campuses with university names
-        const enhancedCampuses = campuses.map(campus => {
-          const university = universities.find(u => u.id === campus.universityId);
-          return {
-            ...campus,
-            universityName: university?.name || 'Unknown University'
-          };
-        });
-        setAvailableCampuses(enhancedCampuses);
+        setAvailableCampuses(allCampuses);
 
-        // Note: allowedDomains still uses Firestore as it's not in MongoDB yet
-        // You may want to migrate this to MongoDB later
-        try {
-          const domainsRef = collection(db, "allowedDomains");
-          const domainsSnapshot = await getDocs(domainsRef);
-          const domains = domainsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setAvailableDomains(domains);
-        } catch (domainError) {
-          console.warn('Could not fetch allowed domains from Firestore:', domainError);
-          // Set empty array as fallback
-          setAvailableDomains([]);
-        }
+        // Fetch domains
+        const domainsRef = collection(db, "allowedDomains");
+        const domainsSnapshot = await getDocs(domainsRef);
+        const domains = domainsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setAvailableDomains(domains);
       } catch (error) {
         const handledError = handleError(error, 'Signup - fetchUniversitiesAndCampuses');
         console.error("Error fetching universities and campuses:", handledError);
@@ -98,22 +93,10 @@ function Signup() {
     const selectedCampus = availableCampuses.find(c => c.id === formData.selectedCampus);
     if (!selectedCampus) return false;
     
-    // If no domains are configured, allow any email (backward compatibility)
-    if (!availableDomains || availableDomains.length === 0) {
-      console.log('No domain restrictions configured - allowing all emails');
-      return true;
-    }
-    
     // Fetch domains for this campus
     const campusDomains = availableDomains.filter(d => 
       d.universityId === selectedCampus.universityId && d.campusId === selectedCampus.id
     );
-    
-    // If no specific domains for this campus, allow any email
-    if (campusDomains.length === 0) {
-      console.log('No domain restrictions for this campus - allowing all emails');
-      return true;
-    }
     
     return campusDomains.some(domain => email.endsWith(domain.domain));
   };
@@ -157,13 +140,8 @@ function Signup() {
       const campusDomains = availableDomains.filter(d => 
         d.universityId === selectedCampus?.universityId && d.campusId === selectedCampus?.id
       );
-      
-      if (campusDomains.length > 0) {
-        const domainList = campusDomains.map(d => d.domain).join(", ");
-        setError(`Email must end with one of the allowed domains for this campus: ${domainList}`);
-      } else {
-        setError("Invalid email address. Please check and try again.");
-      }
+      const domainList = campusDomains.map(d => d.domain).join(", ");
+      setError(`Email must end with one of the allowed domains for this campus: ${domainList}`);
       return;
     }
 
@@ -275,13 +253,12 @@ function Signup() {
         {/* Left Side - Branding Panel */}
         <div className="auth-side-panel">
           <div className="auth-side-content">
-            <div className="auth-logo-container">
-              <img 
-                src={logo} 
-                alt="Hungry Boys Logo" 
-                className="auth-logo-icon"
-              />
-              <h1 className="auth-logo-text">Hungry Boys</h1>
+            <div className="auth-logo">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" />
+                <path d="M2 17L12 22L22 17V12L12 17L2 12V17Z" fill="white" />
+              </svg>
+              <h1>Hungry Boys</h1>
             </div>
             <p className="auth-tagline">Your cravings, delivered fresh to your campus</p>
             

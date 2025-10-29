@@ -25,8 +25,7 @@ export const fetchCampusSettings = async (universityId, campusId, forceRefresh =
       };
     }
   } catch (error) {
-    console.error('Error fetching campus settings:', error);
-    // Return default settings on error
+    // Silently return default settings on error (no console.error)
     return {
       deliveryChargePerPerson: 150,
       accountTitle: "Maratib Ali",

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useParams } from "react-router-dom";
-import { db } from "../firebase";
+import { api } from "../utils/api";
 import { useUniversity } from "../context/UniversityContext";
 import MenuItemCard from "../components/MenuItemCard";
 import SearchBar from "../components/SearchBar";
@@ -32,42 +31,26 @@ const MenuPage = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch restaurant name from the campus-specific collection
-        const restaurantRef = doc(
-          db, 
-          "universities", 
-          selectedUniversity.id, 
-          "campuses", 
-          selectedCampus.id, 
-          "restaurants", 
-          restaurantId
-        );
-        const restaurantSnap = await getDoc(restaurantRef);
-        if (restaurantSnap.exists()) {
-          const restaurantData = restaurantSnap.data();
-          setRestaurantName(restaurantData.name || "Unknown Restaurant");
-          setRestaurantData(restaurantData);
-        } else {
+        // Fetch restaurants via API and find the one by id
+        const restResp = await api.get('/api/restaurants', { params: { campusId: selectedCampus.id } });
+        const restList = restResp.data || [];
+        const rest = restList.find(r => String(r.id) === String(restaurantId));
+        if (!rest) {
           setError("Restaurant not found at this campus.");
           setLoading(false);
           return;
         }
+        setRestaurantName(rest.name || 'Unknown Restaurant');
+        setRestaurantData(rest);
 
-        // Fetch menu items from the restaurant's menuItems subcollection
-        const menuItemsRef = collection(
-          db, 
-          "universities", 
-          selectedUniversity.id, 
-          "campuses", 
-          selectedCampus.id, 
-          "restaurants", 
-          restaurantId, 
-          "menuItems"
-        );
-        const querySnapshot = await getDocs(menuItemsRef);
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        // Fetch menu items via API
+        const itemsResp = await api.get('/api/menu-items', { params: { restaurantId } });
+        const data = (itemsResp.data || []).map(d => ({
+          id: d.id,
+          name: d.name,
+          price: d.price,
+          photoURL: d.photoURL,
+          description: d.description
         }));
         setMenuItems(data);
         setFilteredItems(data);
@@ -142,39 +125,54 @@ const MenuPage = () => {
         )}
 
         {!loading && !error && (
-          <div className="row g-3">
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="col-6 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center align-items-stretch"
-                >
-                  <MenuItemCard
-                    name={item.name}
-                    price={item.price}
-                    restaurantName={restaurantName}
-                    photoURL={item.photoURL}
-                    description={item.description}
-                    campusId={selectedCampus?.id}
-                    openTime={restaurantData?.openTime}
-                    closeTime={restaurantData?.closeTime}
-                    is24x7={restaurantData?.is24x7}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="text-white text-center my-5">
+          <>
+            {filteredItems.length === 0 ? (
+              <div className="empty-results">
+                <div className="empty-icon">🔍</div>
+                <h3>No menu items found</h3>
                 {searchTerm ? (
-                  <>
-                    <h4>No menu items found matching "{searchTerm}"</h4>
-                    <p>Try adjusting your search terms</p>
-                  </>
+                  <p>Try adjusting your search terms</p>
                 ) : (
-                  <h4>No menu items available</h4>
+                  <p>No menu items available at this restaurant yet. Check back soon!</p>
+                )}
+                {searchTerm && (
+                  <button
+                    className="reset-btn"
+                    onClick={() => setSearchTerm("")}
+                  >
+                    Clear Search
+                  </button>
                 )}
               </div>
+            ) : (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', 
+                gap: '2rem',
+                padding: '0'
+              }}>
+                {filteredItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{ width: '100%' }}
+                  >
+                    <MenuItemCard
+                      name={item.name}
+                      price={item.price}
+                      restaurantName={restaurantName}
+                      photoURL={item.photoURL}
+                      description={item.description}
+                      campusId={selectedCampus?.id}
+                      restaurantId={restaurantData?.id}
+                      openTime={restaurantData?.openTime}
+                      closeTime={restaurantData?.closeTime}
+                      is24x7={restaurantData?.is24x7}
+                    />
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
 

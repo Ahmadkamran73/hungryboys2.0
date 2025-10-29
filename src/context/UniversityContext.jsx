@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { 
-  collection, 
-  getDocs 
-} from "firebase/firestore";
-import { db } from "../firebase";
+import { api } from "../utils/api";
 
 const UniversityContext = createContext();
 
@@ -27,11 +23,8 @@ export const UniversityProvider = ({ children }) => {
   // Fetch universities from Firestore
   const fetchUniversities = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "universities"));
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const resp = await api.get('/api/universities');
+      const data = (resp.data || []).map(u => ({ id: u.id, name: u.name }));
       setUniversities(data);
     } catch (error) {
       console.error("Error fetching universities:", error);
@@ -46,13 +39,8 @@ export const UniversityProvider = ({ children }) => {
     }
     
     try {
-      const campusesRef = collection(db, "universities", universityId, "campuses");
-      const querySnapshot = await getDocs(campusesRef);
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        universityId,
-        ...doc.data()
-      }));
+      const resp = await api.get('/api/campuses', { params: { universityId } });
+      const data = (resp.data || []).map(c => ({ id: c.id, universityId: c.universityId, name: c.name }));
       setCampuses(data);
     } catch (error) {
       console.error("Error fetching campuses:", error);

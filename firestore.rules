@@ -2,63 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ======== USERS COLLECTION ========
+    // Only collection actively used in Firestore (for authentication/authorization)
+    // All other data (universities, campuses, restaurants, menus, mart items, orders) is in MongoDB
+
     // Allow each user to read/write their own profile
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Super Admin can manage all users (e.g., add/remove campus admins)
-    // But cannot delete their own profile
+    // Super Admin can read all users and manage them (except delete their own profile)
     match /users/{userId} {
-      allow read: if request.auth != null &&
-                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "superAdmin";
-      allow write: if request.auth != null &&
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "superAdmin" &&
-                   request.auth.uid != userId; // Prevent super admin from deleting their own profile
+      allow read: if request.auth != null && isSuperAdmin();
+      allow write: if request.auth != null && isSuperAdmin() && request.auth.uid != userId;
     }
-
-    // Public read access to universities and allowedDomains
-    match /universities/{universityId} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-      
-      match /campuses/{campusId} {
-        allow read: if true;
-        allow write: if isSuperAdmin() || isCampusAdmin(universityId, campusId);
-
-        // Restaurants
-        match /restaurants/{restaurantId} {
-          allow read: if true;
-          allow write: if isSuperAdmin() || isCampusAdmin(universityId, campusId);
-
-          // Menu items inside a restaurant
-          match /menuItems/{menuItemId} {
-            allow read: if true;
-            allow write: if isSuperAdmin() || isCampusAdmin(universityId, campusId);
-          }
-        }
-
-        // Mart items
-        match /martItems/{itemId} {
-          allow read: if true;
-          allow write: if isSuperAdmin() || isCampusAdmin(universityId, campusId);
-        }
-
-        // Campus settings (delivery charges, payment details)
-        match /settings/{settingId} {
-          allow read: if true;
-          allow write: if isSuperAdmin();
-        }
-      }
-    }
-
-    // Public read access to allowedDomains for signup form
-    match /allowedDomains/{domainId} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    // You can define other rules for orders etc. if needed
 
     // ======== Helper Functions ========
     function isSuperAdmin() {
@@ -66,11 +23,10 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "superAdmin";
     }
 
-    function isCampusAdmin(universityId, campusId) {
-      return request.auth != null &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "campusAdmin" &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.universityId == universityId &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.campusId == campusId;
+    // Deny all other collections by default
+    // (universities, campuses, restaurants, menuItems, martItems, orders are in MongoDB)
+    match /{document=**} {
+      allow read, write: if false;
     }
 
   }
