@@ -23,8 +23,8 @@ const Cart = () => {
   }
 
   return (
-    <div className="cart-page">
-      <h2 className="cart-heading">Your Cart</h2>
+    <div className="cart-page container-fluid py-4">
+      <h2 className="cart-heading text-center">Your Cart</h2>
       <CartSummary
         cartItems={cartItems}
         incrementItem={incrementItem}

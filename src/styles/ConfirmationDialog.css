@@ -1,122 +1,89 @@
-/* ConfirmationDialog.css - Modern Professional Design */
-
-/* ==================== Color Variables ==================== */
-:root {
-  --cd-overlay-bg: rgba(17, 24, 39, 0.75);
-  --cd-dialog-bg: #FFFFFF;
-  --cd-border: #E5E7EB;
-  --cd-text: #111827;
-  --cd-text-secondary: #6B7280;
-  --cd-danger: #EF4444;
-  --cd-danger-light: #FEE2E2;
-  --cd-danger-dark: #DC2626;
-  --cd-warning: #F59E0B;
-  --cd-info: #3B82F6;
-  --cd-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="dark"] {
-  --cd-dialog-bg: #1F2937;
-  --cd-border: #374151;
-  --cd-text: #F9FAFB;
-  --cd-text-secondary: #D1D5DB;
-  --cd-danger-light: rgba(239, 68, 68, 0.1);
-}
-
-/* ==================== Overlay ==================== */
 .confirmation-dialog-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--cd-overlay-bg);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1050;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
-  padding: 1rem;
 }
 
-/* ==================== Dialog Container ==================== */
 .confirmation-dialog {
-  background: var(--cd-dialog-bg);
-  border-radius: 16px;
-  box-shadow: var(--cd-shadow);
-  max-width: 480px;
-  width: 100%;
+  background: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(220, 53, 69, 0.1);
+  max-width: 450px;
+  width: 90%;
   max-height: 90vh;
   overflow: hidden;
-  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid var(--cd-border);
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid #333;
 }
 
-/* ==================== Dialog Header ==================== */
 .confirmation-dialog-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 2rem 2rem 1.5rem;
-  border-bottom: 1px solid var(--cd-border);
-  text-align: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #333;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
 }
 
 .confirmation-dialog-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 24px;
+  margin-right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--cd-danger-light);
+  background: rgba(220, 53, 69, 0.2);
 }
 
 .confirmation-dialog-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 18px;
   font-weight: 600;
-  color: var(--cd-text);
-  line-height: 1.5;
+  color: #ffffff;
+  flex: 1;
 }
 
-/* ==================== Dialog Body ==================== */
 .confirmation-dialog-body {
-  padding: 1.5rem 2rem;
+  padding: 20px 24px;
 }
 
 .confirmation-dialog-message {
   margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--cd-text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+  color: #cccccc;
   text-align: center;
 }
 
-/* ==================== Dialog Footer ==================== */
 .confirmation-dialog-footer {
   display: flex;
-  gap: 0.75rem;
-  padding: 1.5rem 2rem;
-  border-top: 1px solid var(--cd-border);
-  background: var(--cd-dialog-bg);
-  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #333;
+  background: #2a2a2a;
+  justify-content: flex-end;
 }
 
-/* ==================== Buttons ==================== */
 .confirmation-dialog-btn {
-  min-width: 120px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9375rem;
+  min-width: 80px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 500;
   border-radius: 8px;
   transition: all 0.2s ease;
   cursor: pointer;
-  border: none;
-  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .confirmation-dialog-btn:hover {
@@ -128,109 +95,55 @@
   transform: translateY(0);
 }
 
-.confirmation-dialog-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-/* Secondary Button (Cancel) */
 .btn-secondary {
-  background-color: #F3F4F6;
-  color: #374151;
-  border: 1px solid #E5E7EB;
+  background-color: #495057;
+  color: white;
+  border: 1px solid #6c757d;
 }
 
 .btn-secondary:hover {
-  background-color: #E5E7EB;
-  color: #1F2937;
-  border: 1px solid #D1D5DB;
-}
-
-[data-theme="dark"] .btn-secondary {
-  background-color: #374151;
-  color: #F9FAFB;
-  border: 1px solid #4B5563;
-}
-
-[data-theme="dark"] .btn-secondary:hover {
-  background-color: #4B5563;
-  color: #FFFFFF;
-  border: 1px solid #6B7280;
-}
-
-/* Danger Button (Delete) */
-.btn-danger {
-  background-color: var(--cd-danger);
+  background-color: #6c757d;
   color: white;
-  border: none;
+  border: 1px solid #6c757d;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
 }
 
 .btn-danger:hover {
-  background-color: var(--cd-danger-dark);
+  background-color: #c82333;
   color: white;
+  border: 1px solid #c82333;
 }
 
-.btn-danger:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-/* Warning Button */
 .btn-warning {
-  background-color: var(--cd-warning);
-  color: white;
-  border: none;
+  background-color: #ffc107;
+  color: #212529;
+  border: 1px solid #ffc107;
 }
 
 .btn-warning:hover {
-  background-color: #D97706;
-  color: white;
+  background-color: #e0a800;
+  color: #212529;
+  border: 1px solid #e0a800;
 }
 
-.btn-warning:focus {
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-}
-
-/* Info Button */
 .btn-info {
-  background-color: var(--cd-info);
+  background-color: #17a2b8;
   color: white;
-  border: none;
+  border: 1px solid #17a2b8;
 }
 
 .btn-info:hover {
-  background-color: #2563EB;
+  background-color: #138496;
   color: white;
+  border: 1px solid #138496;
 }
 
-.btn-info:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* ==================== Icon Variants ==================== */
-.confirmation-dialog-icon.icon-danger {
-  background: var(--cd-danger-light);
-  color: var(--cd-danger);
-}
-
-.confirmation-dialog-icon.icon-warning {
-  background: #FEF3C7;
-  color: var(--cd-warning);
-}
-
-[data-theme="dark"] .confirmation-dialog-icon.icon-warning {
-  background: rgba(245, 158, 11, 0.1);
-}
-
-.confirmation-dialog-icon.icon-info {
-  background: #DBEAFE;
-  color: var(--cd-info);
-}
-
-[data-theme="dark"] .confirmation-dialog-icon.icon-info {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-/* ==================== Animations ==================== */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -243,63 +156,35 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-20px);
+    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* ==================== Responsive Design ==================== */
+/* Responsive design */
 @media (max-width: 576px) {
   .confirmation-dialog {
     width: 95%;
-    margin: 1rem;
+    margin: 10px;
   }
   
   .confirmation-dialog-header {
-    padding: 1.5rem 1.25rem 1rem;
-  }
-  
-  .confirmation-dialog-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 2.5rem;
-  }
-  
-  .confirmation-dialog-title {
-    font-size: 1.125rem;
+    padding: 16px 20px 12px;
   }
   
   .confirmation-dialog-body {
-    padding: 1rem 1.25rem;
-  }
-  
-  .confirmation-dialog-message {
-    font-size: 0.875rem;
+    padding: 16px 20px;
   }
   
   .confirmation-dialog-footer {
-    padding: 1rem 1.25rem;
+    padding: 12px 20px 16px;
     flex-direction: column;
-    gap: 0.5rem;
   }
   
   .confirmation-dialog-btn {
     width: 100%;
-    min-width: unset;
   }
-}
-
-/* ==================== Accessibility ==================== */
-.confirmation-dialog-btn:focus-visible {
-  outline: 2px solid var(--cd-danger);
-  outline-offset: 2px;
-}
-
-/* ==================== Animation Performance ==================== */
-.confirmation-dialog-overlay,
-.confirmation-dialog {
-  will-change: opacity, transform;
-}
+} 

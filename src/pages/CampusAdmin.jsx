@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import BulkMenuImport from "../components/BulkMenuImport";
-import OrdersPanel from "../components/OrdersPanel";
 import { handleError } from "../utils/errorHandler";
 import CampusAdminDashboard from "../components/CampusAdminDashboard";
-import { api, authHeaders } from "../utils/api";
 import "../styles/CampusAdmin.css";
 
 const CampusAdmin = () => {
   const { universityId, campusId } = useParams();
-  const { user, userData } = useAuth();
+  const { userData } = useAuth();
 
   // Helper functions for time conversion
   const convertTo24Hour = (time12h) => {
@@ -70,9 +70,6 @@ const CampusAdmin = () => {
   const [menuImageFile, setMenuImageFile] = useState(null);
   const [martImageFile, setMartImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-
-  // Orders dropdown state
-  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
 
   // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState({
@@ -153,29 +150,21 @@ const CampusAdmin = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch restaurants for this campus via API
-      const restResp = await api.get('/api/restaurants', { params: { campusId } });
-      const restaurantsData = (restResp.data || []).map(r => ({
-        id: r.id,
-        name: r.name,
-        location: r.location,
-        cuisine: r.cuisine,
-        openTime: r.openTime,
-        closeTime: r.closeTime,
-        is24x7: r.is24x7
+      // Fetch restaurants for this campus
+      const restaurantsRef = collection(db, "universities", universityId, "campuses", campusId, "restaurants");
+      const restaurantsSnapshot = await getDocs(restaurantsRef);
+      const restaurantsData = restaurantsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       }));
       setRestaurants(restaurantsData);
 
-      // Fetch mart items for this campus via API
-      const martResp = await api.get('/api/mart-items', { params: { campusId } });
-      const martItemsData = (martResp.data || []).map(m => ({
-        id: m.id,
-        name: m.name,
-        price: m.price,
-        description: m.description,
-        category: m.category,
-        stock: m.stock,
-        photoURL: m.photoURL
+      // Fetch mart items for this campus
+      const martItemsRef = collection(db, "universities", universityId, "campuses", campusId, "martItems");
+      const martItemsSnapshot = await getDocs(martItemsRef);
+      const martItemsData = martItemsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       }));
       setMartItems(martItemsData);
     } catch (err) {
@@ -189,13 +178,11 @@ const CampusAdmin = () => {
 
   const fetchMenuItems = async (restaurantId) => {
     try {
-      const resp = await api.get('/api/menu-items', { params: { restaurantId } });
-      const menuItemsData = (resp.data || []).map(m => ({
-        id: m.id,
-        name: m.name,
-        price: m.price,
-        photoURL: m.photoURL,
-        description: m.description
+      const menuItemsRef = collection(db, "universities", universityId, "campuses", campusId, "restaurants", restaurantId, "menuItems");
+      const menuItemsSnapshot = await getDocs(menuItemsRef);
+      const menuItemsData = menuItemsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       }));
       setMenuItems(menuItemsData);
     } catch (err) {
@@ -209,10 +196,7 @@ const CampusAdmin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const headers = await authHeaders(user);
       const restaurantData = {
-        campusId,
-        universityId,
         name: restaurantForm.name,
         location: restaurantForm.location,
         cuisine: restaurantForm.cuisine,
@@ -222,9 +206,9 @@ const CampusAdmin = () => {
       };
 
       if (restaurantForm.id) {
-        await api.patch(`/api/restaurants/${restaurantForm.id}`, restaurantData, { headers });
+        await updateDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", restaurantForm.id), restaurantData);
       } else {
-        await api.post('/api/restaurants', restaurantData, { headers });
+        await addDoc(collection(db, "universities", universityId, "campuses", campusId, "restaurants"), restaurantData);
       }
 
       setRestaurantForm({ 
@@ -265,8 +249,7 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
-          await api.delete(`/api/restaurants/${id}`, { headers });
+          await deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", id));
           fetchData();
         } catch (err) {
           setError("Failed to delete restaurant");
@@ -285,7 +268,6 @@ const CampusAdmin = () => {
     if (!selectedRestaurant) return alert("Select a restaurant first!");
     setLoading(true);
     try {
-      const headers = await authHeaders(user);
       // Upload image if selected
       let photoURL = null;
       if (menuImageFile) {
@@ -297,8 +279,6 @@ const CampusAdmin = () => {
       }
 
       const menuData = {
-        restaurantId: selectedRestaurant.id,
-        campusId,
         name: menuForm.name,
         price: parseFloat(menuForm.price),
         description: menuForm.description,
@@ -306,9 +286,9 @@ const CampusAdmin = () => {
       };
 
       if (menuForm.id) {
-        await api.patch(`/api/menu-items/${menuForm.id}`, menuData, { headers });
+        await updateDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", selectedRestaurant.id, "menuItems", menuForm.id), menuData);
       } else {
-        await api.post('/api/menu-items', menuData, { headers });
+        await addDoc(collection(db, "universities", universityId, "campuses", campusId, "restaurants", selectedRestaurant.id, "menuItems"), menuData);
       }
 
       setMenuForm({ name: "", price: "", description: "", id: null });
@@ -336,8 +316,7 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
-          await api.delete(`/api/menu-items/${id}`, { headers });
+          await deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", selectedRestaurant.id, "menuItems", id));
           fetchMenuItems(selectedRestaurant.id);
         } catch (err) {
           setError("Failed to delete menu item");
@@ -360,9 +339,8 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
           const deletePromises = menuItems.map(item =>
-            api.delete(`/api/menu-items/${item.id}`, { headers })
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", selectedRestaurant.id, "menuItems", item.id))
           );
 
           await Promise.all(deletePromises);
@@ -385,9 +363,8 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
           const deletePromises = restaurants.map(restaurant =>
-            api.delete(`/api/restaurants/${restaurant.id}`, { headers })
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "restaurants", restaurant.id))
           );
 
           await Promise.all(deletePromises);
@@ -410,9 +387,8 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
           const deletePromises = martItems.map(item =>
-            api.delete(`/api/mart-items/${item.id}`, { headers })
+            deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "martItems", item.id))
           );
 
           await Promise.all(deletePromises);
@@ -433,7 +409,6 @@ const CampusAdmin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const headers = await authHeaders(user);
       // Upload image if selected
       let photoURL = null;
       if (martImageFile) {
@@ -445,7 +420,6 @@ const CampusAdmin = () => {
       }
 
       const martItemData = {
-        campusId,
         name: martItemForm.name,
         price: parseFloat(martItemForm.price),
         description: martItemForm.description,
@@ -455,9 +429,9 @@ const CampusAdmin = () => {
       };
 
       if (martItemForm.id) {
-        await api.patch(`/api/mart-items/${martItemForm.id}`, martItemData, { headers });
+        await updateDoc(doc(db, "universities", universityId, "campuses", campusId, "martItems", martItemForm.id), martItemData);
       } else {
-        await api.post('/api/mart-items', martItemData, { headers });
+        await addDoc(collection(db, "universities", universityId, "campuses", campusId, "martItems"), martItemData);
       }
 
       setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", id: null });
@@ -485,8 +459,7 @@ const CampusAdmin = () => {
       async () => {
         setLoading(true);
         try {
-          const headers = await authHeaders(user);
-          await api.delete(`/api/mart-items/${id}`, { headers });
+          await deleteDoc(doc(db, "universities", universityId, "campuses", campusId, "martItems", id));
           fetchData();
         } catch (err) {
           setError("Failed to delete mart item");
@@ -542,18 +515,10 @@ const CampusAdmin = () => {
               </li>
               <li className="nav-item" role="presentation">
                 <button
-                  className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
-                  onClick={() => setActiveTab("orders")}
-                >
-                  📦 Orders
-                </button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button
                   className={`nav-link ${activeTab === "dashboard" ? "active" : ""}`}
                   onClick={() => setActiveTab("dashboard")}
                 >
-                  📊 Dashboard
+                  📊 Order Dashboard
                 </button>
               </li>
             </ul>
@@ -952,33 +917,6 @@ const CampusAdmin = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Orders Tab */}
-              {activeTab === "orders" && (
-                <div className="tab-pane fade show active">
-                  <div className="mb-4">
-                    <button
-                      className="btn btn-primary w-100 d-flex justify-content-between align-items-center"
-                      onClick={() => setIsOrdersOpen(!isOrdersOpen)}
-                      style={{
-                        backgroundColor: 'rgba(74, 85, 104, 0.8)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        padding: '12px 20px',
-                        fontSize: '16px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      <span>📦 All Orders</span>
-                      <span>{isOrdersOpen ? '▲' : '▼'}</span>
-                    </button>
-                    {isOrdersOpen && (
-                      <div className="mt-3">
-                        <OrdersPanel campusId={userData?.campusId} campusName={userData?.campusName} />
-                      </div>
-                    )}
                   </div>
                 </div>
               )}

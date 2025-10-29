@@ -1,7 +1,4 @@
-/* ============================================
-   FOOD DELIVERY THEMED CSS & GLOBAL STYLES
-   ============================================ */
-
+/* CSS Reset and Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -9,38 +6,10 @@
 }
 
 /* Prevent horizontal overflow globally */
-html {
+html, body {
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: auto; /* Allow vertical scrolling */
   max-width: 100vw;
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-family);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  overflow-x: hidden;
-  overflow-y: auto;
-  max-width: 100vw;
-  transition: background 0.3s ease, color 0.3s ease;
-  line-height: 1.7;
-}
-
-/* Food pattern background for light mode - more subtle */
-[data-theme="light"] body {
-  background: linear-gradient(180deg, #FEFEFE 0%, #FFF9F5 100%);
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 184, 0, 0.04) 0%, transparent 50%);
-}
-
-[data-theme="dark"] body {
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 120, 60, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(46, 213, 115, 0.05) 0%, transparent 50%);
 }
 
 /* Ensure all containers are properly constrained */
@@ -66,580 +35,131 @@ body {
   overflow-x: hidden;
 }
 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: auto; /* Allow vertical scrolling */
+  max-width: 100vw; /* Ensure body doesn't exceed viewport width */
+}
+
 code {
-  font-family: var(--font-mono);
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
-/* ============================================
-   FOOD DELIVERY THEMED COMPONENTS
-```
-   ============================================ */
-
-/* Navbar with food delivery branding */
+/* Ensure proper Bootstrap integration */
 .navbar {
-  background: var(--nav-bg) !important;
-  box-shadow: var(--nav-shadow);
-  border-bottom: 2px solid var(--border-color);
-  transition: all var(--transition-base);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Typography - Food themed */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
-  font-weight: 800;
-  line-height: 1.3;
-  margin-bottom: var(--spacing-md);
-  letter-spacing: -0.5px;
+/* Global text color fallback for dark themes */
+body {
+  color: #ffffff;
 }
 
-[data-theme="light"] h1, 
-[data-theme="light"] h2, 
-[data-theme="light"] h3, 
-[data-theme="light"] h4, 
-[data-theme="light"] h5, 
-[data-theme="light"] h6 {
-  color: #000000;
-}
-
-h1 {
-  font-size: 2.75rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-[data-theme="light"] h1 {
-  background: linear-gradient(135deg, #FF6B35, #FFB800);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-}
-
-[data-theme="light"] p, 
-[data-theme="light"] span, 
-[data-theme="light"] div {
-  color: #2A2A2A;
-}
-
-p {
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-  font-size: 1.05rem;
-}
-
-a {
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  font-weight: 600;
-}
-
-a:hover {
-  color: var(--primary-hover);
-  transform: translateX(2px);
-}
-
-/* ============================================
-   VIBRANT FORM STYLES (FOOD DELIVERY)
-   ============================================ */
-
+/* Ensure form elements have proper text colors */
 .form-control, .form-select {
-  background-color: var(--input-bg);
-  border: 2px solid var(--input-border);
-  color: var(--text-primary) !important;
-  border-radius: 16px;
-  padding: 0.9rem 1.25rem;
-  transition: all var(--transition-fast);
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-/* Remove default dropdown arrow */
-.form-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 16px 12px;
-  padding-right: 2.75rem;
-}
-
-[data-theme="dark"] .form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23D1D5DB' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-}
-
-.form-control:focus, .form-select:focus {
-  background-color: var(--input-focus-bg);
-  border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 4px var(--input-focus-shadow);
-  outline: none;
-  transform: translateY(-2px);
+  color: #ffffff !important;
 }
 
 .form-control::placeholder, .form-select::placeholder {
-  color: var(--input-placeholder) !important;
-  font-style: italic;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.form-label {
-  color: var(--text-primary);
-  font-weight: 700;
-  margin-bottom: var(--spacing-sm);
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-[data-theme="light"] .form-label {
-  color: #000000;
-  font-weight: 900;
-}
-
-[data-theme="light"] .form-control,
-[data-theme="light"] .form-select {
-  border-color: #AAAAAA;
-  color: #000000;
-  font-weight: 600;
-  background: #FFFFFF;
-}
-
-[data-theme="light"] .form-control:focus,
-[data-theme="light"] .form-select:focus {
-  border-color: #FF6B35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
-  background: #FFFFFF;
-  color: #000000;
-}
-
-[data-theme="light"] .form-control::placeholder,
-[data-theme="light"] .form-select::placeholder {
-  color: #666666 !important;
-  font-weight: 600;
-}
-
-/* ============================================
-   VIBRANT TABLE STYLES (FOOD DELIVERY)
-   ============================================ */
-
+/* Ensure table text is visible */
 .table {
-  color: var(--text-primary);
-  background-color: var(--card-bg);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
+  color: #ffffff;
 }
 
-.table th {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  color: white;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-  padding: 1.25rem;
-  border: none;
+.table th, .table td {
+  color: #ffffff;
 }
 
-[data-theme="light"] .table th {
-  background: linear-gradient(135deg, #FF6B35, #FF8C42);
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+/* Override Bootstrap table classes for dark theme */
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
-.table td {
-  color: var(--text-secondary);
-  padding: 1.25rem;
-  border-top: 1px solid var(--border-color);
-  font-weight: 500;
+.table-striped > tbody > tr:nth-of-type(even) > td {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
 }
 
-[data-theme="light"] .table td {
-  color: #4A4A4A;
-  border-top-color: #E0E0E0;
+.table-striped > tbody > tr:hover > td {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
-.table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: var(--bg-secondary);
-}
-
-.table-striped > tbody > tr:hover {
-  background-color: var(--bg-tertiary);
-  transition: background-color var(--transition-fast);
-}
-
+/* Ensure all table elements are visible */
 .table-responsive {
-  border-radius: var(--card-border-radius);
-  box-shadow: var(--card-shadow);
+  color: #ffffff;
 }
 
-/* Form elements in tables */
+.table-responsive .table {
+  color: #ffffff;
+}
+
+.table-responsive .table th,
+.table-responsive .table td {
+  color: #ffffff;
+}
+
+/* Ensure form elements in tables are visible */
 .table .form-select,
 .table .form-control {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
 }
 
 .table .form-select:focus,
 .table .form-control:focus {
-  background: var(--input-focus-bg);
-  border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  color: #ffffff;
 }
 
 .table .form-select option {
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: #2d2d2d;
+  color: #ffffff;
 }
 
-/* ============================================
-   VIBRANT BUTTON STYLES (FOOD DELIVERY)
-   ============================================ */
-
-.btn {
-  border-radius: 16px;
-  padding: 1rem 2rem;
-  font-weight: 700;
-  transition: all var(--transition-fast);
-  border: none;
-  box-shadow: var(--btn-shadow);
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.btn:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--btn-hover-shadow);
-}
-
-.btn:active {
-  transform: translateY(-1px) scale(1);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover), var(--accent-color));
-  background-size: 200% 200%;
-  color: white;
-  animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 8px 30px rgba(255, 120, 60, 0.5);
-}
-
-.btn-secondary {
-  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-hover));
-  color: white;
-  box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
-}
-
-.btn-secondary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 8px 30px rgba(46, 213, 115, 0.5);
-}
-
-.btn-outline-primary {
-  border: 3px solid var(--primary-color);
-  color: var(--primary-color);
-  background: transparent;
-  font-weight: 700;
-}
-
-.btn-outline-primary:hover {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-/* ============================================
-   FOOD-THEMED CARD STYLES
-   ============================================ */
-
-.card {
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
-  border-radius: 24px;
-  box-shadow: var(--card-shadow);
-  transition: all var(--transition-base);
-  overflow: hidden;
-  position: relative;
-}
-
-[data-theme="light"] .card {
-  border-color: #E0E0E0;
-  box-shadow: 0 3px 12px rgba(255, 107, 53, 0.12);
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
-}
-
-[data-theme="light"] .card::before {
-  background: linear-gradient(90deg, #FF6B35, #FFB800, #00D9A5);
-}
-
-.card:hover {
-  box-shadow: var(--card-hover-shadow);
-  transform: translateY(-8px) scale(1.02);
-  border-color: var(--primary-color);
-}
-
-[data-theme="light"] .card:hover {
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.25);
-  border-color: #FF6B35;
-}
-
-.card-header {
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
-  padding: 1.25rem 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-[data-theme="light"] .card-header {
-  background: #FFF4ED;
-  border-bottom-color: #E0E0E0;
-  color: #1A1A1A;
-}
-
-.card-body {
-  padding: 1.5rem;
-  color: var(--text-secondary);
-}
-
-[data-theme="light"] .card-body {
-  color: #4A4A4A;
-}
-
-.card-footer {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  padding: 1rem 1.5rem;
-}
-
-[data-theme="light"] .card-footer {
-  background: #FFF9F5;
-  border-top-color: #E0E0E0;
-}
-
-/* ============================================
-   MODERN BADGE STYLES
-   ============================================ */
-
-.badge {
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-/* ============================================
-   MODERN ALERT STYLES
-   ============================================ */
-
-.alert {
-  border-radius: 12px;
-  border: none;
-  padding: 1rem 1.25rem;
-  box-shadow: var(--card-shadow);
-}
-
-.alert-success {
-  background: rgba(107, 207, 127, 0.1);
-  color: var(--success-color);
-  border-left: 4px solid var(--success-color);
-}
-
-[data-theme="light"] .alert-success {
-  background: rgba(0, 217, 165, 0.12);
-  color: #00A87D;
-  border-left: 4px solid #00D9A5;
-}
-
-.alert-danger {
-  background: rgba(255, 82, 82, 0.1);
-  color: var(--danger-color);
-  border-left: 4px solid var(--danger-color);
-}
-
-[data-theme="light"] .alert-danger {
-  background: rgba(255, 71, 87, 0.12);
-  color: #D93D3D;
-  border-left: 4px solid #FF4757;
-}
-
-.alert-warning {
-  background: rgba(255, 167, 38, 0.1);
-  color: var(--warning-color);
-  border-left: 4px solid var(--warning-color);
-}
-
-[data-theme="light"] .alert-warning {
-  background: rgba(255, 165, 2, 0.12);
-  color: #CC7A00;
-  border-left: 4px solid #FFA502;
-}
-
-.alert-info {
-  background: rgba(66, 165, 245, 0.1);
-  color: var(--info-color);
-  border-left: 4px solid var(--info-color);
-}
-
-[data-theme="light"] .alert-info {
-  background: rgba(30, 144, 255, 0.12);
-  color: #1873CC;
-  border-left: 4px solid #1E90FF;
-}
-
-/* ============================================
-   MODERN MODAL STYLES
-   ============================================ */
-
-.modal-content {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--card-border-radius);
-  box-shadow: var(--card-hover-shadow);
-}
-
-.modal-header {
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
-  padding: 1.25rem 1.5rem;
-}
-
-.modal-title {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-.modal-body {
-  padding: 1.5rem;
-  color: var(--text-secondary);
-}
-
-.modal-footer {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  padding: 1rem 1.5rem;
-}
-
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
-
+/* Override Bootstrap text-muted for dark themes globally */
 .text-muted {
-  color: var(--text-muted) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
-.bg-light {
-  background-color: var(--bg-secondary) !important;
+/* Ensure all headings are visible on dark backgrounds */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff;
 }
 
-.bg-dark {
-  background-color: var(--bg-tertiary) !important;
+/* Ensure all paragraphs are visible on dark backgrounds */
+p {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.border {
-  border-color: var(--border-color) !important;
-}
-
-/* ============================================
-   MODERN SCROLLBAR (Updated)
-   ============================================ */
-
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: 10px;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 10px;
-  transition: background var(--transition-fast);
+  background: #888;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+  background: #555;
 }
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
-
-@media (max-width: 768px) {
-  .card {
-    border-radius: 12px;
-  }
-  
-  .btn {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.9rem;
-  }
-  
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
-}
-
-/* ============================================
-   LOADING STATES
-   ============================================ */
-
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
-  border-radius: 8px;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-

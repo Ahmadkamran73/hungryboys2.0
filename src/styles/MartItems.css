@@ -1,616 +1,75 @@
-/* ============================================
-   MODERN MART ITEMS PAGE DESIGN
-   Professional E-Commerce Shopping Experience
-   ============================================ */
-
-/* Main Page Container */
-.mart-page {
+.mart-items-page {
   min-height: 100vh;
-  background: #f8f9fa;
-  padding-bottom: 3rem;
-  padding-top: 70px; /* Space for fixed navbar */
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  padding: 2rem 0;
+  color: #ffffff;
 }
 
-[data-theme="dark"] .mart-page {
-  background: #0f172a;
-}
-
-/* ============================================
-   PAGE HEADER
-   ============================================ */
-
-.mart-header {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  padding: 4rem 1.5rem 3rem;
+.mart-items-title {
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 2.5rem;
   margin-bottom: 2rem;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 3px solid #2ED573;
 }
 
-.mart-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    linear-gradient(135deg, rgba(46, 213, 115, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 10% 20%, rgba(46, 213, 115, 0.1) 0%, transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
-  pointer-events: none;
-}
-
-.mart-header::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-}
-
-.mart-header-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-
-.mart-header-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(46, 213, 115, 0.15);
+.mart-item-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 0.5rem 1.25rem;
-  border-radius: 50px;
-  color: #2ED573;
-  font-weight: 700;
-  font-size: 0.813rem;
-  margin-bottom: 1.25rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border: 1px solid rgba(46, 213, 115, 0.3);
-  box-shadow: 0 4px 15px rgba(46, 213, 115, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.mart-header-badge svg {
-  width: 20px;
-  height: 20px;
+.mart-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(220, 53, 69, 0.5);
 }
 
-.mart-header-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  color: #FFFFFF;
-  margin: 0 0 0.75rem 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-}
-
-.mart-header-subtitle {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-/* Light Mode Header Styling */
-[data-theme="light"] .mart-header,
-.mart-header {
-  background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
-  border-bottom: 2px solid #DEE2E6;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .mart-header::before,
-.mart-header::before {
-  background: 
-    linear-gradient(135deg, rgba(79, 70, 229, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.02) 0%, transparent 40%);
-}
-
-[data-theme="light"] .mart-header::after,
-.mart-header::after {
-  background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.1), transparent);
-}
-
-[data-theme="light"] .mart-header-title,
-.mart-header-title {
-  color: #1F2937;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .mart-header-subtitle,
-.mart-header-subtitle {
-  color: #6B7280;
-}
-
-[data-theme="light"] .mart-header-badge,
-.mart-header-badge {
-  background: #4F46E5;
-  color: #FFFFFF;
-  border: 1px solid #4338CA;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
-}
-
-/* Dark Mode Header Overrides */
-[data-theme="dark"] .mart-header {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .mart-header::before {
-  background: 
-    linear-gradient(135deg, rgba(46, 213, 115, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 10% 20%, rgba(46, 213, 115, 0.1) 0%, transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
-}
-
-[data-theme="dark"] .mart-header::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-}
-
-[data-theme="dark"] .mart-header-title {
-  color: #FFFFFF;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .mart-header-subtitle {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-[data-theme="dark"] .mart-header-badge {
-  background: rgba(46, 213, 115, 0.15);
-  color: #2ED573;
-  border: 1px solid rgba(46, 213, 115, 0.3);
-}
-
-/* ============================================
-   CONTENT CONTAINER
-   ============================================ */
-
-.mart-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-/* ============================================
-   CONTROLS SECTION
-   ============================================ */
-
-.mart-controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.mart-controls-left {
-  flex: 1;
-  min-width: 250px;
-}
-
-.mart-search-wrapper {
-  width: 100%;
-}
-
-.mart-controls-right {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-/* Select Dropdowns */
-.mart-select {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 2px solid #E2E8F0;
-  border-radius: 12px;
-  background: #FFFFFF;
-  color: #1A1A1A;
-  font-size: 0.938rem;
+.mart-item-card .card-title {
+  color: #ffffff;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 150px;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231A1A1A' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
+  margin-bottom: 0.5rem;
 }
 
-.mart-select::-ms-expand {
-  display: none;
+.mart-item-card .card-text {
+  color: #cccccc;
 }
 
-.mart-select:hover {
-  border-color: #2ED573;
+.mart-item-card .card-text strong {
+  color: #dc3545;
+  font-size: 1.2rem;
 }
 
-.mart-select:focus {
-  outline: none;
-  border-color: #2ED573;
-  box-shadow: 0 0 0 3px rgba(46, 213, 115, 0.1);
+.mart-item-image {
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="dark"] .mart-select {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  background: #1a2332 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23FFFFFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") no-repeat right 0.75rem center !important;
-  background-size: 16px 12px !important;
-  border-color: #334155;
-  color: #FFFFFF;
+.mart-item-card .card-body {
+  padding: 1.5rem;
 }
 
-[data-theme="dark"] .mart-select::-ms-expand {
-  display: none;
-}
-
-[data-theme="dark"] .mart-select:hover {
-  border-color: #2ED573;
-}
-
-/* ============================================
-   CATEGORY FILTER CHIPS
-   ============================================ */
-
-.mart-categories {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="dark"] .mart-categories {
-  background: #1a2332;
-}
-
-.mart-category-chip {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #E2E8F0;
-  border-radius: 50px;
-  background: transparent;
-  color: #64748B;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.mart-category-chip:hover {
-  border-color: #2ED573;
-  color: #2ED573;
-  transform: translateY(-2px);
-}
-
-.mart-category-chip.active {
-  background: #2ED573;
-  border-color: #2ED573;
-  color: #FFFFFF;
-  transform: scale(1.05);
-}
-
-[data-theme="dark"] .mart-category-chip {
-  border-color: #334155;
-  color: #94A3B8;
-}
-
-[data-theme="dark"] .mart-category-chip:hover {
-  border-color: #2ED573;
-  color: #2ED573;
-}
-
-[data-theme="dark"] .mart-category-chip.active {
-  background: #2ED573;
-  border-color: #2ED573;
-  color: #FFFFFF;
-}
-
-/* ============================================
-   RESULTS INFO
-   ============================================ */
-
-.mart-results-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="dark"] .mart-results-info {
-  background: #1a2332;
-}
-
-.results-count {
-  font-size: 0.938rem;
-  font-weight: 700;
-  color: #1A1A1A;
-}
-
-[data-theme="dark"] .results-count {
-  color: #FFFFFF;
-}
-
-.clear-filters-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: 2px solid #EF4444;
-  border-radius: 8px;
-  color: #EF4444;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.clear-filters-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.clear-filters-btn:hover {
-  background: #EF4444;
-  color: #FFFFFF;
-}
-
-/* ============================================
-   ITEMS GRID
-   ============================================ */
-
-.mart-items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================================
-   EMPTY STATES
-   ============================================ */
-
-.mart-empty-state,
-.mart-error-state,
-.mart-empty-results {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-  min-height: 50vh;
-}
-
-.mart-empty-state svg,
-.mart-error-state svg,
-.mart-empty-results svg {
-  width: 120px;
-  height: 120px;
-  color: #CBD5E1;
-  margin-bottom: 1.5rem;
-  stroke-width: 1.5;
-}
-
-.mart-empty-state h3,
-.mart-error-state h3,
-.mart-empty-results h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #64748B;
-  margin: 0 0 0.5rem 0;
-}
-
-.mart-empty-results p {
-  font-size: 1rem;
-  color: #94A3B8;
-  margin: 0 0 1.5rem 0;
-}
-
-[data-theme="dark"] .mart-empty-state h3,
-[data-theme="dark"] .mart-error-state h3,
-[data-theme="dark"] .mart-empty-results h3 {
-  color: #94A3B8;
-}
-
-[data-theme="dark"] .mart-empty-results p {
-  color: #64748B;
-}
-
-[data-theme="dark"] .mart-empty-state svg,
-[data-theme="dark"] .mart-error-state svg,
-[data-theme="dark"] .mart-empty-results svg {
-  color: #475569;
-}
-
-.reset-btn {
-  padding: 0.75rem 1.5rem;
-  background: #2ED573;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.938rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.reset-btn:hover {
-  background: #26B863;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.3);
-}
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
-
-/* Tablet */
-@media (max-width: 1024px) {
-  .mart-header {
-    padding: 2.5rem 1.25rem;
-  }
-
-  .mart-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.25rem;
-  }
-}
-
-/* Mobile */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .mart-header {
-    padding: 2rem 1rem;
+  .mart-items-title {
+    font-size: 2rem;
   }
-
-  .mart-header-title {
-    font-size: 1.75rem;
-  }
-
-  .mart-header-subtitle {
-    font-size: 1rem;
-  }
-
-  .mart-container {
-    padding: 0 1rem;
-  }
-
-  .mart-controls {
-    flex-direction: column;
-  }
-
-  .mart-controls-left,
-  .mart-controls-right {
-    width: 100%;
-  }
-
-  .mart-controls-right {
-    flex-direction: column;
-  }
-
-  .mart-select {
-    width: 100%;
-  }
-
-  .mart-categories {
-    padding: 0.75rem;
-    gap: 0.5rem;
-  }
-
-  .mart-category-chip {
-    padding: 0.5rem 1rem;
-    font-size: 0.813rem;
-  }
-
-  .mart-results-info {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
-  }
-
-  .clear-filters-btn {
-    justify-content: center;
-  }
-
-  .mart-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1rem;
+  
+  .mart-item-card {
+    margin-bottom: 1rem;
   }
 }
 
-/* Small Mobile */
-@media (max-width: 575px) {
-  .mart-header {
-    padding: 1.5rem 0.75rem;
+@media (max-width: 576px) {
+  .mart-items-page {
+    padding: 1rem 0;
   }
-
-  .mart-header-badge {
-    font-size: 0.75rem;
-    padding: 0.4rem 1rem;
+  
+  .mart-items-title {
+    font-size: 1.8rem;
   }
-
-  .mart-header-badge svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .mart-header-title {
-    font-size: 1.5rem;
-  }
-
-  .mart-header-subtitle {
-    font-size: 0.875rem;
-  }
-
-  .mart-container {
-    padding: 0 0.75rem;
-  }
-
-  .mart-items-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .mart-empty-state svg,
-  .mart-error-state svg,
-  .mart-empty-results svg {
-    width: 80px;
-    height: 80px;
-  }
-
-  .mart-empty-state h3,
-  .mart-error-state h3,
-  .mart-empty-results h3 {
-    font-size: 1.25rem;
-  }
-}
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  .mart-items-grid,
-  .mart-category-chip,
-  .reset-btn,
-  .clear-filters-btn {
-    animation: none;
-    transition: none;
-  }
-}
- 
+} 

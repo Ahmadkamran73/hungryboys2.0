@@ -3,7 +3,6 @@ import { auth, db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { handleError } from "../utils/errorHandler";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 const AuthContext = createContext();
 
@@ -36,6 +35,7 @@ export const AuthProvider = ({ children }) => {
             setUserData(userDoc.data());
           } else {
             setUserData(null);
+            console.warn("User document not found for:", firebaseUser.uid);
           }
         } catch (error) {
           const handledError = handleError(error, 'AuthContext - fetchUserData');
@@ -61,10 +61,6 @@ export const AuthProvider = ({ children }) => {
     return userData?.role === "campusAdmin";
   };
 
-  const isRestaurantManager = () => {
-    return userData?.role === "restaurantManager";
-  };
-
   const isUser = () => {
     return userData?.role === "user";
   };
@@ -88,15 +84,10 @@ export const AuthProvider = ({ children }) => {
     error,
     isSuperAdmin,
     isCampusAdmin,
-    isRestaurantManager,
     isUser,
     hasRole,
     canAccessCampus
   };
-
-  if (loading) {
-    return <LoadingSpinner message="Loading App..." fullscreen={true} />;
-  }
 
   return (
     <AuthContext.Provider value={value}>

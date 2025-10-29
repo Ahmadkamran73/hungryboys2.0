@@ -9,7 +9,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { handleError } from "../utils/errorHandler";
 import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import { getCampusSettings } from "../utils/campusSettings";
-import { auth } from "../firebase";
 import "../styles/CheckOutForm.css";
 
 const CheckOutForm = () => {
@@ -214,15 +213,9 @@ const CheckOutForm = () => {
 
     // Email domain validation removed - any valid email is accepted
 
-    // Check if university and campus are selected with IDs
-    if (!selectedUniversity?.id || !selectedCampus?.id) {
+    // Check if university and campus are selected
+    if (!selectedUniversity || !selectedCampus) {
       setError("Please select your university and campus from the navigation bar.");
-      return;
-    }
-
-    // Check user authentication
-    if (!user) {
-      setError("You must be logged in to place an order.");
       return;
     }
 
@@ -250,15 +243,18 @@ const CheckOutForm = () => {
       return;
     }
 
-    try {
-      // Get Firebase auth token
-      const idToken = await user.getIdToken();
-      if (!idToken) {
-        setError("Authentication failed. Please try logging in again.");
-        setLoading(false);
-        return;
-      }
+    const order = {
+      ...form,
+      itemTotal,
+      deliveryCharge,
+      grandTotal,
+      screenshotURL: uploadedURL,
+      cartItems: formatCartItems(cartItems),
+      timestamp: formatDate(new Date().toISOString()),
+      recaptchaToken,
+    };
 
+    try {
       // Check if any restaurants in the cart are closed
       const closedRestaurants = [];
       for (const item of cartItems) {
@@ -282,50 +278,12 @@ const CheckOutForm = () => {
         return;
       }
 
-      // Extract restaurant names from cart items
-      const restaurantNames = [...new Set(cartItems.map(item => item.restaurantName))];
-
-      // Prepare cart items array
-      const cartItemsArray = cartItems.map(item => ({
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        restaurantName: item.restaurantName,
-        restaurantId: item.restaurantId
-      }));
-
-      // Prepare order data for MongoDB
-      const orderData = {
-        universityId: selectedUniversity.id,
-        campusId: selectedCampus.id,
-        universityName: selectedUniversity.name,
-        campusName: selectedCampus.name,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        phone: form.phone,
-        email: form.email,
-        gender: form.gender,
-        persons: form.persons,
-        deliveryCharge,
-        itemTotal,
-        grandTotal,
-        cartItems: cartItemsArray,
-        cartItemsFormatted: formatCartItems(cartItems),
-        restaurantNames,
-        accountTitle: form.accountTitle,
-        bankName: form.bankName,
-        screenshotURL: uploadedURL,
-        specialInstruction: form.specialInstruction,
-        recaptchaToken
-      };
-
-      // Submit to MongoDB backend API
+      // Submit to backend API (which handles both campus-specific sheet and Master sheet)
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
-      await axios.post(`${backendUrl}/api/orders`, orderData, {
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-          'Content-Type': 'application/json'
-        }
+      await axios.post(`${backendUrl}/submit-order`, {
+        ...order,
+        universityName: selectedUniversity.name,
+        campusName: selectedCampus.name
       });
       
       clearCart();
@@ -340,129 +298,10 @@ const CheckOutForm = () => {
 
   if (submitted) {
     return (
-      <div className="order-success-page">
-        <div className="success-container">
-          {/* Success Header */}
-          <div className="success-header">
-            <div className="success-icon">✓</div>
-            <h1 className="success-title">Order Placed Successfully!</h1>
-            <p className="success-subtitle">Thank you for shopping with Hungry Boys 🎉</p>
-          </div>
-
-          {/* Order Summary Card */}
-          <div className="order-summary-card">
-            <h2 className="summary-heading">Order Summary</h2>
-            
-            {/* Customer Details */}
-            <div className="summary-section">
-              <h3 className="section-title">Customer Details</h3>
-              <div className="detail-row">
-                <span className="detail-label">Name:</span>
-                <span className="detail-value">{form.firstName} {form.lastName}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Phone:</span>
-                <span className="detail-value">{form.phone}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Email:</span>
-                <span className="detail-value">{form.email}</span>
-              </div>
-              {form.room && (
-                <div className="detail-row">
-                  <span className="detail-label">Room:</span>
-                  <span className="detail-value">{form.room}</span>
-                </div>
-              )}
-              <div className="detail-row">
-                <span className="detail-label">Location:</span>
-                <span className="detail-value">{selectedUniversity?.name} - {selectedCampus?.name}</span>
-              </div>
-            </div>
-
-            {/* Order Items */}
-            <div className="summary-section">
-              <h3 className="section-title">Order Items</h3>
-              <div className="order-items-list">
-                {cartItems.map((item, index) => (
-                  <div key={index} className="order-item-row">
-                    <div className="item-details">
-                      <span className="item-name">{item.name}</span>
-                      <span className="item-restaurant">
-                        {item.restaurantName === "Mart" ? "Mart" : `Restaurant: ${item.restaurantName}`}
-                      </span>
-                    </div>
-                    <div className="item-quantity">x{item.quantity}</div>
-                    <div className="item-price">Rs {item.price * item.quantity}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Payment Summary */}
-            <div className="summary-section">
-              <h3 className="section-title">Payment Details</h3>
-              <div className="payment-breakdown">
-                <div className="payment-row">
-                  <span className="payment-label">Subtotal:</span>
-                  <span className="payment-value">Rs {itemTotal}</span>
-                </div>
-                <div className="payment-row">
-                  <span className="payment-label">Delivery Charges ({form.persons} person{form.persons > 1 ? 's' : ''}):</span>
-                  <span className="payment-value">Rs {deliveryCharge}</span>
-                </div>
-                <div className="payment-row payment-total">
-                  <span className="payment-label">Total Amount:</span>
-                  <span className="payment-value">Rs {grandTotal}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="summary-section">
-              <h3 className="section-title">Payment Method</h3>
-              <div className="detail-row">
-                <span className="detail-label">Method:</span>
-                <span className="detail-value">{form.paymentMethod}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Account Title:</span>
-                <span className="detail-value">{form.accountTitle}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Bank:</span>
-                <span className="detail-value">{form.bankName}</span>
-              </div>
-            </div>
-
-            {/* Special Instructions */}
-            {form.specialInstruction && (
-              <div className="summary-section">
-                <h3 className="section-title">Special Instructions</h3>
-                <p className="special-instruction-text">{form.specialInstruction}</p>
-              </div>
-            )}
-
-            {/* Order Status */}
-            <div className="order-status-box">
-              <div className="status-icon">⏳</div>
-              <div className="status-content">
-                <h4 className="status-title">Order Processing</h4>
-                <p className="status-text">Your order is being prepared. We'll notify you once it's on the way!</p>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              <Link to="/restaurants" className="btn-primary-action">
-                Order Again
-              </Link>
-              <Link to="/" className="btn-secondary-action">
-                Back to Home
-              </Link>
-            </div>
-          </div>
-        </div>
+      <div className="checkout-container text-center text-white">
+        <h2>Thank you for shopping! 🎉</h2>
+        <p>Your order has been placed successfully.</p>
+        <Link to="/restaurants" className="btn btn-danger mt-3">Start Ordering</Link>
       </div>
     );
   }
@@ -535,7 +374,7 @@ const CheckOutForm = () => {
                 onChange={handleChange}
                 required
               />
-              <label className="form-check-label" htmlFor="male" style={{ color: '#1A1A1A' }}>
+              <label className="form-check-label text-white" htmlFor="male">
                 Male
               </label>
             </div>
@@ -550,7 +389,7 @@ const CheckOutForm = () => {
                 onChange={handleChange}
                 required
               />
-              <label className="form-check-label" htmlFor="female" style={{ color: '#1A1A1A' }}>
+              <label className="form-check-label text-white" htmlFor="female">
                 Female
               </label>
             </div>
@@ -560,33 +399,12 @@ const CheckOutForm = () => {
         {/* Persons */}
         <div className="col-12">
           <label className="form-label">Number of Persons *</label>
-          <div className="persons-counter">
-            <button 
-              type="button" 
-              className="counter-btn counter-minus" 
-              onClick={() => setForm(prev => ({ ...prev, persons: Math.max(1, prev.persons - 1) }))}
-            >
-              −
-            </button>
-            <input 
-              type="number" 
-              className="counter-input" 
-              name="persons" 
-              value={form.persons} 
-              onChange={handleChange} 
-              min="1" 
-              required 
-              readOnly
-            />
-            <button 
-              type="button" 
-              className="counter-btn counter-plus" 
-              onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}
-            >
-              +
-            </button>
+          <div className="input-group">
+            <button type="button" className="btn btn-danger" onClick={() => setForm(prev => ({ ...prev, persons: Math.max(1, prev.persons - 1) }))}>−</button>
+            <input type="number" className="form-control text-center dark-input" name="persons" value={form.persons} onChange={handleChange} min="1" required />
+            <button type="button" className="btn btn-danger" onClick={() => setForm(prev => ({ ...prev, persons: prev.persons + 1 }))}>+</button>
           </div>
-          <small className="text-muted" style={{ color: '#6B7280' }}>Each delivery is Rs {campusSettings.deliveryChargePerPerson} per person</small>
+          <small className="text">Each delivery is Rs {campusSettings.deliveryChargePerPerson} per person</small>
         </div>
 
         {/* Special Instructions */}
@@ -604,31 +422,12 @@ const CheckOutForm = () => {
 
         {/* Payment Instructions */}
         <input type="hidden" name="paymentMethod" value="Online Payment" />
-        <div 
-          className="col-12 border p-3 rounded bank-details-section" 
-          style={{ 
-            backgroundColor: 'var(--card-background, #F9FAFB)',
-            color: 'var(--text-color, #1A1A1A)',
-            borderColor: 'var(--border-color, #E5E7EB) !important'
-          }}
-        >
+        <div className="col-12 text-white border p-3 rounded" style={{ backgroundColor: "#222" }}>
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <strong style={{ color: 'var(--text-color, #1A1A1A)' }}>Pay to:</strong>
+            <strong>Pay to:</strong>
             <button 
               type="button" 
-              className="btn btn-sm"
-              style={{
-                backgroundColor: '#4F46E5',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '0.25rem 0.75rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#4338CA'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#4F46E5'}
+              className="btn btn-sm btn-outline-light"
               onClick={async () => {
                 if (selectedCampus?.id) {
                   try {
@@ -644,16 +443,9 @@ const CheckOutForm = () => {
               🔄 Refresh
             </button>
           </div>
-          <div style={{ 
-            fontSize: '0.95rem', 
-            lineHeight: '1.8',
-            color: 'var(--text-color, #374151)',
-            fontWeight: '500'
-          }}>
-            <strong>Account Title:</strong> {campusSettings.accountTitle}<br />
-            <strong>Bank:</strong> {campusSettings.bankName}<br />
-            <strong>Account Number:</strong> {campusSettings.accountNumber}
-          </div>
+          Account Title: {campusSettings.accountTitle}<br />
+          Bank: {campusSettings.bankName}<br />
+          Account Number: {campusSettings.accountNumber}
         </div>
 
         {/* Online Payment Info */}
@@ -672,58 +464,11 @@ const CheckOutForm = () => {
 
         {/* Order Summary */}
         <div className="col-12 mt-4">
-          <h5 style={{ 
-            color: 'var(--text-color, #1A1A1A)',
-            fontWeight: '700',
-            marginBottom: '1rem'
-          }}>
-            Order Summary
-          </h5>
-          <ul 
-            className="list-group" 
-            style={{
-              backgroundColor: 'var(--card-background, #F9FAFB)',
-              border: '1px solid var(--border-color, #E5E7EB)',
-              borderRadius: '8px',
-              overflow: 'hidden'
-            }}
-          >
-            <li 
-              className="list-group-item" 
-              style={{ 
-                backgroundColor: 'var(--card-background, #F9FAFB)',
-                color: 'var(--text-color, #1A1A1A)',
-                fontWeight: '600',
-                fontSize: '1rem',
-                borderColor: 'var(--border-color, #E5E7EB)'
-              }}
-            >
-              <strong>Item Total:</strong> Rs {itemTotal}
-            </li>
-            <li 
-              className="list-group-item" 
-              style={{ 
-                backgroundColor: 'var(--card-background, #F9FAFB)',
-                color: 'var(--text-color, #1A1A1A)',
-                fontWeight: '600',
-                fontSize: '1rem',
-                borderColor: 'var(--border-color, #E5E7EB)'
-              }}
-            >
-              <strong>Delivery Charge:</strong> Rs {deliveryCharge}
-            </li>
-            <li 
-              className="list-group-item" 
-              style={{ 
-                backgroundColor: '#4F46E5',
-                color: '#FFFFFF',
-                fontWeight: '700',
-                fontSize: '1.1rem',
-                borderColor: '#4F46E5'
-              }}
-            >
-              <strong>Grand Total: Rs {grandTotal}</strong>
-            </li>
+          <h5 className="text-light">Order Summary</h5>
+          <ul className="list-group bg-dark text-white">
+            <li className="list-group-item bg-dark text-white">Item Total: Rs {itemTotal}</li>
+            <li className="list-group-item bg-dark text-white">Delivery Charge: Rs {deliveryCharge}</li>
+            <li className="list-group-item bg-dark text-white">Grand Total: Rs {grandTotal}</li>
           </ul>
         </div>
 
@@ -737,43 +482,8 @@ const CheckOutForm = () => {
 
         {/* Submit */}
         <div className="col-12 text-center">
-          <button 
-            type="submit" 
-            className="checkout-submit-btn" 
-            disabled={loading || cartItems.length === 0}
-            style={{
-              backgroundColor: loading || cartItems.length === 0 ? '#9CA3AF' : '#4F46E5',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '1rem 3rem',
-              fontSize: '1.1rem',
-              fontWeight: '700',
-              width: '100%',
-              maxWidth: '400px',
-              cursor: loading || cartItems.length === 0 ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: loading || cartItems.length === 0 ? 'none' : '0 4px 12px rgba(79, 70, 229, 0.3)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              marginTop: '1.5rem'
-            }}
-            onMouseOver={(e) => {
-              if (!loading && cartItems.length > 0) {
-                e.target.style.backgroundColor = '#4338CA';
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(79, 70, 229, 0.4)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading && cartItems.length > 0) {
-                e.target.style.backgroundColor = '#4F46E5';
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)';
-              }
-            }}
-          >
-            {loading ? "⏳ Processing..." : "🛒 Complete Checkout"}
+          <button type="submit" className="btn btn-danger px-4 py-2 mt-3" disabled={loading || cartItems.length === 0}>
+            {loading ? "Processing..." : "Checkout"}
           </button>
         </div>
       </form>

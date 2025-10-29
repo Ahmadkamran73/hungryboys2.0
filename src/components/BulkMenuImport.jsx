@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from 'xlsx';
-import axios from 'axios';
-import { useAuth } from "../context/AuthContext";
-import { BASE_URL } from "../utils/api";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const BulkMenuImport = ({ universityId, campusId, restaurantId: propRestaurantId, restaurants = [], onComplete }) => {
   const [fileName, setFileName] = useState("");
@@ -10,7 +9,6 @@ const BulkMenuImport = ({ universityId, campusId, restaurantId: propRestaurantId
   const [message, setMessage] = useState("");
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(propRestaurantId || "");
   const [parsedRows, setParsedRows] = useState(null); // valid rows parsed from file
-  const { user } = useAuth();
 
   useEffect(() => {
     if (propRestaurantId) setSelectedRestaurantId(propRestaurantId);
@@ -76,14 +74,17 @@ const BulkMenuImport = ({ universityId, campusId, restaurantId: propRestaurantId
     setLoading(true);
     setMessage("");
     try {
-      const idToken = user ? await user.getIdToken() : null;
-      await axios.post(`${BASE_URL}/api/menu-items/bulk`, {
-        restaurantId: targetRestaurantId,
-        campusId,
-        items: parsedRows.map(r => ({ name: String(r.name).trim(), price: parseFloat(r.price) || 0 }))
-      }, {
-        headers: idToken ? { Authorization: `Bearer ${idToken}` } : {}
+      const colRef = collection(db, "universities", universityId, "campuses", campusId, "restaurants", targetRestaurantId, "menuItems");
+
+      const uploadPromises = parsedRows.map(r => {
+        const item = {
+          name: String(r.name).trim(),
+          price: parseFloat((r.price || 0) || 0) || 0,
+        };
+        return addDoc(colRef, item);
       });
+
+      await Promise.all(uploadPromises);
       setMessage(`Imported ${parsedRows.length} items successfully.`);
       setFileName("");
       setParsedRows(null);

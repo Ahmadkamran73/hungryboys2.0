@@ -1,26 +1,20 @@
-/* CampusAdminDashboard.css - FoodPanda Clean Style */
-
 .campus-dashboard-container {
-  padding: 2rem 1rem;
-  background-color: #f8f9fa;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
   min-height: 100vh;
-  color: #1A1A1A;
-  max-width: 1400px;
-  margin: 0 auto;
+  color: white;
 }
 
 .dashboard-header {
   text-align: center;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #E5E7EB;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-header h2 {
-  color: #1A1A1A;
+  color: #ff6b6b;
   margin-bottom: 0.5rem;
-  font-weight: 700;
-  font-size: 2rem;
 }
 
 /* Statistics Grid */
@@ -32,20 +26,20 @@
 }
 
 .stat-card {
-  background: #FFFFFF;
-  border: none;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .stat-icon {
@@ -55,9 +49,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(46, 213, 115, 0.1);
+  background: rgba(255, 107, 107, 0.2);
   border-radius: 50%;
-  color: #2ED573;
+  color: #ff6b6b;
 }
 
 .stat-content {
@@ -66,23 +60,22 @@
 
 .stat-value {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #1A1A1A;
+  font-weight: bold;
+  color: #fff;
   margin-bottom: 0.25rem;
 }
 
 .stat-label {
-  color: #6B7280;
+  color: #868e96;
   font-size: 0.9rem;
-  font-weight: 500;
 }
 
 /* Orders Section */
 .orders-section {
-  background: #FFFFFF;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .orders-header {
@@ -91,14 +84,13 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #E5E7EB;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .orders-header h4 {
-  color: #1A1A1A;
+  color: #ff6b6b;
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.2rem;
 }
 
 .orders-actions {
@@ -109,14 +101,12 @@
 .orders-table-container {
   max-height: 600px;
   overflow-y: auto;
-  border-radius: 10px;
 }
 
 .no-orders {
   text-align: center;
-  padding: 3rem 2rem;
-  color: #6B7280;
-  font-size: 1.1rem;
+  padding: 2rem;
+  color: #868e96;
 }
 
 .table {
@@ -124,20 +114,18 @@
 }
 
 .table th {
-  background: #F9FAFB;
-  border-color: #E5E7EB;
-  color: #1A1A1A;
-  font-weight: 700;
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ff6b6b;
+  font-weight: 600;
   position: sticky;
   top: 0;
   z-index: 10;
-  font-size: 0.9rem;
 }
 
 .table td {
-  border-color: #E5E7EB;
+  border-color: rgba(255, 255, 255, 0.1);
   vertical-align: middle;
-  color: #1A1A1A;
 }
 
 .order-items {
@@ -219,17 +207,17 @@
 }
 
 .orders-table-container::-webkit-scrollbar-track {
-  background: #F9FAFB;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
 
 .orders-table-container::-webkit-scrollbar-thumb {
-  background: #2ED573;
+  background: rgba(255, 107, 107, 0.5);
   border-radius: 4px;
 }
 
 .orders-table-container::-webkit-scrollbar-thumb:hover {
-  background: #26B863;
+  background: rgba(255, 107, 107, 0.7);
 }
 
 /* Loading states */
@@ -243,51 +231,46 @@
 /* Alert styling */
 .campus-dashboard-container .alert {
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   margin-bottom: 1rem;
 }
 
 .campus-dashboard-container .alert-danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-  border: 2px solid #EF4444;
+  background: rgba(220, 53, 69, 0.2);
+  color: #ff6b6b;
+  border-left: 4px solid #ff6b6b;
 }
 
 /* Button styling */
 .campus-dashboard-container .btn {
-  border-radius: 10px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .campus-dashboard-container .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .campus-dashboard-container .btn-outline-info {
-  border: 2px solid #06B6D4;
-  color: #06B6D4;
-  background: transparent;
+  border-color: #17a2b8;
+  color: #17a2b8;
 }
 
 .campus-dashboard-container .btn-outline-info:hover {
-  background: #06B6D4;
-  border-color: #06B6D4;
-  color: #FFFFFF;
+  background: #17a2b8;
+  border-color: #17a2b8;
 }
 
 .campus-dashboard-container .btn-outline-secondary {
-  border: 2px solid #6B7280;
-  color: #6B7280;
-  background: transparent;
+  border-color: #6c757d;
+  color: #6c757d;
 }
 
 .campus-dashboard-container .btn-outline-secondary:hover {
-  background: #6B7280;
-  border-color: #6B7280;
-  color: #FFFFFF;
+  background: #6c757d;
+  border-color: #6c757d;
 }
 
 /* Animation for stat cards */
@@ -309,165 +292,4 @@
 .stat-card:nth-child(1) { animation-delay: 0.1s; }
 .stat-card:nth-child(2) { animation-delay: 0.2s; }
 .stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-/* Dark mode support */
-[data-theme="dark"] .campus-dashboard-container {
-  background-color: #0f172a;
-}
-
-[data-theme="dark"] .dashboard-header {
-  border-bottom-color: #334155;
-}
-
-[data-theme="dark"] .dashboard-header h2,
-[data-theme="dark"] .stat-value,
-[data-theme="dark"] .orders-header h4,
-[data-theme="dark"] .table td {
-  color: #FFFFFF;
-}
-
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .orders-section {
-  background: #1a2332;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .stat-label,
-[data-theme="dark"] .no-orders {
-  color: #9CA3AF;
-}
-
-[data-theme="dark"] .table th {
-  background: #0f172a;
-  border-color: #334155;
-  color: #FFFFFF;
-}
-
-[data-theme="dark"] .table td {
-  border-color: #334155;
-}
-
-[data-theme="dark"] .orders-header {
-  border-bottom-color: #334155;
-}
-
-[data-theme="dark"] .orders-table-container::-webkit-scrollbar-track {
-  background: #0f172a;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .campus-dashboard-container {
-    padding: 1.5rem 0.75rem;
-  }
-
-  .dashboard-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-  }
-
-  .dashboard-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .stat-card {
-    padding: 1.25rem;
-  }
-
-  .stat-icon {
-    font-size: 1.5rem;
-    width: 50px;
-    height: 50px;
-  }
-
-  .stat-value {
-    font-size: 1.25rem;
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-  }
-
-  .orders-section {
-    padding: 1.25rem;
-  }
-
-  .orders-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .orders-header h4 {
-    font-size: 1.1rem;
-  }
-
-  .orders-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .table {
-    font-size: 0.85rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.625rem 0.5rem;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 575px) {
-  .campus-dashboard-container {
-    padding: 1rem 0.5rem;
-  }
-
-  .dashboard-header h2 {
-    font-size: 1.35rem;
-  }
-
-  .stats-grid {
-    gap: 0.875rem;
-  }
-
-  .stat-card {
-    padding: 1rem;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .stat-icon {
-    width: 45px;
-    height: 45px;
-    font-size: 1.35rem;
-  }
-
-  .stat-value {
-    font-size: 1.15rem;
-  }
-
-  .orders-section {
-    padding: 1rem;
-  }
-
-  .orders-header h4 {
-    font-size: 1rem;
-  }
-
-  .table {
-    font-size: 0.8rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.5rem 0.375rem;
-  }
-}
- 
+.stat-card:nth-child(4) { animation-delay: 0.4s; } 

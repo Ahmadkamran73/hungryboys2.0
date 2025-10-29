@@ -55,7 +55,6 @@ export const CartProvider = ({ children }) => {
             price: item.price,
             quantity: 1,
             restaurantName: restaurantName,
-            restaurantId: restaurantData?.restaurantId,
             campusId: itemCampusId || userData?.campusId,
             restaurantData: restaurantData,
           },
@@ -89,21 +88,13 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    setCartItems((prev) => {
-      return prev
-        .map((i) => {
-          if (i.name === name && i.restaurantName === restaurantName) {
-            const newQuantity = i.quantity - 1;
-            // If quantity becomes 0, return null to filter it out
-            if (newQuantity <= 0) {
-              return null;
-            }
-            return { ...i, quantity: newQuantity };
-          }
-          return i;
-        })
-        .filter(Boolean); // Remove null items (items with 0 quantity)
-    });
+    setCartItems((prev) =>
+      prev.map((i) =>
+        i.name === name && i.restaurantName === restaurantName
+          ? { ...i, quantity: Math.max(i.quantity - 1, 1) }
+          : i
+      )
+    );
   };
 
   // Remove an item from the cart
