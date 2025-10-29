@@ -276,7 +276,7 @@ function Signup() {
           <div className="auth-side-content">
             <div className="auth-logo-container">
               <img 
-                src="/src/assets/logo.png" 
+                src="/logo.png" 
                 alt="Hungry Boys Logo" 
                 className="auth-logo-icon"
               />

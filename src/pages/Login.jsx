@@ -143,7 +143,7 @@ function Login() {
           <div className="auth-branding">
             <div className="auth-logo-container">
               <img 
-                src="/src/assets/logo.png" 
+                src="/logo.png" 
                 alt="Hungry Boys Logo" 
                 className="auth-logo-icon"
               />
