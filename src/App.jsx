@@ -2,17 +2,21 @@ import React from 'react';
 import AppRoutes from './routes/AppRoutes';
 import WhatsAppIcon from './components/WhatsAppIcon';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './context/ThemeContext';
+import './styles/theme.css';
 
 function App() {
   return (
     <ErrorBoundary>
-      <div>
-        {/* Render your AppRoutes to handle routing */}
-        <AppRoutes />
+      <ThemeProvider>
+        <div>
+          {/* Render your AppRoutes to handle routing */}
+          <AppRoutes />
 
-        {/* WhatsApp Icon, which is globally accessible */}
-        <WhatsAppIcon />
-      </div>
+          {/* WhatsApp Icon, which is globally accessible */}
+          <WhatsAppIcon />
+        </div>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

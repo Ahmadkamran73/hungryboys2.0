@@ -232,74 +232,70 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
   if (loading) return <LoadingSpinner message="Loading orders..." />;
 
   return (
-    <div className="orders-panel-container">
-      <div className="orders-header mb-4 d-flex justify-content-between align-items-center">
+    <div className="rm-orders-panel">
+      <div className="rm-orders-panel-header">
         <div>
-          <h3>📦 Orders for {restaurantName}</h3>
-          <p className="text-muted mb-0">Manage orders for your restaurant</p>
+          <h3 className="rm-panel-title">Orders for {restaurantName}</h3>
+          <p className="rm-panel-subtitle">Manage orders for your restaurant</p>
         </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-primary" onClick={fetchOrders}>
+        <div className="rm-header-actions">
+          <button className="rm-btn rm-btn-secondary" onClick={fetchOrders}>
             🔄 Refresh
           </button>
-          <button className="btn btn-success" onClick={exportToExcel}>
+          <button className="rm-btn rm-btn-primary" onClick={exportToExcel}>
             📊 Export to Excel
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+        <div className="rm-alert rm-alert-danger">
           {error}
-          <button type="button" className="btn-close" onClick={() => setError('')}></button>
+          <button type="button" className="rm-alert-close" onClick={() => setError('')}>×</button>
         </div>
       )}
 
       {/* Statistics */}
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body">
-              <h6>Total Orders</h6>
-              <h3>{totalOrders}</h3>
-            </div>
+      <div className="rm-stats-row">
+        <div className="rm-stat-box rm-stat-primary">
+          <div className="rm-stat-icon">📦</div>
+          <div className="rm-stat-content">
+            <div className="rm-stat-label">Total Orders</div>
+            <div className="rm-stat-number">{totalOrders}</div>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <h6>Total Revenue</h6>
-              <h3>{formatCurrency(totalRevenue)}</h3>
-            </div>
+        <div className="rm-stat-box rm-stat-success">
+          <div className="rm-stat-icon">💰</div>
+          <div className="rm-stat-content">
+            <div className="rm-stat-label">Total Revenue</div>
+            <div className="rm-stat-number">{formatCurrency(totalRevenue)}</div>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body">
-              <h6>Male Orders</h6>
-              <h3>{maleOrders}</h3>
-            </div>
+        <div className="rm-stat-box rm-stat-info">
+          <div className="rm-stat-icon">👨</div>
+          <div className="rm-stat-content">
+            <div className="rm-stat-label">Male Orders</div>
+            <div className="rm-stat-number">{maleOrders}</div>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-white">
-            <div className="card-body">
-              <h6>Female Orders</h6>
-              <h3>{femaleOrders}</h3>
-            </div>
+        <div className="rm-stat-box rm-stat-warning">
+          <div className="rm-stat-icon">👩</div>
+          <div className="rm-stat-content">
+            <div className="rm-stat-label">Female Orders</div>
+            <div className="rm-stat-number">{femaleOrders}</div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="filters-section mb-4">
-        <div className="row g-3">
+      <div className="rm-filters-section">
+        <div className="rm-filters-grid">
           {/* Search */}
-          <div className="col-md-3">
-            <label className="form-label">Search</label>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Search</label>
             <input
               type="text"
-              className="form-control"
+              className="rm-filter-input"
               name="searchQuery"
               placeholder="Name, Phone, Order ID..."
               value={filters.searchQuery}
@@ -308,9 +304,9 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Gender Filter */}
-          <div className="col-md-2">
-            <label className="form-label">Gender</label>
-            <select className="form-select" name="gender" value={filters.gender} onChange={handleFilterChange}>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Gender</label>
+            <select className="rm-filter-select" name="gender" value={filters.gender} onChange={handleFilterChange}>
               <option value="">All</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -318,20 +314,20 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Status Filter */}
-          <div className="col-md-2">
-            <label className="form-label">Status</label>
-            <select className="form-select" name="status" value={filters.status} onChange={handleFilterChange}>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Status</label>
+            <select className="rm-filter-select" name="status" value={filters.status} onChange={handleFilterChange}>
               <option value="">All</option>
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
           {/* Date From */}
-          <div className="col-md-2">
-            <label className="form-label">Date From</label>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Date From</label>
             <input
               type="date"
-              className="form-control"
+              className="rm-filter-input"
               name="dateFrom"
               value={filters.dateFrom}
               onChange={handleFilterChange}
@@ -339,11 +335,11 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Date To */}
-          <div className="col-md-2">
-            <label className="form-label">Date To</label>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Date To</label>
             <input
               type="date"
-              className="form-control"
+              className="rm-filter-input"
               name="dateTo"
               value={filters.dateTo}
               onChange={handleFilterChange}
@@ -351,11 +347,11 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Min Amount */}
-          <div className="col-md-2">
-            <label className="form-label">Min Amount</label>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Min Amount</label>
             <input
               type="number"
-              className="form-control"
+              className="rm-filter-input"
               name="minAmount"
               placeholder="0"
               value={filters.minAmount}
@@ -364,11 +360,11 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Max Amount */}
-          <div className="col-md-2">
-            <label className="form-label">Max Amount</label>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Max Amount</label>
             <input
               type="number"
-              className="form-control"
+              className="rm-filter-input"
               name="maxAmount"
               placeholder="9999"
               value={filters.maxAmount}
@@ -377,26 +373,26 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           </div>
 
           {/* Sort By */}
-          <div className="col-md-2">
-            <label className="form-label">Sort By</label>
-            <select className="form-select" name="sortBy" value={filters.sortBy} onChange={handleFilterChange}>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Sort By</label>
+            <select className="rm-filter-select" name="sortBy" value={filters.sortBy} onChange={handleFilterChange}>
               <option value="createdAt">Date</option>
               <option value="grandTotal">Amount</option>
             </select>
           </div>
 
           {/* Sort Order */}
-          <div className="col-md-2">
-            <label className="form-label">Order</label>
-            <select className="form-select" name="sortOrder" value={filters.sortOrder} onChange={handleFilterChange}>
+          <div className="rm-filter-group">
+            <label className="rm-filter-label">Order</label>
+            <select className="rm-filter-select" name="sortOrder" value={filters.sortOrder} onChange={handleFilterChange}>
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
             </select>
           </div>
 
           {/* Clear Filters */}
-          <div className="col-md-2 d-flex align-items-end">
-            <button className="btn btn-secondary w-100" onClick={clearFilters}>
+          <div className="rm-filter-group rm-filter-action">
+            <button className="rm-btn rm-btn-secondary rm-btn-full" onClick={clearFilters}>
               Clear Filters
             </button>
           </div>
@@ -404,9 +400,9 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
       </div>
 
       {/* Orders Table */}
-      <div className="table-responsive">
-        <table className="table table-hover table-striped">
-          <thead className="table-dark">
+      <div className="rm-table-container">
+        <table className="rm-table">
+          <thead>
             <tr>
               <th>Order ID</th>
               <th>Date</th>
@@ -420,19 +416,19 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           <tbody>
             {currentOrders.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center py-4">
+                <td colSpan="7" className="rm-table-empty">
                   No orders found
                 </td>
               </tr>
             ) : (
               currentOrders.map((order) => (
                 <tr key={order._id}>
-                  <td><small>{order._id}</small></td>
+                  <td><small className="rm-order-id">{order._id}</small></td>
                   <td>{formatDate(order.createdAt)}</td>
                   <td>{order.customerName}</td>
                   <td>{order.phone}</td>
                   <td>
-                    <span className={`badge ${order.gender === 'male' ? 'bg-primary' : 'bg-danger'}`}>
+                    <span className={`rm-badge ${order.gender === 'male' ? 'rm-badge-blue' : 'rm-badge-pink'}`}>
                       {order.gender}
                     </span>
                   </td>
@@ -441,7 +437,7 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
                   </td>
                   <td>
                     <button
-                      className="btn btn-sm btn-outline-primary"
+                      className="rm-btn rm-btn-sm rm-btn-outline"
                       onClick={() => setSelectedOrder(order)}
                     >
                       View Details
@@ -456,72 +452,83 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pagination-section d-flex justify-content-center mt-4">
-          <nav>
-            <ul className="pagination">
-              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => paginate(currentPage - 1)}>
-                  Previous
-                </button>
-              </li>
-              {[...Array(totalPages)].map((_, index) => (
-                <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                  <button className="page-link" onClick={() => paginate(index + 1)}>
-                    {index + 1}
-                  </button>
-                </li>
-              ))}
-              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => paginate(currentPage + 1)}>
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
+        <div className="rm-pagination">
+          <button 
+            className="rm-pagination-btn" 
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <div className="rm-pagination-numbers">
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                className={`rm-pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
+                onClick={() => paginate(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+          <button 
+            className="rm-pagination-btn" 
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
         </div>
       )}
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content modal-content-custom">
-              <div className="modal-header">
-                <h5 className="modal-title">Order Details - {selectedOrder._id}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedOrder(null)}></button>
-              </div>
-              <div className="modal-body">
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <strong>Customer:</strong> {selectedOrder.customerName}<br />
-                    <strong>Phone:</strong> {selectedOrder.phone}<br />
-                    <strong>Gender:</strong> {selectedOrder.gender}<br />
-                    <strong>Campus:</strong> {selectedOrder.campusName}<br />
+        <div className="rm-modal-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="rm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="rm-modal-header">
+              <h3 className="rm-modal-title">Order Details - {selectedOrder._id}</h3>
+              <button className="rm-modal-close" onClick={() => setSelectedOrder(null)}>×</button>
+            </div>
+            <div className="rm-modal-body">
+              <div className="rm-modal-grid">
+                <div className="rm-modal-section">
+                  <div className="rm-modal-info-item">
+                    <span className="rm-modal-label">Customer:</span>
+                    <span className="rm-modal-value">{selectedOrder.customerName}</span>
                   </div>
-                  <div className="col-md-6">
-                    <strong>Date:</strong> {formatDate(selectedOrder.createdAt)}<br />
+                  <div className="rm-modal-info-item">
+                    <span className="rm-modal-label">Phone:</span>
+                    <span className="rm-modal-value">{selectedOrder.phone}</span>
                   </div>
-                </div>
-                <div className="mb-3">
-                  <strong>Cart Items:</strong>
-                  <pre className="bg-dark text-light p-3 rounded" style={{ whiteSpace: 'pre-wrap' }}>
-                    {formatCartItems(selectedOrder.cartItems)}
-                  </pre>
-                </div>
-                <div className="mb-3">
-                  <div className="p-3 bg-primary text-white rounded">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <strong style={{ fontSize: '1.1rem' }}>Restaurant Items Total:</strong>
-                      <strong style={{ fontSize: '1.3rem' }}>{formatCurrency(selectedOrder.itemsTotal || 0)}</strong>
-                    </div>
+                  <div className="rm-modal-info-item">
+                    <span className="rm-modal-label">Gender:</span>
+                    <span className="rm-modal-value">{selectedOrder.gender}</span>
+                  </div>
+                  <div className="rm-modal-info-item">
+                    <span className="rm-modal-label">Campus:</span>
+                    <span className="rm-modal-value">{selectedOrder.campusName}</span>
                   </div>
                 </div>
+                <div className="rm-modal-section">
+                  <div className="rm-modal-info-item">
+                    <span className="rm-modal-label">Date:</span>
+                    <span className="rm-modal-value">{formatDate(selectedOrder.createdAt)}</span>
+                  </div>
+                </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setSelectedOrder(null)}>
-                  Close
-                </button>
+              <div className="rm-modal-items">
+                <strong className="rm-modal-subtitle">Cart Items:</strong>
+                <pre className="rm-modal-items-pre">{formatCartItems(selectedOrder.cartItems)}</pre>
               </div>
+              <div className="rm-modal-total">
+                <span className="rm-modal-total-label">Restaurant Items Total:</span>
+                <span className="rm-modal-total-value">{formatCurrency(selectedOrder.itemsTotal || 0)}</span>
+              </div>
+            </div>
+            <div className="rm-modal-footer">
+              <button className="rm-btn rm-btn-secondary" onClick={() => setSelectedOrder(null)}>
+                Close
+              </button>
             </div>
           </div>
         </div>

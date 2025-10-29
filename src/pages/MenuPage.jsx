@@ -125,40 +125,54 @@ const MenuPage = () => {
         )}
 
         {!loading && !error && (
-          <div className="row g-3">
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="col-6 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center align-items-stretch"
-                >
-                  <MenuItemCard
-                    name={item.name}
-                    price={item.price}
-                    restaurantName={restaurantName}
-                    photoURL={item.photoURL}
-                    description={item.description}
-                    campusId={selectedCampus?.id}
-                    restaurantId={restaurantData?.id}
-                    openTime={restaurantData?.openTime}
-                    closeTime={restaurantData?.closeTime}
-                    is24x7={restaurantData?.is24x7}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="text-white text-center my-5">
+          <>
+            {filteredItems.length === 0 ? (
+              <div className="empty-results">
+                <div className="empty-icon">🔍</div>
+                <h3>No menu items found</h3>
                 {searchTerm ? (
-                  <>
-                    <h4>No menu items found matching "{searchTerm}"</h4>
-                    <p>Try adjusting your search terms</p>
-                  </>
+                  <p>Try adjusting your search terms</p>
                 ) : (
-                  <h4>No menu items available</h4>
+                  <p>No menu items available at this restaurant yet. Check back soon!</p>
+                )}
+                {searchTerm && (
+                  <button
+                    className="reset-btn"
+                    onClick={() => setSearchTerm("")}
+                  >
+                    Clear Search
+                  </button>
                 )}
               </div>
+            ) : (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', 
+                gap: '2rem',
+                padding: '0'
+              }}>
+                {filteredItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{ width: '100%' }}
+                  >
+                    <MenuItemCard
+                      name={item.name}
+                      price={item.price}
+                      restaurantName={restaurantName}
+                      photoURL={item.photoURL}
+                      description={item.description}
+                      campusId={selectedCampus?.id}
+                      restaurantId={restaurantData?.id}
+                      openTime={restaurantData?.openTime}
+                      closeTime={restaurantData?.closeTime}
+                      is24x7={restaurantData?.is24x7}
+                    />
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
 

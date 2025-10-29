@@ -349,6 +349,27 @@ const SuperAdmin = () => {
     }
   };
 
+  const handleUserEdit = (user) => {
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Populate the form with user data
+    setUserForm({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      password: "", // Don't populate password for security
+      role: user.role || "user",
+      universityId: user.universityId || "",
+      campusId: user.campusId || "",
+      restaurantId: user.restaurantId || "",
+      id: user.id
+    });
+    
+    // Switch to users tab if not already there
+    setActiveTab("users");
+  };
+
   const handleUserDelete = async (userId) => {
     const user = users.find(u => u.id === userId);
     
@@ -374,7 +395,7 @@ const SuperAdmin = () => {
     );
   };
 
-  // User creation
+  // User creation/update
   const handleUserSubmit = async (e) => {
     e.preventDefault();
     if (!userForm.universityId || !userForm.campusId) {
@@ -385,14 +406,19 @@ const SuperAdmin = () => {
       setError("Please select a restaurant for restaurant manager");
       return;
     }
+    
+    // If editing (has id), check if password is required
+    if (!userForm.id && !userForm.password) {
+      setError("Password is required for new users");
+      return;
+    }
+    
     setLoading(true);
     try {
-      // Create user via backend API (prevents automatic sign-in)
       const userData = {
         firstName: userForm.firstName,
         lastName: userForm.lastName,
         email: userForm.email,
-        password: userForm.password,
         role: userForm.role,
         universityId: userForm.universityId,
         campusId: userForm.campusId,
@@ -400,20 +426,38 @@ const SuperAdmin = () => {
         campusName: campuses.find(c => c.id === userForm.campusId)?.name,
       };
       
+      // Add password only for new users or if provided for update
+      if (!userForm.id || userForm.password) {
+        userData.password = userForm.password;
+      }
+      
       // Add restaurant data for restaurant managers
       if (userForm.role === 'restaurantManager') {
         userData.restaurantId = userForm.restaurantId;
         userData.restaurantName = allRestaurants.find(r => r.id === userForm.restaurantId)?.name;
+      } else {
+        // Remove restaurant data if role changed from restaurant manager
+        userData.restaurantId = null;
+        userData.restaurantName = null;
       }
       
       const headers = await authHeaders(user);
-      await api.post('/api/users', userData, { headers });
+      
+      if (userForm.id) {
+        // Update existing user in Firestore
+        const userRef = doc(db, "users", userForm.id);
+        await updateDoc(userRef, userData);
+        alert("User updated successfully!");
+      } else {
+        // Create new user via backend API
+        await api.post('/api/users', userData, { headers });
+        alert("User created successfully! The user can now sign in with the provided email and password.");
+      }
       
       setUserForm({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null });
       fetchAllData();
-      alert("User created successfully! The user can now sign in with the provided email and password.");
     } catch (err) {
-      setError("Failed to create user: " + (err.response?.data?.error || err.message || err.code));
+      setError(`Failed to ${userForm.id ? 'update' : 'create'} user: ` + (err.response?.data?.error || err.message || err.code));
       console.error(err);
     } finally {
       setLoading(false);
@@ -978,7 +1022,7 @@ const SuperAdmin = () => {
                   className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
                   onClick={() => setActiveTab("orders")}
                 >
-                  � Orders Dashboard
+                  💎 Orders Dashboard
                 </button>
               </li>
             </ul>
@@ -1182,91 +1226,125 @@ const SuperAdmin = () => {
                     {universities.map(university => {
                       const universityCampuses = campuses.filter(c => c.universityId === university.id);
                       return (
-                                              <div key={university.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
-                          <div className="card-body">
-                            <h5 className="card-title">{university.name}</h5>
-                            <p className="card-text text-muted">
-                              ID: {university.id}
-                            </p>
-                              <div className="mb-3">
-                              <span className="badge bg-primary">
-                                  {universityCampuses.length} Campuses
-                              </span>
+                        <div key={university.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
+                          <div className="university-card">
+                            <div className="admin-card-content">
+                              <h5 className="card-title">{university.name}</h5>
+                              <p className="text-muted small mb-3">
+                                ID: {university.id.substring(0, 15)}...
+                              </p>
+                              
+                              <div className="admin-card-info-row">
+                                <span className="admin-card-info-label">Campuses</span>
+                                <span className="admin-card-info-value">{universityCampuses.length} {universityCampuses.length === 1 ? 'Campus' : 'Campuses'}</span>
                               </div>
                               
-                              {/* Campuses for this university */}
-                              <div className="mb-3">
-                                <h6>Campuses:</h6>
-                                {universityCampuses.length > 0 ? (
-                                  <ul className="list-group list-group-flush">
+                              {/* Campuses List */}
+                              {universityCampuses.length > 0 && (
+                                <div className="mt-3">
+                                  <h6 className="text-muted small mb-2">Campuses:</h6>
+                                  <div className="campus-list">
                                     {universityCampuses.map(campus => (
-                                      <li key={campus.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                      <div key={campus.id} className="campus-item">
                                         <span>{campus.name}</span>
-                                        <div>
-                                          <button 
-                                            className="btn btn-sm btn-outline-primary me-1"
-                                            onClick={() => handleCampusEdit(campus)}
-                                          >
-                                            Edit
-                                          </button>
-                                          <button 
-                                            className="btn btn-sm btn-outline-danger me-1"
-                                            onClick={() => handleCampusDelete(campus)}
-                                          >
-                                            Delete
-                                          </button>
-                                          <div className="btn-group-vertical d-inline-block">
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning mb-1"
-                                              onClick={() => handleBulkDeleteUsers(campus)}
-                                              title="Delete all users from this campus"
-                                            >
-                                              Clear Users
-                                            </button>
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning mb-1"
-                                              onClick={() => handleBulkDeleteRestaurants(campus)}
-                                              title="Delete all restaurants from this campus"
-                                            >
-                                              Clear Restaurants
-                                            </button>
-                                            <button 
-                                              className="btn btn-sm btn-outline-warning"
-                                              onClick={() => handleBulkDeleteMartItems(campus)}
-                                              title="Delete all mart items from this campus"
-                                            >
-                                              Clear Mart Items
-                                            </button>
-                                          </div>
-                            </div>
-                                      </li>
+                                      </div>
                                     ))}
-                                  </ul>
-                                ) : (
-                                  <p className="text-muted">No campuses yet</p>
-                                )}
-                          </div>
-                              
-                              <div className="d-flex justify-content-between">
-                                <button 
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => handleUniversityEdit(university)}
-                                >
-                                  Edit University
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleUniversityDelete(university.id)}
-                                >
-                                  Delete University
-                                </button>
-                        </div>
-                      </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="action-buttons">
+                              <button 
+                                className="btn-edit"
+                                onClick={() => handleUniversityEdit(university)}
+                                title="Edit University"
+                              >
+                                EDIT
+                              </button>
+                              <button 
+                                className="btn-delete"
+                                onClick={() => handleUniversityDelete(university.id)}
+                                title="Delete University"
+                              >
+                                DELETE
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
+                  </div>
+                  
+                  {/* Campuses Management Section */}
+                  <div className="mt-5">
+                    <h4 className="mb-4">All Campuses</h4>
+                    <div className="row">
+                      {campuses.map(campus => {
+                        const university = universities.find(u => u.id === campus.universityId);
+                        return (
+                          <div key={campus.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
+                            <div className="campus-card">
+                              <div className="admin-card-content">
+                                <h5 className="card-title">{campus.name}</h5>
+                                <p className="text-muted small mb-3">
+                                  ID: {campus.id.substring(0, 15)}...
+                                </p>
+                                
+                                <div className="admin-card-info-row">
+                                  <span className="admin-card-info-label">University</span>
+                                  <span className="admin-card-info-value">{university?.name || 'N/A'}</span>
+                                </div>
+                              </div>
+                              
+                              {/* Action Buttons */}
+                              <div className="action-buttons">
+                                <button 
+                                  className="btn-edit"
+                                  onClick={() => handleCampusEdit(campus)}
+                                  title="Edit Campus"
+                                >
+                                  EDIT
+                                </button>
+                                <button 
+                                  className="btn-delete"
+                                  onClick={() => handleCampusDelete(campus)}
+                                  title="Delete Campus"
+                                >
+                                  DELETE
+                                </button>
+                              </div>
+                              
+                              {/* Additional Actions Dropdown */}
+                              <div className="admin-card-actions" style={{borderTop: '1px solid #E2E8F0', paddingTop: '0.75rem', marginTop: '0.5rem'}}>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100 mb-2"
+                                  onClick={() => handleBulkDeleteUsers(campus)}
+                                  title="Delete all users from this campus"
+                                >
+                                  CLEAR USERS
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100 mb-2"
+                                  onClick={() => handleBulkDeleteRestaurants(campus)}
+                                  title="Delete all restaurants from this campus"
+                                >
+                                  CLEAR RESTAURANTS
+                                </button>
+                                <button 
+                                  className="btn btn-sm btn-outline-warning w-100"
+                                  onClick={() => handleBulkDeleteMartItems(campus)}
+                                  title="Delete all mart items from this campus"
+                                >
+                                  CLEAR MART ITEMS
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1445,10 +1523,19 @@ const SuperAdmin = () => {
                     </div>
                   </div>
                   
-                  {/* Create User Form */}
+                  {/* Create/Edit User Form */}
                   <div className="card mb-4">
-                    <div className="card-header">
-                      <h5 className="mb-0">Create New User</h5>
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                      <h5 className="mb-0">{userForm.id ? 'Edit User' : 'Create New User'}</h5>
+                      {userForm.id && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setUserForm({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null })}
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
                     </div>
                     <div className="card-body">
                       <form onSubmit={handleUserSubmit} className="row g-3">
@@ -1486,12 +1573,12 @@ const SuperAdmin = () => {
                           />
                         </div>
                         <div className="col-md-3">
-                          <label className="form-label">Password</label>
+                          <label className="form-label">Password {userForm.id && <small className="text-muted">(leave blank to keep current)</small>}</label>
                           <input
                             type="password"
                             className="form-control"
-                            placeholder="Password"
-                            required
+                            placeholder={userForm.id ? "Leave blank to keep current" : "Password"}
+                            required={!userForm.id}
                             value={userForm.password}
                             onChange={(e) => setUserForm({...userForm, password: e.target.value})}
                           />
@@ -1559,7 +1646,7 @@ const SuperAdmin = () => {
                         )}
                         <div className={`${userForm.role === 'restaurantManager' ? 'col-md-8' : 'col-md-4'} d-flex align-items-end`}>
                           <button type="submit" className="btn btn-primary w-100">
-                            Create User
+                            {userForm.id ? 'Update User' : 'Create User'}
                           </button>
                         </div>
                       </form>
@@ -1569,8 +1656,7 @@ const SuperAdmin = () => {
                   {/* Collapsible User List Header */}
                   <div className="card mb-3">
                     <div 
-                      className="card-header d-flex justify-content-between align-items-center"
-                      style={{ cursor: 'pointer' }}
+                      className="card-header collapsible-header d-flex justify-content-between align-items-center"
                       onClick={() => setIsUserListOpen(!isUserListOpen)}
                     >
                       <h5 className="mb-0">
@@ -1583,6 +1669,48 @@ const SuperAdmin = () => {
                   </div>
 
                   {isUserListOpen && (
+                  <>
+                    {/* Quick Search Bar */}
+                    <div className="card mb-3">
+                      <div className="card-body">
+                        <div className="row g-3">
+                          <div className="col-md-6">
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="🔍 Quick search by name or email..."
+                              value={searchUser}
+                              onChange={(e) => setSearchUser(e.target.value)}
+                            />
+                          </div>
+                          <div className="col-md-3">
+                            <select
+                              className="form-select"
+                              value={filterUserRole}
+                              onChange={(e) => setFilterUserRole(e.target.value)}
+                            >
+                              <option value="">All Roles</option>
+                              <option value="user">Basic User</option>
+                              <option value="campusAdmin">Campus Admin</option>
+                              <option value="restaurantManager">Restaurant Manager</option>
+                              <option value="superAdmin">Super Admin</option>
+                            </select>
+                          </div>
+                          <div className="col-md-3">
+                            <button 
+                              className="btn btn-outline-secondary w-100"
+                              onClick={() => {
+                                setSearchUser("");
+                                setFilterUserRole("");
+                              }}
+                            >
+                              Clear Filters
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   <div className="table-responsive">
                     {/* Filter Status */}
                     {(filterUserRole || filterUniversity || filterCampus || searchUser) && (
@@ -1622,19 +1750,19 @@ const SuperAdmin = () => {
                             <td>{user.firstName} {user.lastName}</td>
                             <td>{user.email}</td>
                             <td>
-                              <div className="d-flex align-items-center gap-2">
-                                <span className={`badge ${
-                                  user.role === "superAdmin" ? "bg-danger" : 
-                                  user.role === "campusAdmin" ? "bg-warning" : 
-                                  user.role === "restaurantManager" ? "bg-info" : "bg-secondary"
+                              <div className="role-badge-container">
+                                <span className={`role-badge ${
+                                  user.role === "superAdmin" ? "role-super-admin" : 
+                                  user.role === "campusAdmin" ? "role-campus-admin" : 
+                                  user.role === "restaurantManager" ? "role-restaurant-manager" : "role-basic-user"
                                 }`}>
                                   {user.role === "user" ? "Basic User" : 
                                    user.role === "campusAdmin" ? "Campus Admin" : 
-                                   user.role === "restaurantManager" ? "Restaurant Manager" : 
+                                   user.role === "restaurantManager" ? "Restaurant Mgr" : 
                                    user.role === "superAdmin" ? "Super Admin" : "Basic User"}
                                 </span>
                               <select
-                                className="form-select form-select-sm"
+                                className="form-select form-select-sm role-select"
                                 value={user.role || "user"}
                                 onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
                               >
@@ -1664,6 +1792,12 @@ const SuperAdmin = () => {
                             </td>
                             <td>
                               <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => handleUserEdit(user)}
+                              >
+                                Edit
+                              </button>
+                              <button
                                 className="btn btn-sm btn-outline-danger"
                                 onClick={() => handleUserDelete(user.id)}
                                 disabled={user.role === "superAdmin" && user.id === userData?.uid}
@@ -1677,6 +1811,7 @@ const SuperAdmin = () => {
                       </tbody>
                     </table>
                   </div>
+                  </>
                   )}
                 </div>
               )}
@@ -1880,44 +2015,54 @@ const SuperAdmin = () => {
                   {/* Restaurants List */}
                   <div className="row">
                     {getFilteredRestaurants().map(restaurant => (
-                      <div key={`${restaurant.universityId}-${restaurant.campusId}-${restaurant.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
-                        <div className="card-body">
-                            <h5 className="card-title">{restaurant.name}</h5>
-                            <p className="card-text text-muted">
+                      <div key={`${restaurant.universityId}-${restaurant.campusId}-${restaurant.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="restaurant-card">
+                          <div className="restaurant-card-header">
+                            <h5 className="restaurant-card-title">{restaurant.name}</h5>
+                            <p className="restaurant-card-subtitle">
                               {restaurant.location} • {restaurant.cuisine}
                             </p>
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{restaurant.universityName}</span>
-                              <span className="badge bg-secondary">{restaurant.campusName}</span>
-                        </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {restaurant.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleRestaurantEdit(restaurant)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleRestaurantDelete(restaurant)}
-                                >
-                                  Delete
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-warning"
-                                  onClick={() => handleBulkDeleteMenuItems(restaurant)}
-                                  title="Delete all menu items from this restaurant"
-                                >
-                                  Clear Menu
-                                </button>
-
-                      </div>
-                    </div>
+                          </div>
+                          
+                          <div className="restaurant-card-body">
+                            <div className="restaurant-badges">
+                              <span className="badge badge-university">{restaurant.universityName}</span>
+                              <span className="badge badge-campus">{restaurant.campusName}</span>
+                            </div>
+                            
+                            <div className="restaurant-timing">
+                              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                              </svg>
+                              <span>{restaurant.is24x7 ? '24/7 Open' : `${restaurant.openTime} - ${restaurant.closeTime}`}</span>
+                            </div>
+                            
+                            <div className="restaurant-id">
+                              <small>ID: {restaurant.id.substring(0, 8)}...</small>
+                            </div>
+                          </div>
+                          
+                          <div className="restaurant-card-footer">
+                            <button 
+                              className="btn-restaurant btn-edit"
+                              onClick={() => handleRestaurantEdit(restaurant)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-restaurant btn-delete"
+                              onClick={() => handleRestaurantDelete(restaurant)}
+                            >
+                              Delete
+                            </button>
+                            <button 
+                              className="btn-restaurant btn-clear"
+                              onClick={() => handleBulkDeleteMenuItems(restaurant)}
+                              title="Delete all menu items from this restaurant"
+                            >
+                              Clear Menu
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2108,54 +2253,71 @@ const SuperAdmin = () => {
                   {/* Mart Items List */}
                   <div className="row">
                     {getFilteredMartItems().map(item => (
-                      <div key={`${item.universityId}-${item.campusId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
+                      <div key={`${item.universityId}-${item.campusId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="mart-item-card">
                           {item.photoURL && (
-                            <img 
-                              src={item.photoURL} 
-                              className="card-img-top" 
-                              alt={item.name}
-                              style={{ height: "200px", objectFit: "cover" }}
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <div className="card-body">
-                            <h5 className="card-title">{item.name}</h5>
-                            <p className="card-text">₹{item.price}</p>
-                            <p className="card-text text-muted">
-                              Category: {item.category}
-                            </p>
-                            <p className="card-text text-muted">
-                              Stock: {item.stock}
-                            </p>
-                            {item.description && (
-                              <p className="card-text text-muted small">{item.description}</p>
-                            )}
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{item.universityName}</span>
-                              <span className="badge bg-secondary">{item.campusName}</span>
+                            <div className="mart-item-image">
+                              <img 
+                                src={item.photoURL} 
+                                alt={item.name}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.style.display = 'none';
+                                }}
+                              />
+                              {item.stock <= 5 && item.stock > 0 && (
+                                <div className="stock-badge low-stock">Low Stock</div>
+                              )}
+                              {item.stock === 0 && (
+                                <div className="stock-badge out-of-stock">Out of Stock</div>
+                              )}
                             </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {item.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleMartItemEdit(item)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleMartItemDelete(item)}
-                                >
-                                  Delete
-                                </button>
+                          )}
+                          
+                          <div className="mart-item-body">
+                            <h5 className="mart-item-title">{item.name}</h5>
+                            <div className="mart-item-price">₹{item.price}</div>
+                            
+                            <div className="mart-item-info">
+                              <div className="info-row">
+                                <span className="info-label">Category:</span>
+                                <span className="info-value">{item.category}</span>
+                              </div>
+                              <div className="info-row">
+                                <span className="info-label">Stock:</span>
+                                <span className={`info-value stock-${item.stock <= 5 ? 'low' : 'good'}`}>
+                                  {item.stock} units
+                                </span>
                               </div>
                             </div>
+                            
+                            {item.description && (
+                              <p className="mart-item-description">{item.description}</p>
+                            )}
+                            
+                            <div className="mart-item-badges">
+                              <span className="badge badge-university">{item.universityName}</span>
+                              <span className="badge badge-campus">{item.campusName}</span>
+                            </div>
+                            
+                            <div className="mart-item-id">
+                              <small>ID: {item.id.substring(0, 8)}...</small>
+                            </div>
+                          </div>
+                          
+                          <div className="mart-item-footer">
+                            <button 
+                              className="btn-mart-item btn-edit"
+                              onClick={() => handleMartItemEdit(item)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-mart-item btn-delete"
+                              onClick={() => handleMartItemDelete(item)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2364,49 +2526,53 @@ const SuperAdmin = () => {
                   {/* Menu Items List */}
                   <div className="row">
                     {getFilteredMenuItems().map(item => (
-                      <div key={`${item.universityId}-${item.campusId}-${item.restaurantId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-3">
-                        <div className="card h-100">
+                      <div key={`${item.universityId}-${item.campusId}-${item.restaurantId}-${item.id}`} className="col-md-6 col-lg-4 col-xl-3 mb-4">
+                        <div className="menu-item-card">
                           {item.photoURL && (
-                            <img 
-                              src={item.photoURL} 
-                              className="card-img-top" 
-                              alt={item.name}
-                              style={{ height: "200px", objectFit: "cover" }}
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }}
-                            />
+                            <div className="menu-item-image">
+                              <img 
+                                src={item.photoURL} 
+                                alt={item.name}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.style.display = 'none';
+                                }}
+                              />
+                            </div>
                           )}
-                          <div className="card-body">
-                            <h5 className="card-title">{item.name}</h5>
-                            <p className="card-text">₹{item.price}</p>
+                          
+                          <div className="menu-item-body">
+                            <h5 className="menu-item-title">{item.name}</h5>
+                            <div className="menu-item-price">₹{item.price}</div>
+                            
                             {item.description && (
-                              <p className="card-text text-muted small">{item.description}</p>
+                              <p className="menu-item-description">{item.description}</p>
                             )}
-                            <div className="mb-2">
-                              <span className="badge bg-primary me-1">{item.universityName}</span>
-                              <span className="badge bg-secondary me-1">{item.campusName}</span>
-                              <span className="badge bg-info">{item.restaurantName}</span>
+                            
+                            <div className="menu-item-badges">
+                              <span className="badge badge-university">{item.universityName}</span>
+                              <span className="badge badge-campus">{item.campusName}</span>
+                              <span className="badge badge-restaurant">{item.restaurantName}</span>
                             </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <small className="text-muted">
-                                ID: {item.id}
-                              </small>
-                              <div>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-1"
-                                  onClick={() => handleMenuEdit(item)}
-                                >
-                                  Edit
-                                </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger me-1"
-                                  onClick={() => handleMenuDelete(item)}
-                                >
-                                  Delete
-                                </button>
-                              </div>
+                            
+                            <div className="menu-item-id">
+                              <small>ID: {item.id.substring(0, 8)}...</small>
                             </div>
+                          </div>
+                          
+                          <div className="menu-item-footer">
+                            <button 
+                              className="btn-menu-item btn-edit"
+                              onClick={() => handleMenuEdit(item)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn-menu-item btn-delete"
+                              onClick={() => handleMenuDelete(item)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>

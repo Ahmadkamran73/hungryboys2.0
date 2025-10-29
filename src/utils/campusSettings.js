@@ -1,20 +1,31 @@
-import { api, authHeaders } from "./api";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 /**
- * Fetch campus settings for a specific campus from MongoDB
+ * Fetch campus settings for a specific campus
+ * @param {string} universityId - University ID
  * @param {string} campusId - Campus ID
- * @param {Object} user - Firebase user object (optional, for auth)
+ * @param {boolean} forceRefresh - Force refresh from server (bypass cache)
  * @returns {Promise<Object>} Campus settings object
  */
-export const fetchCampusSettings = async (campusId, user = null) => {
+export const fetchCampusSettings = async (universityId, campusId, forceRefresh = false) => {
   try {
-    const response = await api.get(`/api/campus-settings/${campusId}`, {
-      headers: await authHeaders(user)
-    });
-    return response.data;
+    const settingsRef = doc(db, "universities", universityId, "campuses", campusId, "settings", "payment");
+    const settingsDoc = await getDoc(settingsRef);
+    
+    if (settingsDoc.exists()) {
+      return settingsDoc.data();
+    } else {
+      // Return default settings if none exist
+      return {
+        deliveryChargePerPerson: 150,
+        accountTitle: "Maratib Ali",
+        bankName: "SadaPay",
+        accountNumber: "03330374616"
+      };
+    }
   } catch (error) {
-    console.error('Error fetching campus settings:', error);
-    // Return default settings on error
+    // Silently return default settings on error (no console.error)
     return {
       deliveryChargePerPerson: 150,
       accountTitle: "Maratib Ali",
@@ -26,12 +37,11 @@ export const fetchCampusSettings = async (campusId, user = null) => {
 
 /**
  * Get campus settings with fallback to defaults
- * @param {Object} campus - Campus object with id
- * @param {Object} user - Firebase user object (optional, for auth)
+ * @param {Object} campus - Campus object with universityId and id
  * @returns {Promise<Object>} Campus settings object
  */
-export const getCampusSettings = async (campus, user = null) => {
-  if (!campus?.id) {
+export const getCampusSettings = async (campus) => {
+  if (!campus?.universityId || !campus?.id) {
     return {
       deliveryChargePerPerson: 150,
       accountTitle: "Maratib Ali",
@@ -40,7 +50,7 @@ export const getCampusSettings = async (campus, user = null) => {
     };
   }
   
-  return await fetchCampusSettings(campus.id, user);
+  return await fetchCampusSettings(campus.universityId, campus.id);
 };
 
 export default {

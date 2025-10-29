@@ -1,39 +1,98 @@
+/* FloatingCartButton.css - FoodPanda Clean Style */
+
 .floating-cart-button {
-    position: fixed;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #2ED573;
+  color: white;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-cart-button:hover {
+  background-color: #26B863;
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.4);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #EF4444;
+  color: #FFFFFF;
+  border-radius: 50%;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid #fff;
+  padding: 0 4px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .cart-badge {
+  border-color: #0f172a;
+}
+
+/* Animation on count change */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cart-badge {
+  animation: pop 0.3s ease;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .floating-cart-button {
     bottom: 20px;
     right: 20px;
-    background-color: #f44336;
-    color: white;
-    border-radius: 50%;
-    padding: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    transition: background-color 0.3s ease;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .floating-cart-button:hover {
-    background-color: #d32f2f;
-    color: white;
+    width: 52px;
+    height: 52px;
   }
 
   .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #ffeb3b;
-    color: #000;
-    border-radius: 50%;
-    width: 20px;
+    min-width: 20px;
     height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #fff;
+    font-size: 0.7rem;
   }
+}
+
+@media (max-width: 575px) {
+  .floating-cart-button {
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .cart-badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+}
   
