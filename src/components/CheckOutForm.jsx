@@ -34,6 +34,8 @@ const CheckOutForm = () => {
   const [screenshotFile, setScreenshotFile] = useState(null);
   const [screenshotURL, setScreenshotURL] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  // Snapshot of the order at time of submission so we can show the summary after clearing cart
+  const [orderSnapshot, setOrderSnapshot] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
@@ -327,7 +329,16 @@ const CheckOutForm = () => {
           'Content-Type': 'application/json'
         }
       });
-      
+      // Take a snapshot of the cart and totals so we can display them after clearing
+      setOrderSnapshot({
+        cartItems: cartItems.map(i => ({ ...i })),
+        itemTotal,
+        deliveryCharge,
+        grandTotal,
+        cartItemsFormatted: formatCartItems(cartItems),
+        restaurantNames
+      });
+
       clearCart();
       setSubmitted(true);
     } catch (err) {
@@ -384,7 +395,7 @@ const CheckOutForm = () => {
             <div className="summary-section">
               <h3 className="section-title">Order Items</h3>
               <div className="order-items-list">
-                {cartItems.map((item, index) => (
+                {(orderSnapshot?.cartItems || cartItems).map((item, index) => (
                   <div key={index} className="order-item-row">
                     <div className="item-details">
                       <span className="item-name">{item.name}</span>
@@ -405,15 +416,15 @@ const CheckOutForm = () => {
               <div className="payment-breakdown">
                 <div className="payment-row">
                   <span className="payment-label">Subtotal:</span>
-                  <span className="payment-value">Rs {itemTotal}</span>
+                  <span className="payment-value">Rs {orderSnapshot?.itemTotal ?? itemTotal}</span>
                 </div>
                 <div className="payment-row">
                   <span className="payment-label">Delivery Charges ({form.persons} person{form.persons > 1 ? 's' : ''}):</span>
-                  <span className="payment-value">Rs {deliveryCharge}</span>
+                  <span className="payment-value">Rs {orderSnapshot?.deliveryCharge ?? deliveryCharge}</span>
                 </div>
                 <div className="payment-row payment-total">
                   <span className="payment-label">Total Amount:</span>
-                  <span className="payment-value">Rs {grandTotal}</span>
+                  <span className="payment-value">Rs {orderSnapshot?.grandTotal ?? grandTotal}</span>
                 </div>
               </div>
             </div>

@@ -67,9 +67,13 @@ const CartSummary = () => {
             <h5>
               Total: <span className="text-success">Rs {total.toFixed(2)}</span>
             </h5>
-            <button className="btn btn-danger mt-3 w-100" onClick={handleCheckout}>
-              Checkout
-            </button>
+            <div className="checkout-action">
+              <button className="checkout-btn" onClick={handleCheckout} aria-label="Proceed to checkout">
+                <span className="btn-icon" aria-hidden>🛒</span>
+                <span className="btn-text">Checkout</span>
+                <span className="btn-amount">Rs {total.toFixed(2)}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

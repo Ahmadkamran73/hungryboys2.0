@@ -43,6 +43,20 @@ body {
     radial-gradient(circle at 80% 80%, rgba(46, 213, 115, 0.05) 0%, transparent 50%);
 }
 
+/* Global hr (horizontal rule) styling - Override Bootstrap defaults */
+hr {
+  border: 0 !important;
+  border-top: 2px solid #dee2e6 !important;
+  margin: 1.5rem 0 !important;
+  opacity: 1 !important;
+  background: transparent !important;
+  height: 0 !important;
+}
+
+[data-theme="dark"] hr {
+  border-top-color: rgba(255, 255, 255, 0.6) !important;
+}
+
 /* Ensure all containers are properly constrained */
 .container, .container-fluid {
   max-width: 100%;

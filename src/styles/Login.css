@@ -211,6 +211,9 @@
 .auth-form-content {
   width: 100%;
   max-width: 480px;
+  /* Ensure content sits above decorative pseudo elements for proper tapping */
+  position: relative;
+  z-index: 2;
 }
 
 .auth-form-header {

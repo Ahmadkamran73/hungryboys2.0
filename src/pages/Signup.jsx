@@ -370,7 +370,7 @@ function Signup() {
             <form onSubmit={handleSignup} className="auth-form">
               <div className="auth-form-row">
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="firstName">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
                     </svg>
@@ -379,16 +379,18 @@ function Signup() {
                   <input
                     type="text"
                     className="auth-input"
+                    id="firstName"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
                     placeholder="Enter first name"
+                    autoComplete="given-name"
                     required
                   />
                 </div>
 
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="lastName">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
                     </svg>
@@ -397,10 +399,12 @@ function Signup() {
                   <input
                     type="text"
                     className="auth-input"
+                    id="lastName"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
                     placeholder="Enter last name"
+                    autoComplete="family-name"
                     required
                   />
                 </div>
@@ -408,7 +412,7 @@ function Signup() {
 
               <div className="auth-form-row">
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="selectedUniversity">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
                     </svg>
@@ -416,6 +420,7 @@ function Signup() {
                   </label>
                   <select
                     className="auth-input"
+                    id="selectedUniversity"
                     name="selectedUniversity"
                     value={formData.selectedUniversity}
                     onChange={(e) => {
@@ -425,6 +430,7 @@ function Signup() {
                         selectedCampus: ""
                       });
                     }}
+                    autoComplete="organization"
                     required
                   >
                     <option value="">Select University</option>
@@ -437,7 +443,7 @@ function Signup() {
                 </div>
 
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="selectedCampus">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M3 12L12 3L21 12H18V20H15V14H9V20H6V12H3Z" fill="currentColor"/>
                     </svg>
@@ -445,6 +451,7 @@ function Signup() {
                   </label>
                   <select
                     className="auth-input"
+                    id="selectedCampus"
                     name="selectedCampus"
                     value={formData.selectedCampus}
                     onChange={handleInputChange}
@@ -464,7 +471,7 @@ function Signup() {
               </div>
 
               <div className="auth-form-group">
-                <label className="auth-label">
+                <label className="auth-label" htmlFor="email">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
                   </svg>
@@ -473,10 +480,13 @@ function Signup() {
                 <input
                   type="email"
                   className="auth-input"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="your.email@university.edu"
+                  autoComplete="email"
+                  inputMode="email"
                   required
                 />
                 {formData.selectedCampus && formData.email && !validateEmail(formData.email) && (
@@ -487,7 +497,7 @@ function Signup() {
               </div>
 
               <div className="auth-form-group">
-                <label className="auth-label">
+                <label className="auth-label" htmlFor="password">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z" fill="currentColor"/>
                   </svg>
@@ -496,16 +506,18 @@ function Signup() {
                 <input
                   type="password"
                   className="auth-input"
+                  id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Minimum 6 characters"
+                  autoComplete="new-password"
                   required
                 />
               </div>
 
               <div className="auth-form-group">
-                <label className="auth-label">
+                <label className="auth-label" htmlFor="confirmPassword">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z" fill="currentColor"/>
                   </svg>
@@ -514,10 +526,12 @@ function Signup() {
                 <input
                   type="password"
                   className="auth-input"
+                  id="confirmPassword"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
                   required
                 />
                 {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (

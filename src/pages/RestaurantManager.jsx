@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api, authHeaders } from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import RestaurantManagerOrdersPanel from "../components/RestaurantManagerOrdersPanel";
 import { handleError } from "../utils/errorHandler";
 import "../styles/RestaurantManager.css";
+const RestaurantManagerCRM = React.lazy(() => import("../components/RestaurantManagerCRM"));
 
 const RestaurantManager = () => {
   const { user, userData } = useAuth();
@@ -12,6 +13,7 @@ const RestaurantManager = () => {
   const [error, setError] = useState("");
   const [restaurant, setRestaurant] = useState(null);
   const [isOrdersOpen, setIsOrdersOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     totalOrders: 0,
     pendingOrders: 0,
@@ -126,6 +128,14 @@ const RestaurantManager = () => {
         </div>
       </div>
 
+      {/* Tabs within Restaurant Manager dashboard */}
+      <div className="rm-container" style={{marginTop: '1rem'}}>
+        <ul className="nav nav-tabs mb-3">
+          <li className="nav-item"><button className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button></li>
+          <li className="nav-item"><button className={`nav-link ${activeTab === 'crm' ? 'active' : ''}`} onClick={() => setActiveTab('crm')}>📈 CRM</button></li>
+        </ul>
+      </div>
+
       {/* Stats Cards */}
       <div className="rm-stats-section">
         <div className="rm-container">
@@ -176,7 +186,12 @@ const RestaurantManager = () => {
       {/* Main Content */}
       <div className="rm-main-content">
         <div className="rm-container">
-          <div className="rm-content-grid">
+          {activeTab === 'crm' ? (
+            <Suspense fallback={<LoadingSpinner message="Loading CRM..." /> }>
+              <RestaurantManagerCRM />
+            </Suspense>
+          ) : (
+            <div className="rm-content-grid">
             {/* Restaurant Information Card */}
             <div className="rm-info-card">
               <div className="rm-card-header">
@@ -247,6 +262,7 @@ const RestaurantManager = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

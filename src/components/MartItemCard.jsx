@@ -90,10 +90,6 @@ const MartItemCard = ({ name, price, description, category, stock, photoURL, cam
           </div>
         )}
 
-        {/* Price Badge */}
-        <div className="mart-product-price-badge">
-          <span className="price-amount">₹{price}</span>
-        </div>
       </div>
 
       {/* Content Section */}
@@ -114,6 +110,11 @@ const MartItemCard = ({ name, price, description, category, stock, photoURL, cam
           {description && (
             <p className="mart-product-description">{description}</p>
           )}
+        </div>
+
+        {/* Price placed at the bottom of the content */}
+        <div className="mart-product-price">
+          <span className="price-amount">Rs {price}</span>
         </div>
 
         {/* Action Section */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import imageCompression from "browser-image-compression";
@@ -8,6 +8,7 @@ import BulkMenuImport from "../components/BulkMenuImport";
 import OrdersPanel from "../components/OrdersPanel";
 import { handleError } from "../utils/errorHandler";
 import CampusAdminDashboard from "../components/CampusAdminDashboard";
+const CampusAdminCRM = React.lazy(() => import("../components/CampusAdminCRM"));
 import { api, authHeaders } from "../utils/api";
 import "../styles/CampusAdmin.css";
 
@@ -61,6 +62,7 @@ const CampusAdmin = () => {
     openTime: "10:00 AM",
     closeTime: "10:00 PM",
     is24x7: true,
+    photoURL: "",
     id: null 
   });
   const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", id: null });
@@ -68,6 +70,7 @@ const CampusAdmin = () => {
 
   // Image upload states
   const [menuImageFile, setMenuImageFile] = useState(null);
+  const [restaurantImageFile, setRestaurantImageFile] = useState(null);
   const [martImageFile, setMartImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -162,7 +165,8 @@ const CampusAdmin = () => {
         cuisine: r.cuisine,
         openTime: r.openTime,
         closeTime: r.closeTime,
-        is24x7: r.is24x7
+        is24x7: r.is24x7,
+        photoURL: r.photoURL || null
       }));
       setRestaurants(restaurantsData);
 
@@ -208,8 +212,28 @@ const CampusAdmin = () => {
   const handleRestaurantSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    let photoURL = null;
+    
     try {
       const headers = await authHeaders(user);
+      
+      // Upload image if selected
+      if (restaurantImageFile) {
+        console.log('🖼️ [Campus Admin] Uploading restaurant image...');
+        try {
+          photoURL = await handleImageUpload(restaurantImageFile);
+          console.log('✅ [Campus Admin] Image uploaded successfully:', photoURL);
+        } catch (uploadErr) {
+          console.error('❌ [Campus Admin] Image upload failed:', uploadErr);
+          setError('Failed to upload image. Please try again.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        console.log('ℹ️ [Campus Admin] No image file selected, photoURL will be null');
+      }
+      
       const restaurantData = {
         campusId,
         universityId,
@@ -219,12 +243,17 @@ const CampusAdmin = () => {
         openTime: restaurantForm.openTime || "10:00 AM",
         closeTime: restaurantForm.closeTime || "10:00 PM",
         is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
+        photoURL: photoURL // Always include photoURL (null or URL string)
       };
+
+      console.log('💾 [Campus Admin] Saving restaurant with data:', restaurantData);
 
       if (restaurantForm.id) {
         await api.patch(`/api/restaurants/${restaurantForm.id}`, restaurantData, { headers });
+        console.log('✅ [Campus Admin] Restaurant updated successfully');
       } else {
         await api.post('/api/restaurants', restaurantData, { headers });
+        console.log('✅ [Campus Admin] Restaurant created successfully');
       }
 
       setRestaurantForm({ 
@@ -234,13 +263,15 @@ const CampusAdmin = () => {
         openTime: "10:00 AM",
         closeTime: "10:00 PM",
         is24x7: true,
+        photoURL: "",
         id: null 
       });
+      setRestaurantImageFile(null);
       fetchData();
     } catch (err) {
       const handledError = handleError(err, 'CampusAdmin - saveRestaurant');
       setError(handledError.message);
-      console.error("Failed to save restaurant:", handledError);
+      console.error("❌ [Campus Admin] Failed to save restaurant:", handledError);
     } finally {
       setLoading(false);
     }
@@ -255,6 +286,7 @@ const CampusAdmin = () => {
     });
     setSelectedRestaurant(restaurant);
     fetchMenuItems(restaurant.id);
+    setRestaurantImageFile(null);
   };
 
   const handleRestaurantDelete = async (id) => {
@@ -550,6 +582,14 @@ const CampusAdmin = () => {
               </li>
               <li className="nav-item" role="presentation">
                 <button
+                  className={`nav-link ${activeTab === "crm" ? "active" : ""}`}
+                  onClick={() => setActiveTab("crm")}
+                >
+                  📈 CRM
+                </button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button
                   className={`nav-link ${activeTab === "dashboard" ? "active" : ""}`}
                   onClick={() => setActiveTab("dashboard")}
                 >
@@ -599,6 +639,23 @@ const CampusAdmin = () => {
                             value={restaurantForm.cuisine}
                             onChange={(e) => setRestaurantForm({ ...restaurantForm, cuisine: e.target.value })}
                           />
+                        </div>
+                        <div className="col-md-4">
+                          <input
+                            type="file"
+                            className="form-control"
+                            accept="image/*"
+                            onChange={(e) => setRestaurantImageFile(e.target.files[0])}
+                          />
+                          {(restaurantForm.photoURL || restaurantImageFile) && (
+                            <div className="mt-2">
+                              <img
+                                src={restaurantImageFile ? URL.createObjectURL(restaurantImageFile) : restaurantForm.photoURL}
+                                alt="Restaurant"
+                                style={{ maxWidth: '180px', maxHeight: '120px', objectFit: 'cover', borderRadius: '8px' }}
+                              />
+                            </div>
+                          )}
                         </div>
                         
                         {/* Restaurant Timing Fields */}
@@ -650,8 +707,17 @@ const CampusAdmin = () => {
                   {/* Restaurants List */}
                   <div className="row">
                     {restaurants.map(restaurant => (
-                                              <div key={restaurant.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
+                      <div key={restaurant.id} className="col-md-6 col-lg-4 col-xl-3 mb-3">
                         <div className="card h-100">
+                          {restaurant.photoURL && (
+                            <img
+                              src={restaurant.photoURL}
+                              alt={restaurant.name}
+                              className="card-img-top"
+                              style={{ height: '150px', objectFit: 'cover' }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          )}
                           <div className="card-body">
                             <h5 className="card-title">{restaurant.name}</h5>
                             <p className="card-text text-muted">
@@ -987,6 +1053,14 @@ const CampusAdmin = () => {
               {activeTab === "dashboard" && (
                 <div className="tab-pane fade show active">
                   <CampusAdminDashboard />
+                </div>
+              )}
+              {/* CRM Tab */}
+              {activeTab === "crm" && (
+                <div className="tab-pane fade show active">
+                  <Suspense fallback={<LoadingSpinner message="Loading CRM..." /> }>
+                    <CampusAdminCRM />
+                  </Suspense>
                 </div>
               )}
             </div>

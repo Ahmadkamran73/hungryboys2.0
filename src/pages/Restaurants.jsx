@@ -40,8 +40,14 @@ const Restaurants = () => {
         }
         
         const data = await response.json();
-        setRestaurants(data);
-        setFilteredRestaurants(data);
+        // Normalize possible legacy image keys -> photoURL
+        const normalized = (Array.isArray(data) ? data : []).map(r => ({
+          ...r,
+          photoURL: r.photoURL || r.imageUrl || r.photoUrl || r.imageURL || null,
+        }));
+        console.log('Restaurants fetched and normalized:', normalized);
+        setRestaurants(normalized);
+        setFilteredRestaurants(normalized);
       } catch (err) {
         const handledError = handleError(err, 'Restaurants - fetchRestaurants');
         setError(handledError.message);
@@ -242,6 +248,7 @@ const Restaurants = () => {
                   openTime={rest.openTime}
                   closeTime={rest.closeTime}
                   is24x7={rest.is24x7}
+                  photoURL={rest.photoURL}
                 />
               </div>
             ))}

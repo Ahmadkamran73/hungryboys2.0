@@ -287,6 +287,13 @@
   transition: all 0.3s ease;
 }
 
+/* Ensure form submit buttons align text vertically within grid rows */
+.campus-admin-page form .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .campus-admin-page .btn-primary {
   background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
   border: none;

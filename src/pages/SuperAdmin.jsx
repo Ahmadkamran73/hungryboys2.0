@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
 import { doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
+import imageCompression from "browser-image-compression";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
@@ -9,6 +10,7 @@ import { handleError } from "../utils/errorHandler";
 import CampusSettingsManager from "../components/CampusSettingsManager";
 import BulkMenuImport from "../components/BulkMenuImport";
 import SuperAdminOrdersPanel from "../components/SuperAdminOrdersPanel";
+const SuperAdminCRM = React.lazy(() => import("../components/SuperAdminCRM"));
 import { api, authHeaders } from "../utils/api";
 import "../styles/SuperAdmin.css";
 
@@ -68,10 +70,12 @@ const SuperAdmin = () => {
     openTime: "10:00 AM",
     closeTime: "10:00 PM",
     is24x7: true,
+    photoURL: "",
+    imageFile: null,
     id: null 
   });
-  const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null });
-  const [martItemForm, setMartItemForm] = useState({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null });
+  const [menuForm, setMenuForm] = useState({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", photoURL: "", imageFile: null, id: null });
+  const [martItemForm, setMartItemForm] = useState({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", imageUrl: "", imageFile: null, id: null });
   const [userForm, setUserForm] = useState({ firstName: "", lastName: "", email: "", password: "", role: "campusAdmin", universityId: "", campusId: "", restaurantId: "", id: null });
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedCampus, setSelectedCampus] = useState(null);
@@ -464,7 +468,41 @@ const SuperAdmin = () => {
     }
   };
 
-  // Restaurant management
+  // Image upload helper function
+  const uploadImage = async (file) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    try {
+      // Compress image
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+
+      // Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", uploadPreset);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
+  // Restaurant management (now supports image upload via Cloudinary)
   const handleRestaurantSubmit = async (e) => {
     e.preventDefault();
     if (!restaurantForm.universityId || !restaurantForm.campusId) {
@@ -474,27 +512,44 @@ const SuperAdmin = () => {
     setLoading(true);
     try {
       const headers = await authHeaders(user);
+      // Upload image if selected
+      let photoURL = restaurantForm.photoURL || null;
+      if (restaurantForm.imageFile) {
+        console.log('🖼️ Uploading restaurant image to Cloudinary...');
+        try {
+          photoURL = await uploadImage(restaurantForm.imageFile);
+          console.log('✅ Image uploaded successfully:', photoURL);
+        } catch (uploadErr) {
+          console.error('❌ Image upload failed:', uploadErr);
+          setError(`Image upload failed: ${uploadErr.message || 'Unknown error'}`);
+          // Continue without image rather than failing the whole save
+        }
+      }
+
+      const restaurantData = {
+        name: restaurantForm.name,
+        location: restaurantForm.location,
+        cuisine: restaurantForm.cuisine,
+        openTime: restaurantForm.openTime || "10:00 AM",
+        closeTime: restaurantForm.closeTime || "10:00 PM",
+        is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
+        photoURL: photoURL // Always include photoURL field (can be null)
+      };
+
+      console.log('💾 Saving restaurant with data:', restaurantData);
+
       if (restaurantForm.id) {
-        await api.patch(`/api/restaurants/${restaurantForm.id}`, {
-          name: restaurantForm.name,
-          location: restaurantForm.location,
-          cuisine: restaurantForm.cuisine,
-          openTime: restaurantForm.openTime || "10:00 AM",
-          closeTime: restaurantForm.closeTime || "10:00 PM",
-          is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
-        }, { headers });
+        const response = await api.patch(`/api/restaurants/${restaurantForm.id}`, restaurantData, { headers });
+        console.log('✅ Restaurant updated:', response.data);
       } else {
-        await api.post('/api/restaurants', {
+        const response = await api.post('/api/restaurants', {
           campusId: restaurantForm.campusId,
           universityId: restaurantForm.universityId,
-          name: restaurantForm.name,
-          location: restaurantForm.location,
-          cuisine: restaurantForm.cuisine,
-          openTime: restaurantForm.openTime || "10:00 AM",
-          closeTime: restaurantForm.closeTime || "10:00 PM",
-          is24x7: restaurantForm.is24x7 !== undefined ? restaurantForm.is24x7 : true,
+          ...restaurantData
         }, { headers });
+        console.log('✅ Restaurant created:', response.data);
       }
+      
       setRestaurantForm({ 
         name: "", 
         location: "", 
@@ -504,12 +559,14 @@ const SuperAdmin = () => {
         openTime: "10:00 AM",
         closeTime: "10:00 PM",
         is24x7: true,
+        photoURL: "",
+        imageFile: null,
         id: null 
       });
       fetchAllData();
     } catch (err) {
-      setError("Failed to save restaurant");
-      console.error(err);
+      setError("Failed to save restaurant: " + (err.response?.data?.error || err.message));
+      console.error('❌ Restaurant save failed:', err);
     } finally {
       setLoading(false);
     }
@@ -521,6 +578,8 @@ const SuperAdmin = () => {
       openTime: restaurant.openTime || "10:00 AM",
       closeTime: restaurant.closeTime || "10:00 PM",
       is24x7: restaurant.is24x7 !== undefined ? restaurant.is24x7 : true,
+      photoURL: restaurant.photoURL || "",
+      imageFile: null,
     });
   };
 
@@ -555,11 +614,16 @@ const SuperAdmin = () => {
     setLoading(true);
     try {
       const headers = await authHeaders(user);
+      let photoURL = menuForm.photoURL;
+      if (menuForm.imageFile) {
+        try { photoURL = await uploadImage(menuForm.imageFile); } catch (_) {}
+      }
       if (menuForm.id) {
         await api.patch(`/api/menu-items/${menuForm.id}`, {
           name: menuForm.name,
           price: parseFloat(menuForm.price),
           description: menuForm.description,
+          ...(photoURL && { photoURL }),
         }, { headers });
       } else {
         await api.post('/api/menu-items', {
@@ -568,9 +632,10 @@ const SuperAdmin = () => {
           name: menuForm.name,
           price: parseFloat(menuForm.price),
           description: menuForm.description,
+          ...(photoURL && { photoURL }),
         }, { headers });
       }
-      setMenuForm({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null });
+      setMenuForm({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", photoURL: "", imageFile: null, id: null });
       fetchAllData();
     } catch (err) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Unknown error';
@@ -582,7 +647,7 @@ const SuperAdmin = () => {
   };
 
   const handleMenuEdit = (menu) => {
-    setMenuForm(menu);
+    setMenuForm({ ...menu, imageFile: null });
   };
 
   const handleMenuDelete = async (menu) => {
@@ -751,7 +816,7 @@ const SuperAdmin = () => {
     );
   };
 
-  // Mart item management
+  // Mart item management (use photoURL like Campus Admin)
   const handleMartItemSubmit = async (e) => {
     e.preventDefault();
     if (!martItemForm.universityId || !martItemForm.campusId) {
@@ -761,6 +826,13 @@ const SuperAdmin = () => {
     setLoading(true);
     try {
       const headers = await authHeaders(user);
+      
+      // Upload image if a new file is selected
+      let photoURL = null;
+      if (martItemForm.imageFile) {
+        photoURL = await uploadImage(martItemForm.imageFile);
+      }
+      
       if (martItemForm.id) {
         await api.patch(`/api/mart-items/${martItemForm.id}`, {
           name: martItemForm.name,
@@ -768,6 +840,7 @@ const SuperAdmin = () => {
           description: martItemForm.description,
           category: martItemForm.category,
           stock: parseInt(martItemForm.stock),
+          ...(photoURL && { photoURL }),
         }, { headers });
       } else {
         await api.post('/api/mart-items', {
@@ -777,9 +850,10 @@ const SuperAdmin = () => {
           description: martItemForm.description,
           category: martItemForm.category,
           stock: parseInt(martItemForm.stock),
+          ...(photoURL && { photoURL }),
         }, { headers });
       }
-      setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null });
+      setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", imageUrl: "", imageFile: null, id: null });
       fetchAllData();
     } catch (err) {
       setError("Failed to save mart item");
@@ -1025,6 +1099,14 @@ const SuperAdmin = () => {
                   💎 Orders Dashboard
                 </button>
               </li>
+              <li className="nav-item" role="presentation">
+                <button
+                  className={`nav-link ${activeTab === "crm" ? "active" : ""}`}
+                  onClick={() => setActiveTab("crm")}
+                >
+                  📈 CRM
+                </button>
+              </li>
             </ul>
 
             {/* Tab Content */}
@@ -1150,6 +1232,14 @@ const SuperAdmin = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {activeTab === "crm" && (
+                <div className="tab-pane fade show active">
+                  <Suspense fallback={<LoadingSpinner message="Loading CRM..." /> }>
+                    <SuperAdminCRM />
+                  </Suspense>
                 </div>
               )}
 
@@ -1992,6 +2082,31 @@ const SuperAdmin = () => {
                           </div>
                         </div>
                         
+                        {/* Restaurant Image Upload */}
+                        <div className="row g-3 mt-2">
+                          <div className="col-md-4">
+                            <label className="form-label">Restaurant Image</label>
+                            <input
+                              type="file"
+                              className="form-control"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) setRestaurantForm({ ...restaurantForm, imageFile: file });
+                              }}
+                            />
+                            {(restaurantForm.imageFile || restaurantForm.photoURL) && (
+                              <div className="mt-2">
+                                <img
+                                  src={restaurantForm.imageFile ? URL.createObjectURL(restaurantForm.imageFile) : restaurantForm.photoURL}
+                                  alt="Preview"
+                                  style={{ maxWidth: '200px', maxHeight: '140px', objectFit: 'cover', borderRadius: '8px' }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
                         <div className="row g-3 mt-2">
                           <div className="col-12">
                             <button type="submit" className="btn btn-primary me-2">
@@ -2001,7 +2116,19 @@ const SuperAdmin = () => {
                               <button 
                                 type="button" 
                                 className="btn btn-secondary"
-                                onClick={() => setRestaurantForm({ name: "", location: "", cuisine: "", universityId: "", campusId: "", id: null })}
+                                onClick={() => setRestaurantForm({ 
+                                  name: "", 
+                                  location: "", 
+                                  cuisine: "", 
+                                  universityId: "", 
+                                  campusId: "", 
+                                  openTime: "10:00 AM",
+                                  closeTime: "10:00 PM",
+                                  is24x7: true,
+                                  photoURL: "",
+                                  imageFile: null,
+                                  id: null 
+                                })}
                               >
                                 Cancel
                               </button>
@@ -2029,6 +2156,16 @@ const SuperAdmin = () => {
                               <span className="badge badge-university">{restaurant.universityName}</span>
                               <span className="badge badge-campus">{restaurant.campusName}</span>
                             </div>
+                            {restaurant.photoURL && (
+                              <div className="mt-2">
+                                <img
+                                  src={restaurant.photoURL}
+                                  alt={restaurant.name}
+                                  style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px' }}
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              </div>
+                            )}
                             
                             <div className="restaurant-timing">
                               <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -2231,6 +2368,38 @@ const SuperAdmin = () => {
                               onChange={(e) => setMartItemForm({...martItemForm, description: e.target.value})}
                             />
                           </div>
+                        </div>
+                        
+                        {/* Mart Item Image Upload */}
+                        <div className="row g-3 mt-2">
+                          <div className="col-md-12">
+                            <label className="form-label">Item Image</label>
+                            <input
+                              type="file"
+                              className="form-control"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files[0]) {
+                                  setMartItemForm({
+                                    ...martItemForm,
+                                    imageFile: e.target.files[0]
+                                  });
+                                }
+                              }}
+                            />
+                            {(martItemForm.imageUrl || martItemForm.imageFile) && (
+                              <div className="mt-2">
+                                <img 
+                                  src={martItemForm.imageFile ? URL.createObjectURL(martItemForm.imageFile) : martItemForm.imageUrl} 
+                                  alt="Preview" 
+                                  style={{ maxWidth: "200px", maxHeight: "150px", objectFit: "cover", borderRadius: "8px" }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="row g-3 mt-2">
                           <div className="col-12">
                             <button type="submit" className="btn btn-primary me-2">
                               {martItemForm.id ? "Update Mart Item" : "Add Mart Item"}
@@ -2239,7 +2408,7 @@ const SuperAdmin = () => {
                               <button 
                                 type="button" 
                                 className="btn btn-secondary"
-                                onClick={() => setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", id: null })}
+                                onClick={() => setMartItemForm({ name: "", price: "", description: "", category: "", stock: "", universityId: "", campusId: "", imageUrl: "", imageFile: null, id: null })}
                               >
                                 Cancel
                               </button>
@@ -2495,6 +2664,24 @@ const SuperAdmin = () => {
                               onChange={(e) => setMenuForm({...menuForm, description: e.target.value})}
                             />
                           </div>
+                          <div className="col-md-3">
+                            <label className="form-label">Item Image</label>
+                            <input
+                              type="file"
+                              className="form-control"
+                              accept="image/*"
+                              onChange={(e) => setMenuForm({ ...menuForm, imageFile: e.target.files?.[0] || null })}
+                            />
+                            {(menuForm.imageFile || menuForm.photoURL) && (
+                              <div className="mt-2">
+                                <img
+                                  src={menuForm.imageFile ? URL.createObjectURL(menuForm.imageFile) : menuForm.photoURL}
+                                  alt="Preview"
+                                  style={{ maxWidth: '200px', maxHeight: '140px', objectFit: 'cover', borderRadius: '8px' }}
+                                />
+                              </div>
+                            )}
+                          </div>
                           <div className="col-12">
                             <button type="submit" className="btn btn-primary me-2">
                               {menuForm.id ? "Update Menu Item" : "Add Menu Item"}
@@ -2503,7 +2690,7 @@ const SuperAdmin = () => {
                               <button 
                                 type="button" 
                                 className="btn btn-secondary"
-                                onClick={() => setMenuForm({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", id: null })}
+                                onClick={() => setMenuForm({ name: "", price: "", description: "", universityId: "", campusId: "", restaurantId: "", photoURL: "", imageFile: null, id: null })}
                               >
                                 Cancel
                               </button>

@@ -113,32 +113,26 @@
   color: #FFFFFF;
 }
 
-/* Price Badge */
-.mart-product-price-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Price (moved to content bottom) */
+.mart-product-price {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
-.price-amount {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #1A1A1A;
-  letter-spacing: 0.5px;
+.mart-product-price .price-amount {
+  font-size: 1.0625rem;
+  font-weight: 900;
+  color: #111827;
+  background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
 }
 
-[data-theme="dark"] .mart-product-price-badge {
-  background: rgba(26, 35, 50, 0.95);
-}
-
-[data-theme="dark"] .price-amount {
+[data-theme="dark"] .mart-product-price .price-amount {
   color: #FFFFFF;
+  background: rgba(255,255,255,0.03);
 }
 
 /* ============================================
@@ -215,6 +209,7 @@
 
 .mart-product-actions {
   width: 100%;
+  margin-top: auto; /* push actions to bottom so price sits above */
 }
 
 /* Add to Cart Button */
@@ -434,8 +429,7 @@
     height: 160px;
   }
 
-  .mart-stock-badge,
-  .mart-product-price-badge {
+  .mart-stock-badge {
     top: 10px;
     padding: 0.4rem 0.75rem;
   }
@@ -450,9 +444,7 @@
     height: 12px;
   }
 
-  .mart-product-price-badge {
-    right: 10px;
-  }
+  /* price moved to content; adjust font size below */
 
   .price-amount {
     font-size: 0.875rem;
@@ -502,8 +494,7 @@
     height: 140px;
   }
 
-  .mart-stock-badge,
-  .mart-product-price-badge {
+  .mart-stock-badge {
     padding: 0.375rem 0.625rem;
   }
 
@@ -622,14 +613,10 @@
     height: 12px;
   }
 
-  .mart-price-badge {
-    top: 10px;
-    right: 10px;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .price-amount {
+  /* price moved to content; adjust padding/font-size */
+  .mart-product-price .price-amount {
     font-size: 0.9rem;
+    padding: 0.35rem 0.6rem;
   }
 
   .mart-product-content {
@@ -686,11 +673,8 @@
     font-size: 0.65rem;
   }
 
-  .mart-price-badge {
-    padding: 0.35rem 0.7rem;
-  }
-
-  .price-amount {
+  .mart-product-price .price-amount {
+    padding: 0.325rem 0.55rem;
     font-size: 0.85rem;
   }
 

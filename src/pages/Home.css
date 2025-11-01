@@ -4,6 +4,8 @@
 .home-page {
   min-height: 100vh;
   background-color: #f8f9fa;
+  /* Prevent fixed navbar from overlapping content on mobile */
+  padding-top: var(--navbar-height, 70px);
 }
 
 .hero-section {
@@ -135,8 +137,8 @@
   flex-wrap: wrap;
 }
 
-.btn-primary,
-.btn-secondary {
+.hero-section .btn-primary,
+.hero-section .btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -149,30 +151,28 @@
   border: 2px solid transparent;
 }
 
-.btn-primary {
-  background: #FFFFFF;
-  color: #2ED573;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-  color: #2ED573;
-}
-
-.btn-secondary {
-  background: transparent;
+.hero-section .btn-primary {
+  background: linear-gradient(135deg, #FF8A50 0%, #FF6B35 100%);
   color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.25);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #FFFFFF;
+.hero-section .btn-primary:hover {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF5A24 100%);
   transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(255, 107, 53, 0.35);
+}
+
+.hero-section .btn-secondary {
+  background: linear-gradient(135deg, #2ED573 0%, #26B863 100%);
   color: #FFFFFF;
+  border-color: transparent;
+}
+
+.hero-section .btn-secondary:hover {
+  background: linear-gradient(135deg, #26B863 0%, #1FA857 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(46, 213, 115, 0.35);
 }
 
 .btn-icon {
@@ -220,8 +220,12 @@
 .scroll-indicator {
   position: absolute;
   bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -229,6 +233,9 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   animation: bounce 2s infinite;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .scroll-arrow {

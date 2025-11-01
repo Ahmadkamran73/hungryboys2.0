@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { isRestaurantOpen, getNextOpeningTime, getNextClosingTime } from "../utils/isRestaurantOpen";
 import "../styles/RestaurantCard.css"; 
 
-const RestaurantCard = ({ id, name, location, cuisine, openTime, closeTime, is24x7 }) => {
+const RestaurantCard = ({ id, name, location, cuisine, openTime, closeTime, is24x7, photoURL }) => {
+  // Debug: log the photoURL prop received
+  console.log(`RestaurantCard "${name}": photoURL =`, photoURL);
+  
   const isOpen = isRestaurantOpen({ openTime, closeTime, is24x7 });
   const nextOpeningTime = getNextOpeningTime({ openTime, closeTime, is24x7 });
   const nextClosingTime = getNextClosingTime({ openTime, closeTime, is24x7 });
@@ -26,11 +29,22 @@ const RestaurantCard = ({ id, name, location, cuisine, openTime, closeTime, is24
     return gradients[index];
   };
 
+  // Base header uses gradient; when photoURL exists, we layer an <img> for reliable onError handling
+  const headerStyle = { background: getGradient(name) };
+
   return (
     <Link to={`/menu/${id}`} className="restaurant-card-link">
       <div className="restaurant-card">
         {/* Image/Gradient Header */}
-        <div className="restaurant-card-header" style={{ background: getGradient(name) }}>
+        <div className="restaurant-card-header" style={headerStyle}>
+          {photoURL && (
+            <img
+              src={photoURL}
+              alt=""
+              className="restaurant-card-bg"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          )}
           <div className="restaurant-card-overlay">
             {/* Status Badge */}
             <div className={`restaurant-status-badge ${isOpen ? 'open' : 'closed'}`}>

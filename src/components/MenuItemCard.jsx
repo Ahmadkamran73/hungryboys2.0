@@ -59,10 +59,6 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
           </div>
         )}
         
-        {/* Price Badge */}
-        <div className="menu-item-price-badge">
-          <span className="price-amount">Rs {price}</span>
-        </div>
       </div>
 
       {/* Content Section */}
@@ -75,6 +71,11 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
         </div>
 
         {/* Action Section */}
+        {/* Price placed at the bottom of the content */}
+        <div className="menu-item-price">
+          <span className="price-amount">Rs {price}</span>
+        </div>
+
         <div className="menu-item-actions">
           {!isOpen ? (
             <button

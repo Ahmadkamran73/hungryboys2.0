@@ -1,6 +1,10 @@
 /* Orders Panel Enhanced Styling */
 .orders-panel-enhanced {
   padding: 1rem;
+  color: #212529;
+}
+
+[data-theme="dark"] .orders-panel-enhanced {
   color: #f1f1f1;
 }
 
@@ -15,28 +19,52 @@
 
 .orders-header h3 {
   margin: 0;
+  color: #212529;
+}
+
+[data-theme="dark"] .orders-header h3 {
   color: #ffffff;
 }
 
 .filters-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+[data-theme="dark"] .filters-section {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .filters-section h5 {
+  color: #212529;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .filters-section h5 {
   color: #ffffff;
-  font-weight: 600;
 }
 
-/* Make filter labels clearly visible on dark background */
+/* Make filter labels clearly visible */
 .orders-panel-enhanced .filters-section .form-label {
-  color: rgba(255, 255, 255, 0.92);
+  color: #495057;
   font-weight: 600;
 }
 
-/* Dark inputs/selects inside Orders panel */
+[data-theme="dark"] .orders-panel-enhanced .filters-section .form-label {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Inputs/selects inside Orders panel */
 .orders-panel-enhanced .form-control,
 .orders-panel-enhanced .form-select {
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  color: #212529;
+}
+
+[data-theme="dark"] .orders-panel-enhanced .form-control,
+[data-theme="dark"] .orders-panel-enhanced .form-select {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
@@ -46,26 +74,103 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  /* Remove custom arrow to avoid artifacts/zigzag on some platforms */
+  --bs-form-select-bg-img: none !important;
+  background-image: none !important;
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 16px 12px;
   padding-right: 2.5rem;
 }
 
+[data-theme="dark"] .orders-panel-enhanced .form-select {
+  --bs-form-select-bg-img: none !important;
+  background-image: none !important;
+}
+
 .orders-panel-enhanced .form-control::placeholder {
+  color: #6c757d;
+}
+
+[data-theme="dark"] .orders-panel-enhanced .form-control::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
+
 .orders-panel-enhanced .form-control:focus,
 .orders-panel-enhanced .form-select:focus {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #ffffff;
   border-color: #667eea;
   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  color: #212529;
+}
+
+[data-theme="dark"] .orders-panel-enhanced .form-control:focus,
+[data-theme="dark"] .orders-panel-enhanced .form-select:focus {
+  background-color: rgba(255, 255, 255, 0.15);
   color: #ffffff;
 }
+
 .orders-panel-enhanced .form-select option {
+  background-color: #ffffff;
+  color: #212529;
+  padding: 8px;
+  border: 1px solid #dee2e6;
+}
+
+[data-theme="dark"] .orders-panel-enhanced .form-select option {
   background-color: #1f1f1f;
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Additional styling for small select dropdowns in table */
+.table .form-select,
+.table .form-select-sm {
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  color: #212529;
+  font-size: 0.875rem;
+  /* Remove Bootstrap's embedded arrow to prevent repeated patterns */
+  --bs-form-select-bg-img: none !important;
+  background-image: none !important;
+}
+
+[data-theme="dark"] .table .form-select,
+[data-theme="dark"] .table .form-select-sm {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  --bs-form-select-bg-img: none !important;
+  background-image: none !important;
+}
+
+.table .form-select:focus,
+.table .form-select-sm:focus {
+  background-color: #ffffff;
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+[data-theme="dark"] .table .form-select:focus,
+[data-theme="dark"] .table .form-select-sm:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #667eea;
+  color: #ffffff;
+}
+
+.table .form-select option,
+.table .form-select-sm option {
+  background-color: #ffffff;
+  color: #212529;
+  padding: 8px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .table .form-select option,
+[data-theme="dark"] .table .form-select-sm option {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .statistics-section {
@@ -90,18 +195,42 @@
 }
 
 .table-responsive {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .table-responsive {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .table {
   margin-bottom: 0;
+  --bs-table-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  --bs-table-striped-bg: #f8f9fa;
+  --bs-table-active-bg: #f8f9fa;
+  --bs-table-hover-bg: #f8f9fa;
+}
+
+[data-theme="dark"] .table {
+  --bs-table-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+  --bs-table-active-bg: rgba(255, 255, 255, 0.06);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
 }
 
 .table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+[data-theme="dark"] .table thead {
   background: rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -109,26 +238,60 @@
 .table thead th {
   border-top: none;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: #495057;
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.5px;
   padding: 1rem 0.75rem;
 }
 
+[data-theme="dark"] .table thead th {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .table tbody tr {
   transition: background-color 0.2s ease;
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] .table tbody tr {
+  background-color: transparent;
 }
 
 .table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .table tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
+
 .table.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .table.table-striped tbody tr:nth-of-type(odd) {
   background-color: rgba(255, 255, 255, 0.03);
 }
-.table {
-  color: #eaeaea;
+
+.table.table-striped tbody tr:nth-of-type(even) {
+  background-color: #ffffff;
 }
+
+[data-theme="dark"] .table.table-striped tbody tr:nth-of-type(even) {
+  background-color: transparent;
+}
+
+.table {
+  color: #212529;
+  background-color: transparent;
+}
+
+[data-theme="dark"] .table {
+  color: #eaeaea;
+  background-color: transparent;
+}
+
 .table tbody tr td .badge {
   color: #fff;
 }
@@ -136,6 +299,24 @@
 .table td {
   vertical-align: middle;
   padding: 0.75rem;
+  color: #212529;
+  background-color: transparent;
+}
+
+[data-theme="dark"] .table td {
+  color: #eaeaea;
+  background-color: transparent;
+}
+
+.table th {
+  background-color: transparent;
+}
+
+[data-theme="dark"] .table th {
+  background-color: transparent;
+}
+
+[data-theme="dark"] .table td {
   color: #eaeaea;
 }
 
@@ -147,10 +328,17 @@
 }
 
 .pagination-section {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  border: 1px solid #dee2e6;
   padding: 1rem;
   border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  color: #212529;
+}
+
+[data-theme="dark"] .pagination-section {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   color: #eaeaea;
 }
@@ -160,12 +348,24 @@
 }
 
 .page-link {
+  color: #667eea;
+  background-color: #ffffff;
+  border-color: #dee2e6;
+}
+
+[data-theme="dark"] .page-link {
   color: #c5cbff;
   background-color: transparent;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
 .page-link:hover {
+  color: #5568d3;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+[data-theme="dark"] .page-link:hover {
   color: #ffffff;
   background-color: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.25);
@@ -193,15 +393,21 @@
 }
 
 .modal-content-custom {
-  background: #1f1f1f;
-  color: #eaeaea;
+  background: #ffffff;
+  color: #212529;
   border-radius: 12px;
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: modalSlideIn 0.3s ease-out;
+}
+
+[data-theme="dark"] .modal-content-custom {
+  background: #1f1f1f;
+  color: #eaeaea;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 @keyframes modalSlideIn {
@@ -247,18 +453,30 @@
 
 .modal-body-custom h6 {
   font-weight: 600;
-  color: #dcdcdc;
+  color: #495057;
   margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .modal-body-custom h6 {
+  color: #dcdcdc;
 }
 
 .modal-body-custom p {
   margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+[data-theme="dark"] .modal-body-custom p {
   color: #bdbdbd;
 }
 
 .modal-body-custom strong {
-  color: #ffffff;
+  color: #212529;
   font-weight: 600;
+}
+
+[data-theme="dark"] .modal-body-custom strong {
+  color: #ffffff;
 }
 
 .modal-footer-custom {
@@ -269,8 +487,14 @@
   gap: 0.5rem;
 }
 
-/* Darken preformatted cartItems block shown as bg-light in code */
+/* Preformatted cartItems block */
 .modal-body-custom pre.bg-light {
+  background-color: #f8f9fa !important;
+  color: #212529;
+  border: 1px solid #dee2e6;
+}
+
+[data-theme="dark"] .modal-body-custom pre.bg-light {
   background-color: rgba(255, 255, 255, 0.08) !important;
   color: #eaeaea;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -279,9 +503,18 @@
 /* Billing details table inside modal */
 .modal-body-custom .table {
   background-color: transparent;
-  color: #eaeaea;
-  /* Bootstrap table CSS variables override for dark modal */
+  color: #212529;
   --bs-table-bg: transparent;
+  --bs-table-color: #212529;
+  --bs-table-border-color: #dee2e6;
+  --bs-table-striped-bg: #f8f9fa;
+  --bs-table-striped-color: #212529;
+  --bs-table-hover-bg: #e9ecef;
+  --bs-table-hover-color: #212529;
+}
+
+[data-theme="dark"] .modal-body-custom .table {
+  color: #eaeaea;
   --bs-table-color: #eaeaea;
   --bs-table-border-color: rgba(255, 255, 255, 0.15);
   --bs-table-striped-bg: rgba(255, 255, 255, 0.06);
@@ -289,25 +522,62 @@
   --bs-table-hover-bg: rgba(255, 255, 255, 0.08);
   --bs-table-hover-color: #ffffff;
 }
+
 .modal-body-custom .table > :not(caption) > * > * {
   background-color: transparent !important;
 }
+
 .modal-body-custom .table th,
 .modal-body-custom .table td {
+  color: #212529;
+  border-color: #dee2e6;
+}
+
+[data-theme="dark"] .modal-body-custom .table th,
+[data-theme="dark"] .modal-body-custom .table td {
   color: #eaeaea;
   border-color: rgba(255, 255, 255, 0.15);
 }
+
 .modal-body-custom .table tr.table-primary th,
 .modal-body-custom .table tr.table-primary td {
-  background-color: rgba(102, 126, 234, 0.25) !important; /* match header gradient hue */
+  background-color: rgba(102, 126, 234, 0.15) !important;
+  color: #212529;
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .modal-body-custom .table tr.table-primary th,
+[data-theme="dark"] .modal-body-custom .table tr.table-primary td {
+  background-color: rgba(102, 126, 234, 0.25) !important;
   color: #ffffff;
   border-color: rgba(102, 126, 234, 0.4);
 }
+
 .modal-body-custom .table tbody tr:last-child td {
   font-weight: 700;
 }
+
 .modal-body-custom .table td.text-end {
+  color: #212529;
+}
+
+[data-theme="dark"] .modal-body-custom .table td.text-end {
   color: #ffffff;
+}
+
+/* Horizontal rule (hr) visibility fix for dark mode */
+.modal-body-custom hr {
+  border: 0;
+  border-top: 2px solid #dee2e6 !important;
+  margin: 1.5rem 0;
+  opacity: 1 !important;
+  background: transparent !important;
+  height: 0 !important;
+}
+
+[data-theme="dark"] .modal-body-custom hr {
+  border-top: 2px solid rgba(255, 255, 255, 0.5) !important;
+  opacity: 1 !important;
 }
 
 /* Legacy dark theme support */

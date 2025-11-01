@@ -51,6 +51,16 @@
   overflow: hidden;
 }
 
+/* Background image layer for restaurant header */
+.restaurant-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 .restaurant-card-overlay {
   position: absolute;
   top: 0;
@@ -66,6 +76,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 1rem;
+  z-index: 1;
 }
 
 /* Status Badge */
@@ -269,7 +280,7 @@
 .restaurant-view-menu:hover {
   background: #26B863;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.35);
 }
 
 .restaurant-view-menu:hover svg {
@@ -286,7 +297,7 @@
 
 [data-theme="dark"] .restaurant-view-menu:hover {
   background: #5FE18A;
-  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.4);
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.4);
 }
 
 /* ============================================

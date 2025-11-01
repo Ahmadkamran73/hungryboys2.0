@@ -78,24 +78,26 @@
   color: rgba(255, 255, 255, 0.2);
 }
 
-/* Price Badge */
-.menu-item-price-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(46, 213, 115, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Price (moved to content bottom) */
+.menu-item-price {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
-.price-amount {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.5px;
+.menu-item-price .price-amount {
+  font-size: 1.0625rem;
+  font-weight: 900;
+  color: #111827;
+  background: linear-gradient(90deg, rgba(46,213,115,0.12), rgba(16,185,129,0.06));
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .menu-item-price .price-amount {
+  color: #E6FDF0;
+  background: linear-gradient(90deg, rgba(46,213,115,0.08), rgba(16,185,129,0.04));
 }
 
 /* ============================================
@@ -161,6 +163,7 @@
 
 .menu-item-actions {
   width: 100%;
+  margin-top: auto; /* push actions to bottom so price sits above */
 }
 
 /* Add to Cart Button */
@@ -368,10 +371,9 @@
     height: 160px;
   }
 
-  .menu-item-price-badge {
-    top: 10px;
-    right: 10px;
-    padding: 0.4rem 0.875rem;
+  /* price moved into content: adjust font/padding instead */
+  .menu-item-price .price-amount {
+    padding: 0.35rem 0.6rem;
   }
 
   .price-amount {
@@ -417,8 +419,8 @@
     height: 140px;
   }
 
-  .menu-item-price-badge {
-    padding: 0.375rem 0.75rem;
+  .menu-item-price .price-amount {
+    padding: 0.325rem 0.55rem;
   }
 
   .price-amount {
@@ -510,10 +512,8 @@
     height: 48px;
   }
 
-  .menu-item-price-badge {
-    top: 10px;
-    right: 10px;
-    padding: 0.4rem 0.8rem;
+  .menu-item-price .price-amount {
+    padding: 0.35rem 0.6rem;
   }
 
   .price-amount {
@@ -563,8 +563,8 @@
     height: 140px;
   }
 
-  .menu-item-price-badge {
-    padding: 0.35rem 0.7rem;
+  .menu-item-price .price-amount {
+    padding: 0.325rem 0.55rem;
   }
 
   .price-amount {

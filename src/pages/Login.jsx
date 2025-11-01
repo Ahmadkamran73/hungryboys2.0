@@ -64,10 +64,13 @@ function Login() {
       console.error("Login error:", err);
       
       // Handle specific Firebase Auth errors
-      if (err.code === 'auth/user-not-found') {
-        setError("No account found with this email address. Please check your email or sign up for a new account.");
-      } else if (err.code === 'auth/wrong-password') {
-        setError("Incorrect password. Please try again.");
+      if (
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-credential' ||
+        err.code === 'auth/invalid-login-credentials'
+      ) {
+        setError("Incorrect email or password. Please try again.");
       } else if (err.code === 'auth/invalid-email') {
         setError("Invalid email address. Please enter a valid email.");
       } else if (err.code === 'auth/user-disabled') {
@@ -226,7 +229,7 @@ function Login() {
             {!showForgotPassword ? (
               <form onSubmit={handleLogin} className="auth-form">
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="loginEmail">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                       <polyline points="22,6 12,13 2,6" />
@@ -236,7 +239,10 @@ function Login() {
                   <input
                     type="email"
                     className="auth-input"
+                    id="loginEmail"
                     placeholder="Enter your email"
+                    autoComplete="email"
+                    inputMode="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -245,7 +251,7 @@ function Login() {
                 </div>
                 
                 <div className="auth-form-group">
-                  <label className="auth-label">
+                  <label className="auth-label" htmlFor="loginPassword">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -255,7 +261,9 @@ function Login() {
                   <input
                     type="password"
                     className="auth-input"
+                    id="loginPassword"
                     placeholder="Enter your password"
+                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
