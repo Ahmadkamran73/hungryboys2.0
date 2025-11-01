@@ -10,7 +10,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <div>
-          {/* Render your AppRoutes to handle routing */}
+          {/* Render Your AppRoutes to handle routing */}
           <AppRoutes />
 
           {/* WhatsApp Icon, which is globally accessible */}
