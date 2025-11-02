@@ -42,7 +42,7 @@ function Home() {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <div className="hero-badge">🎉 Now Serving Multiple Campuses</div>
+          <div className="hero-badge">🎉 30% Off on Delivery</div>
           <h1 className="hero-title">
             Your Cravings,<br />
             <span className="hero-highlight">Delivered Fresh</span>
