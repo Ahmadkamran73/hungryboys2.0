@@ -3,5 +3,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
-  ]
+  ],
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./backend"
 }

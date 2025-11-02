@@ -1,0 +1,11 @@
+# Ignore backend folder (deployed separately to Railway)
+backend/
+
+# Ignore documentation files
+docs/
+*.md
+!README.md
+
+# Ignore local development files
+.env.local
+.env.*.local
