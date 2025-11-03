@@ -42,8 +42,8 @@ const CheckOutForm = () => {
   const [campusSettings, setCampusSettings] = useState({
     deliveryChargePerPerson: 150,
     accountTitle: "Maratib Ali",
-    bankName: "SadaPay",
-    accountNumber: "03330374616"
+    bankName: "Habib bank limited",
+    accountNumber: "54427000095103"
   });
 
   // Auto-fill email, firstName, lastName when user is logged in
