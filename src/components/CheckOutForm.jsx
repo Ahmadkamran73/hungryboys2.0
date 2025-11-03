@@ -62,7 +62,7 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
+        const settings = await getCampusSettings(selectedCampus, user);
         setCampusSettings(settings);
       } catch (err) {
         console.warn('Failed to fetch campus settings, using defaults:', err);
@@ -79,7 +79,7 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
+        const settings = await getCampusSettings(selectedCampus, user);
         setCampusSettings(settings);
       } catch (err) {
         console.warn('Failed to refresh campus settings:', err);
@@ -640,10 +640,10 @@ const CheckOutForm = () => {
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#4338CA'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#4F46E5'}
-              onClick={async () => {
+                  onClick={async () => {
                 if (selectedCampus?.id) {
                   try {
-                    const settings = await getCampusSettings(selectedCampus);
+                    const settings = await getCampusSettings(selectedCampus, user);
                     setCampusSettings(settings);
                   } catch (err) {
                     console.warn('Failed to refresh settings:', err);

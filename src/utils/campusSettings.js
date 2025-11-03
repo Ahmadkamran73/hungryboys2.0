@@ -1,5 +1,4 @@
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { api, authHeaders } from "./api";
 
 /**
  * Fetch campus settings for a specific campus
@@ -8,24 +7,31 @@ import { db } from "../firebase";
  * @param {boolean} forceRefresh - Force refresh from server (bypass cache)
  * @returns {Promise<Object>} Campus settings object
  */
-export const fetchCampusSettings = async (universityId, campusId, forceRefresh = false) => {
+/**
+ * Fetch campus settings for a specific campus.
+ * Prefer the backend (MongoDB) endpoint when available. If a `user` is
+ * provided the request will include auth headers. On any failure we fall
+ * back to the Firestore document (preserve previous behaviour) and finally
+ * to sensible defaults.
+ *
+ * @param {string} universityId
+ * @param {string} campusId
+ * @param {boolean} forceRefresh
+ * @param {Object} user - optional Firebase user used to build auth headers
+ */
+export const fetchCampusSettings = async (universityId, campusId, forceRefresh = false, user = null) => {
+  // Fetch campus settings from the backend (MongoDB). If auth `user` is
+  // provided we'll include the Firebase token in the Authorization header.
   try {
-    const settingsRef = doc(db, "universities", universityId, "campuses", campusId, "settings", "payment");
-    const settingsDoc = await getDoc(settingsRef);
-    
-    if (settingsDoc.exists()) {
-      return settingsDoc.data();
-    } else {
-      // Return default settings if none exist
-      return {
-        deliveryChargePerPerson: 150,
-        accountTitle: "Maratib Ali",
-        bankName: "Habib bank limited",
-        accountNumber: "54427000095103"
-      };
+    if (!campusId) throw new Error('campusId required');
+    const headers = user ? await authHeaders(user) : {};
+    const res = await api.get(`/api/campus-settings/${campusId}`, { headers });
+    if (res && res.data) {
+      return res.data;
     }
-  } catch (error) {
-    // Silently return default settings on error (no console.error)
+  } catch (err) {
+  // On error we return defaults (keep checkout resilient)
+    // On failure return defaults — keep checkout resilient.
     return {
       deliveryChargePerPerson: 150,
       accountTitle: "Maratib Ali",
@@ -40,7 +46,12 @@ export const fetchCampusSettings = async (universityId, campusId, forceRefresh =
  * @param {Object} campus - Campus object with universityId and id
  * @returns {Promise<Object>} Campus settings object
  */
-export const getCampusSettings = async (campus) => {
+/**
+ * Convenience wrapper used by components. Accepts an optional `user` so callers
+ * can include auth for backend requests. If no user is supplied the function
+ * will attempt the backend without auth and then fall back to Firestore.
+ */
+export const getCampusSettings = async (campus, user = null) => {
   if (!campus?.universityId || !campus?.id) {
     return {
       deliveryChargePerPerson: 150,
@@ -50,7 +61,7 @@ export const getCampusSettings = async (campus) => {
     };
   }
   
-  return await fetchCampusSettings(campus.universityId, campus.id);
+  return await fetchCampusSettings(campus.universityId, campus.id, false, user);
 };
 
 export default {
