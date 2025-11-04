@@ -1260,6 +1260,13 @@ app.get('/api/campus-settings/:campusId', async (req, res) => {
       });
     }
 
+    // Ensure deliveryChargePerPerson is at least 150 (remove old 30% discount)
+    // If it's 105 (which is 150 * 0.7), upgrade it to 150
+    const deliveryCharge = settings.deliveryChargePerPerson;
+    if (deliveryCharge < 150) {
+      settings.deliveryChargePerPerson = 150;
+    }
+
     res.json(settings);
   } catch (e) {
     res.status(500).json({ error: 'Failed to fetch campus settings' });
