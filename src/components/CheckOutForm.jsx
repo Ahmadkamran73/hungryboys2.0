@@ -62,8 +62,15 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
-        setCampusSettings(settings);
+        const settings = await getCampusSettings(selectedCampus, user);
+        // Ensure delivery charge is at least 150 (remove old 30% discount)
+        const validSettings = {
+          ...settings,
+          deliveryChargePerPerson: (settings?.deliveryChargePerPerson && settings.deliveryChargePerPerson >= 150) 
+            ? settings.deliveryChargePerPerson 
+            : 150
+        };
+        setCampusSettings(validSettings);
       } catch (err) {
         console.warn('Failed to fetch campus settings, using defaults:', err);
         // Keep default settings if fetch fails
@@ -71,7 +78,7 @@ const CheckOutForm = () => {
     };
 
     loadCampusSettings();
-  }, [selectedCampus]);
+  }, [selectedCampus, user]);
 
   // Refresh settings when component mounts (in case settings were updated)
   useEffect(() => {
@@ -79,8 +86,15 @@ const CheckOutForm = () => {
       if (!selectedCampus?.id) return;
       
       try {
-        const settings = await getCampusSettings(selectedCampus);
-        setCampusSettings(settings);
+        const settings = await getCampusSettings(selectedCampus, user);
+        // Ensure delivery charge is at least 150 (remove old 30% discount)
+        const validSettings = {
+          ...settings,
+          deliveryChargePerPerson: (settings?.deliveryChargePerPerson && settings.deliveryChargePerPerson >= 150) 
+            ? settings.deliveryChargePerPerson 
+            : 150
+        };
+        setCampusSettings(validSettings);
       } catch (err) {
         console.warn('Failed to refresh campus settings:', err);
       }
@@ -88,7 +102,7 @@ const CheckOutForm = () => {
 
     // Refresh settings on component mount
     refreshSettings();
-  }, []);
+  }, [selectedCampus, user]);
 
   // Update email when user changes
   useEffect(() => {
