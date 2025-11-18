@@ -8,22 +8,22 @@ function Home() {
 
   const features = [
     {
-      icon: "🚀",
+      icon: "",
       title: "Fast Delivery",
       description: "Get your food delivered within 30-45 minutes"
     },
     {
-      icon: "💰",
+      icon: "",
       title: "Batch Delivery",
       description: "Smart cost-effective delivery to remote areas"
     },
     {
-      icon: "🍽️",
+      icon: "",
       title: "Wide Selection",
       description: "Choose from multiple restaurants & mart items"
     },
     {
-      icon: "📱",
+      icon: "",
       title: "Easy Ordering",
       description: "Simple and intuitive ordering process"
     }
@@ -42,7 +42,7 @@ function Home() {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <div className="hero-badge">🚀 Trusted by students. Fast, reliable, and always fresh!</div>
+          <div className="hero-badge">Trusted by students. Fast, reliable, and always fresh!</div>
           <h1 className="hero-title">
             Your Cravings,<br />
             <span className="hero-highlight">Delivered Fresh</span>
@@ -54,7 +54,7 @@ function Home() {
           {selectedUniversity && selectedCampus ? (
             <div className="hero-location">
               <div className="location-badge">
-                <span className="location-icon">📍</span>
+                <span className="location-icon"></span>
                 <span className="location-text">
                   {selectedUniversity.name} - {selectedCampus.name}
                 </span>
@@ -66,14 +66,14 @@ function Home() {
                 </Link>
                 <Link to="/mart-items" className="btn-secondary">
                   <span>Shop Mart Items</span>
-                  <span className="btn-icon">🛒</span>
+                  <span className="btn-icon">→</span>
                 </Link>
               </div>
             </div>
           ) : (
             <div className="hero-prompt">
               <div className="prompt-card">
-                <div className="prompt-icon">📍</div>
+                <div className="prompt-icon"></div>
                 <h3>Select Your Location</h3>
                 <p>Choose your university and campus from the navigation bar to start exploring</p>
               </div>
@@ -132,7 +132,7 @@ function Home() {
           <div className="steps-container">
             <div className="step-card">
               <div className="step-number">1</div>
-              <div className="step-icon">🔍</div>
+              <div className="step-icon"></div>
               <h3 className="step-title">Browse & Select</h3>
               <p className="step-description">Explore restaurants and menu items from your favorite places</p>
             </div>
@@ -141,7 +141,7 @@ function Home() {
 
             <div className="step-card">
               <div className="step-number">2</div>
-              <div className="step-icon">🛒</div>
+              <div className="step-icon"></div>
               <h3 className="step-title">Add to Cart</h3>
               <p className="step-description">Choose your items and customize your order</p>
             </div>
@@ -150,7 +150,7 @@ function Home() {
 
             <div className="step-card">
               <div className="step-number">3</div>
-              <div className="step-icon">🚀</div>
+              <div className="step-icon"></div>
               <h3 className="step-title">Fast Delivery</h3>
               <p className="step-description">Sit back and relax while we deliver to your location</p>
             </div>
@@ -189,7 +189,7 @@ function Home() {
               Whether you're buried in assignments or just don't feel like stepping out, we've got your back—with 
               your favorite meals just a few clicks away.
             </p>
-            <p className="info-highlight">More campuses coming soon. Stay hungry. 🍔</p>
+            <p className="info-highlight">More campuses coming soon. Stay hungry.</p>
           </div>
         </div>
       </section>

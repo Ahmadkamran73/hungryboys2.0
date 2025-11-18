@@ -12,6 +12,8 @@ function SignOutButton() {
     setLoading(true);
     try {
       await signOut(auth);
+      // Clear cart from localStorage on logout
+      localStorage.removeItem('cart');
       navigate("/login");
     } catch (err) {
       const handledError = handleError(err, 'SignOutButton - signOut');
@@ -37,7 +39,7 @@ function SignOutButton() {
           boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        {loading ? "Signing Out..." : "🚪 Sign Out"}
+        {loading ? "Signing Out..." : "Sign Out"}
       </button>
     </div>
   );

@@ -1026,7 +1026,7 @@ const SuperAdmin = () => {
       <div className="container">
         <div className="row">
           <div className="col-12">
-            <h1 className="text-center mb-4">🔧 Super Admin Dashboard</h1>
+            <h1 className="text-center mb-4">Super Admin Dashboard</h1>
             <p className="text-center text-muted mb-4">
               Welcome, {userData?.firstName} {userData?.lastName} ({userData?.email})
             </p>
@@ -1088,7 +1088,7 @@ const SuperAdmin = () => {
                   className={`nav-link ${activeTab === "campusSettings" ? "active" : ""}`}
                   onClick={() => setActiveTab("campusSettings")}
                 >
-                  🏢 Campus Settings
+                  Campus Settings
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -1096,7 +1096,7 @@ const SuperAdmin = () => {
                   className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
                   onClick={() => setActiveTab("orders")}
                 >
-                  💎 Orders Dashboard
+                  Orders Dashboard
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -1104,7 +1104,7 @@ const SuperAdmin = () => {
                   className={`nav-link ${activeTab === "crm" ? "active" : ""}`}
                   onClick={() => setActiveTab("crm")}
                 >
-                  📈 CRM
+                  CRM
                 </button>
               </li>
             </ul>
@@ -2795,7 +2795,7 @@ const SuperAdmin = () => {
                         fontWeight: '600'
                       }}
                     >
-                      <span>📦 All Orders</span>
+                      <span>All Orders</span>
                       <span>{isOrdersOpen ? '▲' : '▼'}</span>
                     </button>
                     {isOrdersOpen && (

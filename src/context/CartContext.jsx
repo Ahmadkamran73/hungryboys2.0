@@ -13,10 +13,32 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cartItems");
+    const savedUserId = localStorage.getItem("cartUserId");
     return savedCart ? JSON.parse(savedCart) : [];
   });
   const { user, userData } = useAuth();
   const { selectedUniversity, selectedCampus } = useUniversity();
+
+  // Clear cart when user changes
+  useEffect(() => {
+    if (user) {
+      const savedUserId = localStorage.getItem("cartUserId");
+      
+      // If the user ID has changed, clear the cart
+      if (savedUserId && savedUserId !== user.uid) {
+        setCartItems([]);
+        localStorage.removeItem("cartItems");
+      }
+      
+      // Store the current user ID
+      localStorage.setItem("cartUserId", user.uid);
+    } else {
+      // If user is null (logged out), clear cart and user ID
+      setCartItems([]);
+      localStorage.removeItem("cartItems");
+      localStorage.removeItem("cartUserId");
+    }
+  }, [user?.uid]);
 
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));

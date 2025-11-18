@@ -27,13 +27,13 @@ const ConfirmationDialog = ({
   const getIcon = () => {
     switch (type) {
       case 'danger':
-        return '⚠️';
+        return '!';
       case 'warning':
-        return '⚠️';
+        return '!';
       case 'info':
-        return 'ℹ️';
+        return 'i';
       default:
-        return '❓';
+        return '?';
     }
   };
 

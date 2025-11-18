@@ -29,7 +29,7 @@
 
 .auth-side-panel {
   flex: 1;
-  background: linear-gradient(135deg, #0f766e 0%, #059669 50%, #10b981 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #dbeafe 100%);
   padding: 3rem;
   display: flex;
   align-items: center;
@@ -47,9 +47,9 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 40%),
-    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 35%);
+    radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 40% 60%, rgba(147, 197, 253, 0.1) 0%, transparent 35%);
   animation: pulse 8s ease-in-out infinite;
 }
 
@@ -1435,3 +1435,118 @@ select.auth-input::-ms-expand {
     transition: none !important;
   }
 }
+
+/* ============================================
+   CENTERED LAYOUT REDESIGN
+   Single Column Centered Auth Pages
+   ============================================ */
+
+.auth-page-centered {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ef 100%);
+  padding: 2rem 1rem;
+  padding-top: calc(70px + 2rem);
+}
+
+[data-theme="dark"] .auth-page-centered {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.auth-container-centered {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  animation: slideUp 0.4s ease-out;
+}
+
+[data-theme="dark"] .auth-container-centered {
+  background: #1e293b;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-header-centered {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.auth-logo-container-centered {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #2ED573, #26B863);
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(46, 213, 115, 0.3);
+}
+
+.auth-logo-icon-centered {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(46, 213, 115, 0.25);
+}
+
+.auth-title-centered {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.5px;
+}
+
+[data-theme="dark"] .auth-title-centered {
+  color: #ffffff;
+}
+
+.auth-welcome-centered {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .auth-welcome-centered {
+  color: #94a3b8;
+}
+
+.auth-form-content-centered {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .auth-container-centered {
+    padding: 2rem 1.5rem;
+  }
+  
+  .auth-title-centered {
+    font-size: 1.875rem;
+  }
+  
+  .auth-logo-container-centered {
+    width: 75px;
+    height: 75px;
+    margin-bottom: 1rem;
+  }
+}
+

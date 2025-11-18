@@ -7,6 +7,7 @@
   color: #1A1A1A;
   max-width: 1400px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .dashboard-header {
@@ -406,11 +407,6 @@
 
   .orders-header h4 {
     font-size: 1.1rem;
-  }
-
-  .orders-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .table {

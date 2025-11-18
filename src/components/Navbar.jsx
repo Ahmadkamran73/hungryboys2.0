@@ -16,12 +16,16 @@ function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
 
   const cartItemCount = cart?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      // Clear cart from localStorage on logout
+      localStorage.removeItem('cart');
       setIsUserMenuOpen(false);
     } catch (error) {
       console.error("Error signing out:", error);
@@ -44,6 +48,22 @@ function Navbar() {
     setIsUserMenuOpen(false);
   };
 
+  const toggleMoreMenu = () => {
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
+
+  const closeMoreMenu = () => {
+    setIsMoreMenuOpen(false);
+  };
+
+  const toggleSettingsMenu = () => {
+    setIsSettingsMenuOpen(!isSettingsMenuOpen);
+  };
+
+  const closeSettingsMenu = () => {
+    setIsSettingsMenuOpen(false);
+  };
+
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -58,6 +78,8 @@ function Navbar() {
   useEffect(() => {
     closeMobileMenu();
     closeUserMenu();
+    closeMoreMenu();
+    closeSettingsMenu();
   }, [location]);
 
   // Close menus when clicking outside
@@ -65,16 +87,21 @@ function Navbar() {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.modern-navbar')) {
         closeUserMenu();
+        closeMoreMenu();
+        closeSettingsMenu();
       }
     };
 
-    if (isUserMenuOpen) {
+    if (isUserMenuOpen || isMoreMenuOpen || isSettingsMenuOpen) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [isUserMenuOpen]);
+  }, [isUserMenuOpen, isMoreMenuOpen, isSettingsMenuOpen]);
 
   const isActive = (path) => location.pathname === path;
+
+  // Check if user is any admin role
+  const isAdminRole = isSuperAdmin() || isCampusAdmin() || isRestaurantManager();
 
   return (
     <nav className={`modern-navbar ${isScrolled ? 'scrolled' : ''}`}>
@@ -97,36 +124,134 @@ function Navbar() {
               </svg>
               <span>Home</span>
             </Link>
-            <Link 
-              className={`navbar-link ${isActive('/restaurants') ? 'active' : ''}`} 
-              to="/restaurants"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
-              </svg>
-              <span>Restaurants</span>
-            </Link>
-            <Link 
-              className={`navbar-link ${isActive('/mart-items') ? 'active' : ''}`} 
-              to="/mart-items"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
-              </svg>
-              <span>Mart Items</span>
-            </Link>
-            <Link 
-              className={`navbar-link navbar-cart ${isActive('/cart') ? 'active' : ''}`} 
-              to="/cart"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
-              </svg>
-              <span>Cart</span>
-              {cartItemCount > 0 && (
-                <span className="cart-badge">{cartItemCount}</span>
-              )}
-            </Link>
+
+            {/* Admin-specific navigation */}
+            {isAdminRole ? (
+              <>
+                {/* Dashboard Link */}
+                {isSuperAdmin() && (
+                  <Link 
+                    className={`navbar-link ${isActive('/super-admin') ? 'active' : ''}`} 
+                    to="/super-admin"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                    </svg>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+                {isCampusAdmin() && (
+                  <Link 
+                    className={`navbar-link ${isActive(`/admin/${userData?.universityId}/${userData?.campusId}`) ? 'active' : ''}`} 
+                    to={`/admin/${userData?.universityId}/${userData?.campusId}`}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                    </svg>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+                {isRestaurantManager() && (
+                  <Link 
+                    className={`navbar-link ${isActive('/restaurant-manager') ? 'active' : ''}`} 
+                    to="/restaurant-manager"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                    </svg>
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+
+                {/* More dropdown for Restaurants, Mart Items, Cart */}
+                <div className="navbar-dropdown-wrapper">
+                  <button 
+                    className={`navbar-link ${isActive('/restaurants') || isActive('/mart-items') || isActive('/cart') ? 'active' : ''}`}
+                    onClick={toggleMoreMenu}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z" fill="currentColor"/>
+                    </svg>
+                    <span>More</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+                    </svg>
+                  </button>
+
+                  {isMoreMenuOpen && (
+                    <div className="navbar-dropdown">
+                      <Link 
+                        className="navbar-dropdown-link" 
+                        to="/restaurants"
+                        onClick={closeMoreMenu}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
+                        </svg>
+                        <span>Restaurants</span>
+                      </Link>
+                      <Link 
+                        className="navbar-dropdown-link" 
+                        to="/mart-items"
+                        onClick={closeMoreMenu}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
+                        </svg>
+                        <span>Mart Items</span>
+                      </Link>
+                      <Link 
+                        className="navbar-dropdown-link" 
+                        to="/cart"
+                        onClick={closeMoreMenu}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
+                        </svg>
+                        <span>Cart</span>
+                        {cartItemCount > 0 && (
+                          <span className="cart-badge-dropdown">{cartItemCount}</span>
+                        )}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              /* Regular user navigation */
+              <>
+                <Link 
+                  className={`navbar-link ${isActive('/restaurants') ? 'active' : ''}`} 
+                  to="/restaurants"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
+                  </svg>
+                  <span>Restaurants</span>
+                </Link>
+                <Link 
+                  className={`navbar-link ${isActive('/mart-items') ? 'active' : ''}`} 
+                  to="/mart-items"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
+                  </svg>
+                  <span>Mart Items</span>
+                </Link>
+                <Link 
+                  className={`navbar-link navbar-cart ${isActive('/cart') ? 'active' : ''}`} 
+                  to="/cart"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
+                  </svg>
+                  <span>Cart</span>
+                  {cartItemCount > 0 && (
+                    <span className="cart-badge">{cartItemCount}</span>
+                  )}
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="navbar-actions">
@@ -135,9 +260,31 @@ function Navbar() {
               <UniversitySelector />
             </div>
 
-            {/* Theme Toggle */}
-            <div className="navbar-theme">
-              <ThemeToggle />
+            {/* Settings Dropdown with Theme Toggle */}
+            <div className="navbar-dropdown-wrapper">
+              <button 
+                className="navbar-settings-trigger"
+                onClick={toggleSettingsMenu}
+                title="Settings"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19.14 12.94C19.18 12.64 19.2 12.33 19.2 12C19.2 11.68 19.18 11.36 19.13 11.06L21.16 9.48C21.34 9.34 21.39 9.07 21.28 8.87L19.36 5.55C19.24 5.33 18.99 5.26 18.77 5.33L16.38 6.29C15.88 5.91 15.35 5.59 14.76 5.35L14.4 2.81C14.36 2.57 14.16 2.4 13.92 2.4H10.08C9.84 2.4 9.65 2.57 9.61 2.81L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33C5.02 5.25 4.77 5.33 4.65 5.55L2.74 8.87C2.62 9.08 2.66 9.34 2.86 9.48L4.89 11.06C4.84 11.36 4.8 11.69 4.8 12C4.8 12.31 4.82 12.64 4.87 12.94L2.84 14.52C2.66 14.66 2.61 14.93 2.72 15.13L4.64 18.45C4.76 18.67 5.01 18.74 5.23 18.67L7.62 17.71C8.12 18.09 8.65 18.41 9.24 18.65L9.6 21.19C9.65 21.43 9.84 21.6 10.08 21.6H13.92C14.16 21.6 14.36 21.43 14.39 21.19L14.75 18.65C15.34 18.41 15.88 18.09 16.37 17.71L18.76 18.67C18.98 18.75 19.23 18.67 19.35 18.45L21.27 15.13C21.39 14.91 21.34 14.66 21.15 14.52L19.14 12.94ZM12 15.6C10.02 15.6 8.4 13.98 8.4 12C8.4 10.02 10.02 8.4 12 8.4C13.98 8.4 15.6 10.02 15.6 12C15.6 13.98 13.98 15.6 12 15.6Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              {isSettingsMenuOpen && (
+                <div className="navbar-dropdown navbar-settings-dropdown">
+                  <div className="navbar-dropdown-header">
+                    <p className="navbar-dropdown-title">Settings</p>
+                  </div>
+                  <div className="navbar-dropdown-links">
+                    <div className="navbar-dropdown-theme">
+                      <span>Theme</span>
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* User Menu */}
@@ -279,39 +426,125 @@ function Navbar() {
                 </svg>
                 <span>Home</span>
               </Link>
-              <Link 
-                className={`navbar-mobile-link ${isActive('/restaurants') ? 'active' : ''}`} 
-                to="/restaurants"
-                onClick={closeMobileMenu}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
-                </svg>
-                <span>Restaurants</span>
-              </Link>
-              <Link 
-                className={`navbar-mobile-link ${isActive('/mart-items') ? 'active' : ''}`} 
-                to="/mart-items"
-                onClick={closeMobileMenu}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
-                </svg>
-                <span>Mart Items</span>
-              </Link>
-              <Link 
-                className={`navbar-mobile-link ${isActive('/cart') ? 'active' : ''}`} 
-                to="/cart"
-                onClick={closeMobileMenu}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
-                </svg>
-                <span>Cart</span>
-                {cartItemCount > 0 && (
-                  <span className="navbar-mobile-badge">{cartItemCount}</span>
-                )}
-              </Link>
+
+              {/* Admin-specific mobile navigation */}
+              {isAdminRole ? (
+                <>
+                  {/* Dashboard Links */}
+                  {isSuperAdmin() && (
+                    <Link 
+                      className={`navbar-mobile-link ${isActive('/super-admin') ? 'active' : ''}`} 
+                      to="/super-admin"
+                      onClick={closeMobileMenu}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                      </svg>
+                      <span>Dashboard</span>
+                    </Link>
+                  )}
+                  {isCampusAdmin() && (
+                    <Link 
+                      className={`navbar-mobile-link ${isActive(`/admin/${userData?.universityId}/${userData?.campusId}`) ? 'active' : ''}`} 
+                      to={`/admin/${userData?.universityId}/${userData?.campusId}`}
+                      onClick={closeMobileMenu}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                      </svg>
+                      <span>Dashboard</span>
+                    </Link>
+                  )}
+                  {isRestaurantManager() && (
+                    <Link 
+                      className={`navbar-mobile-link ${isActive('/restaurant-manager') ? 'active' : ''}`} 
+                      to="/restaurant-manager"
+                      onClick={closeMobileMenu}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 13H11V3H3V13ZM3 21H11V15H3V21ZM13 21H21V11H13V21ZM13 3V9H21V3H13Z" fill="currentColor"/>
+                      </svg>
+                      <span>Dashboard</span>
+                    </Link>
+                  )}
+
+                  {/* Expandable More Section */}
+                  <div className="navbar-mobile-divider">
+                    <span>More Options</span>
+                  </div>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/restaurants') ? 'active' : ''}`} 
+                    to="/restaurants"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
+                    </svg>
+                    <span>Restaurants</span>
+                  </Link>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/mart-items') ? 'active' : ''}`} 
+                    to="/mart-items"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
+                    </svg>
+                    <span>Mart Items</span>
+                  </Link>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/cart') ? 'active' : ''}`} 
+                    to="/cart"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
+                    </svg>
+                    <span>Cart</span>
+                    {cartItemCount > 0 && (
+                      <span className="navbar-mobile-badge">{cartItemCount}</span>
+                    )}
+                  </Link>
+                </>
+              ) : (
+                /* Regular user mobile navigation */
+                <>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/restaurants') ? 'active' : ''}`} 
+                    to="/restaurants"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 4V8H4V4H8ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM8 10V14H4V10H8ZM14 10H10V14H14V10ZM16 10H20V14H16V10ZM8 16V20H4V16H8ZM10 16H14V20H10V16ZM20 16V20H16V16H20Z" fill="currentColor"/>
+                    </svg>
+                    <span>Restaurants</span>
+                  </Link>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/mart-items') ? 'active' : ''}`} 
+                    to="/mart-items"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7ZM7 6H5V20H19V6H17V8H7V6Z" fill="currentColor"/>
+                    </svg>
+                    <span>Mart Items</span>
+                  </Link>
+                  <Link 
+                    className={`navbar-mobile-link ${isActive('/cart') ? 'active' : ''}`} 
+                    to="/cart"
+                    onClick={closeMobileMenu}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 4V2H17V4H20.007C20.555 4 21 4.445 21 4.993V21.007C21 21.555 20.555 22 20.007 22H3.993C3.445 22 3 21.555 3 21.007V4.993C3 4.445 3.445 4 3.993 4H7Z" fill="currentColor"/>
+                    </svg>
+                    <span>Cart</span>
+                    {cartItemCount > 0 && (
+                      <span className="navbar-mobile-badge">{cartItemCount}</span>
+                    )}
+                  </Link>
+                </>
+              )}
+
               <Link 
                 className={`navbar-mobile-link ${isActive('/checkout') ? 'active' : ''}`} 
                 to="/checkout"
@@ -373,6 +606,7 @@ function Navbar() {
 
               {/* Theme Toggle in Mobile */}
               <div className="navbar-mobile-theme">
+                <span className="navbar-mobile-theme-label">Theme</span>
                 <ThemeToggle />
               </div>
               

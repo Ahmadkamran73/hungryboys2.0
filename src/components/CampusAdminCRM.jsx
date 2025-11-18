@@ -101,7 +101,7 @@ export default function CampusAdminCRM() {
   const doughnutOptions = { plugins: { legend: { labels: { color: axisColor } }, tooltip: { backgroundColor: tooltipBg, titleColor: axisColor, bodyColor: axisColor, borderColor: tooltipBorder, borderWidth: 1, padding: 10 } } };
   const hourlyData = { labels: Array.from({ length: 24 }, (_, h) => `${h}:00`), datasets: [{ label: 'Orders by Hour (7d)', data: hourly, backgroundColor: '#60A5FA' }] };
   const hourlyOptions = { responsive: true, plugins: { legend: { display: false, labels: { color: axisColor } }, tooltip: { backgroundColor: tooltipBg, titleColor: axisColor, bodyColor: axisColor, borderColor: tooltipBorder, borderWidth: 1, padding: 10 } }, scales: { x: { grid: { display: false }, ticks: { color: axisColor } }, y: { ticks: { precision: 0, color: axisColor }, grid: { color: gridColor } } } };
-  const topRestaurantsData = { labels: topRestaurants.labels, datasets: [{ label: 'Revenue (Rs)', data: topRestaurants.values, backgroundColor: '#A78BFA' }] };
+  const topRestaurantsData = { labels: topRestaurants.labels, datasets: [{ label: 'Revenue (Rs)', data: topRestaurants.values, backgroundColor: '#3B82F6' }] };
   const topRestaurantsOptions = { indexAxis: 'y', responsive: true, plugins: { legend: { display: false, labels: { color: axisColor } }, tooltip: { backgroundColor: tooltipBg, titleColor: axisColor, bodyColor: axisColor, borderColor: tooltipBorder, borderWidth: 1, padding: 10 } }, scales: { x: { ticks: { color: axisColor }, grid: { color: gridColor } }, y: { ticks: { color: axisColor }, grid: { color: gridColor } } } };
 
   if (loading) return <LoadingSpinner message="Loading CRM..." />;
@@ -110,19 +110,11 @@ export default function CampusAdminCRM() {
   return (
     <div className="campus-dashboard-container">
       <div className="dashboard-header">
-        <h2>📈 CRM Overview (Campus)</h2>
+        <h2>CRM Overview (Campus)</h2>
         <p className="text-muted">Auto-refreshing every 15 seconds • {userData?.campusName || 'Your campus'}</p>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card"><div className="stat-icon">📦</div><div className="stat-content"><div className="stat-value">{stats.total}</div><div className="stat-label">Total Orders</div></div></div>
-        <div className="stat-card"><div className="stat-icon">💰</div><div className="stat-content"><div className="stat-value">Rs. {stats.revenue.toFixed(0)}</div><div className="stat-label">Total Revenue</div></div></div>
-        <div className="stat-card"><div className="stat-icon">📅</div><div className="stat-content"><div className="stat-value">{stats.today}</div><div className="stat-label">Today</div></div></div>
-        <div className="stat-card"><div className="stat-icon">⚖️</div><div className="stat-content"><div className="stat-value">Rs. {stats.avg.toFixed(0)}</div><div className="stat-label">Avg Order Value</div></div></div>
-        <div className="stat-card"><div className="stat-icon">✅</div><div className="stat-content"><div className="stat-value">{Math.round(deliveredStats.rate*100)}%</div><div className="stat-label">Delivered Rate</div></div></div>
-        <div className="stat-card"><div className="stat-icon">📉</div><div className="stat-content"><div className="stat-value">Rs. {Math.round(deliveredStats.receivableAmount)}</div><div className="stat-label">Receivable</div></div></div>
-      </div>
-
+      {/* Charts Section - Moved to Top */}
       <div className="row g-4 mt-1">
         <div className="col-12 col-lg-8">
           <div className="card p-3 h-100">
@@ -138,16 +130,7 @@ export default function CampusAdminCRM() {
         </div>
       </div>
 
-      <div className="row g-4 mt-1">
-        <div className="col-12">
-          <div className="card p-3">
-            <h5 className="mb-3">Orders by Status</h5>
-            <Bar data={barData} options={barOptions} height={90} />
-          </div>
-        </div>
-      </div>
-
-      <div className="row g-4 mt-1">
+      <div className="row g-4 mt-3">
         <div className="col-12 col-lg-6">
           <div className="card p-3 h-100">
             <h5 className="mb-3">Top Restaurants by Revenue</h5>
@@ -161,6 +144,26 @@ export default function CampusAdminCRM() {
           </div>
         </div>
       </div>
+
+      {/* Stats Grid - Moved Below Charts */}
+      <div className="stats-grid mt-4">
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.total}</div><div className="stat-label">Total Orders</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {stats.revenue.toFixed(0)}</div><div className="stat-label">Total Revenue</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.today}</div><div className="stat-label">Today</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {stats.avg.toFixed(0)}</div><div className="stat-label">Avg Order Value</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{Math.round(deliveredStats.rate*100)}%</div><div className="stat-label">Delivered Rate</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {Math.round(deliveredStats.receivableAmount)}</div><div className="stat-label">Receivable</div></div></div>
+      </div>
+
+      {/* Orders by Status Chart - Removed as per requirement */}
+      {/* <div className="row g-4 mt-1">
+        <div className="col-12">
+          <div className="card p-3">
+            <h5 className="mb-3">Orders by Status</h5>
+            <Bar data={barData} options={barOptions} height={90} />
+          </div>
+        </div>
+      </div> */}
     </div>
   );
 }

@@ -212,8 +212,8 @@ const MartItems = () => {
           </div>
         </div>
 
-        {/* Category Filter Chips */}
-        {categories.length > 1 && (
+        {/* Category Filter Chips - Commented out for future use */}
+        {/* {categories.length > 1 && (
           <div className="mart-categories">
             {categories.map((category) => (
               <button
@@ -225,7 +225,7 @@ const MartItems = () => {
               </button>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* Results Info */}
         <div className="mart-results-info">

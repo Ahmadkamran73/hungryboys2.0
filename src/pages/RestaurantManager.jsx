@@ -77,7 +77,7 @@ const RestaurantManager = () => {
       <div className="rm-dashboard">
         <div className="rm-container">
           <div className="rm-error-card">
-            <div className="rm-error-icon">⚠️</div>
+            <div className="rm-error-icon"></div>
             <h3>Error Loading Dashboard</h3>
             <p>{error}</p>
           </div>
@@ -91,7 +91,7 @@ const RestaurantManager = () => {
       <div className="rm-dashboard">
         <div className="rm-container">
           <div className="rm-warning-card">
-            <div className="rm-warning-icon">ℹ️</div>
+            <div className="rm-warning-icon"></div>
             <h3>No Restaurant Assigned</h3>
             <p>No restaurant is assigned to your account. Please contact the administrator.</p>
           </div>
@@ -108,7 +108,7 @@ const RestaurantManager = () => {
           <div className="rm-header-content">
             <div className="rm-header-left">
               <div className="rm-restaurant-badge">
-                <span className="rm-badge-icon">🍽️</span>
+                <span className="rm-badge-icon"></span>
                 <span className="rm-badge-text">Restaurant Manager</span>
               </div>
               <h1 className="rm-restaurant-name">{restaurant.name}</h1>
@@ -132,7 +132,7 @@ const RestaurantManager = () => {
       <div className="rm-container" style={{marginTop: '1rem'}}>
         <ul className="nav nav-tabs mb-3">
           <li className="nav-item"><button className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button></li>
-          <li className="nav-item"><button className={`nav-link ${activeTab === 'crm' ? 'active' : ''}`} onClick={() => setActiveTab('crm')}>📈 CRM</button></li>
+          <li className="nav-item"><button className={`nav-link ${activeTab === 'crm' ? 'active' : ''}`} onClick={() => setActiveTab('crm')}>CRM</button></li>
         </ul>
       </div>
 
@@ -142,7 +142,7 @@ const RestaurantManager = () => {
           <div className="rm-stats-grid">
             <div className="rm-stat-card rm-stat-primary">
               <div className="rm-stat-icon-wrapper">
-                <div className="rm-stat-icon">📦</div>
+                <div className="rm-stat-icon"></div>
               </div>
               <div className="rm-stat-content">
                 <div className="rm-stat-value">{stats.totalOrders}</div>
@@ -152,7 +152,7 @@ const RestaurantManager = () => {
 
             <div className="rm-stat-card rm-stat-warning">
               <div className="rm-stat-icon-wrapper">
-                <div className="rm-stat-icon">⏳</div>
+                <div className="rm-stat-icon"></div>
               </div>
               <div className="rm-stat-content">
                 <div className="rm-stat-value">{stats.pendingOrders}</div>
@@ -162,7 +162,7 @@ const RestaurantManager = () => {
 
             <div className="rm-stat-card rm-stat-success">
               <div className="rm-stat-icon-wrapper">
-                <div className="rm-stat-icon">✅</div>
+                <div className="rm-stat-icon"></div>
               </div>
               <div className="rm-stat-content">
                 <div className="rm-stat-value">{stats.completedOrders}</div>
@@ -172,7 +172,7 @@ const RestaurantManager = () => {
 
             <div className="rm-stat-card rm-stat-revenue">
               <div className="rm-stat-icon-wrapper">
-                <div className="rm-stat-icon">💰</div>
+                <div className="rm-stat-icon"></div>
               </div>
               <div className="rm-stat-content">
                 <div className="rm-stat-value">Rs. {stats.todayRevenue.toFixed(0)}</div>
@@ -240,7 +240,7 @@ const RestaurantManager = () => {
               <div className="rm-orders-card">
                 <div className="rm-card-header rm-orders-header">
                   <h2 className="rm-card-title">
-                    <span className="rm-title-icon">📋</span>
+                    <span className="rm-title-icon"></span>
                     Order Management
                   </h2>
                   <button

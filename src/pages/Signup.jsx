@@ -270,62 +270,20 @@ function Signup() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        {/* Left Side - Branding Panel */}
-        <div className="auth-side-panel">
-          <div className="auth-side-content">
-            <div className="auth-logo-container">
-              <img 
-                src={logo} 
-                alt="Hungry Boys Logo" 
-                className="auth-logo-icon"
-              />
-              <h1 className="auth-logo-text">Hungry Boys</h1>
-            </div>
-            <p className="auth-tagline">Your cravings, delivered fresh to your campus</p>
-            
-            <div className="auth-features">
-              <div className="auth-feature">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="white" />
-                </svg>
-                <div>
-                  <h4>Fast Delivery</h4>
-                  <p>Get your food delivered in minutes</p>
-                </div>
-              </div>
-              
-              <div className="auth-feature">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 12L12 3L21 12H18V20H15V14H9V20H6V12H3Z" fill="white" />
-                </svg>
-                <div>
-                  <h4>Multiple Restaurants</h4>
-                  <p>Choose from a variety of cuisines</p>
-                </div>
-              </div>
-              
-              <div className="auth-feature">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 1V8H15V1H17V8H19C20.11 8 21 8.9 21 10V12C21 13.11 20.11 14 19 14H5C3.9 14 3 13.11 3 12V10C3 8.9 3.9 8 5 8H7V1H9ZM7 16H9V23H7V16ZM15 16H17V23H15V16Z" fill="white" />
-                </svg>
-                <div>
-                  <h4>Easy Ordering</h4>
-                  <p>Simple and quick ordering process</p>
-                </div>
-              </div>
-            </div>
+    <div className="auth-page-centered">
+      <div className="auth-container-centered">
+        {/* Header with Logo */}
+        <div className="auth-header-centered">
+          <div className="auth-logo-container-centered">
+            <img 
+              src={logo} 
+              alt="Hungry Boys Logo" 
+              className="auth-logo-icon-centered"
+            />
           </div>
+          <h1 className="auth-title-centered">Hungry Boys</h1>
+          <p className="auth-welcome-centered">Create your account and start ordering delicious food</p>
         </div>
-
-        {/* Right Side - Form Panel */}
-        <div className="auth-form-panel">
-          <div className="auth-form-content">
-            <div className="auth-form-header">
-              <h2>Create Account</h2>
-              <p>Join thousands of students ordering delicious food</p>
-            </div>
 
             {availableUniversities.length === 0 && (
               <div className="auth-alert auth-alert-warning">
@@ -574,8 +532,6 @@ function Signup() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
       </div>
     </div>
   );

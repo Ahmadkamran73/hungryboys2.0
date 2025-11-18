@@ -216,7 +216,7 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
       'Date': formatDate(o.createdAt),
       'Customer': o.customerName,
       'Phone': o.phone,
-      'Gender': o.gender,
+      // 'Gender': o.gender, // Hidden for Restaurant Manager
       'Campus': o.campusName,
       'University': o.universityName,
       'Items': formatCartItems(o.cartItems),
@@ -303,15 +303,15 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
             />
           </div>
 
-          {/* Gender Filter */}
-          <div className="rm-filter-group">
+          {/* Gender Filter - Hidden for Restaurant Manager */}
+          {/* <div className="rm-filter-group">
             <label className="rm-filter-label">Gender</label>
             <select className="rm-filter-select" name="gender" value={filters.gender} onChange={handleFilterChange}>
               <option value="">All</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Status Filter */}
           <div className="rm-filter-group">
@@ -408,7 +408,7 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
               <th>Date</th>
               <th>Customer</th>
               <th>Phone</th>
-              <th>Gender</th>
+              {/* <th>Gender</th> */}
               <th>Total</th>
               <th>Actions</th>
             </tr>
@@ -416,7 +416,7 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
           <tbody>
             {currentOrders.length === 0 ? (
               <tr>
-                <td colSpan="7" className="rm-table-empty">
+                <td colSpan="6" className="rm-table-empty">
                   No orders found
                 </td>
               </tr>
@@ -427,11 +427,11 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
                   <td>{formatDate(order.createdAt)}</td>
                   <td>{order.customerName}</td>
                   <td>{order.phone}</td>
-                  <td>
+                  {/* <td>
                     <span className={`rm-badge ${order.gender === 'male' ? 'rm-badge-blue' : 'rm-badge-pink'}`}>
                       {order.gender}
                     </span>
-                  </td>
+                  </td> */}
                   <td>
                     <strong>{formatCurrency(order.itemsTotal || 0)}</strong>
                   </td>
@@ -500,10 +500,10 @@ function RestaurantManagerOrdersPanel({ restaurantId, restaurantName }) {
                     <span className="rm-modal-label">Phone:</span>
                     <span className="rm-modal-value">{selectedOrder.phone}</span>
                   </div>
-                  <div className="rm-modal-info-item">
+                  {/* <div className="rm-modal-info-item">
                     <span className="rm-modal-label">Gender:</span>
                     <span className="rm-modal-value">{selectedOrder.gender}</span>
-                  </div>
+                  </div> */}
                   <div className="rm-modal-info-item">
                     <span className="rm-modal-label">Campus:</span>
                     <span className="rm-modal-value">{selectedOrder.campusName}</span>

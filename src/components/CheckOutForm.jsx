@@ -172,7 +172,7 @@ const CheckOutForm = () => {
     return Object.entries(grouped)
       .map(
         ([restaurant, orders]) =>
-          `📍 ${restaurant}:\n  - ${orders.join("\n  - ")}`
+          `${restaurant}:\n  - ${orders.join("\n  - ")}`
       )
       .join("\n\n");
   };
@@ -371,7 +371,7 @@ const CheckOutForm = () => {
           <div className="success-header">
             <div className="success-icon">✓</div>
             <h1 className="success-title">Order Placed Successfully!</h1>
-            <p className="success-subtitle">Thank you for shopping with Hungry Boys 🎉</p>
+            <p className="success-subtitle">Thank you for shopping with Hungry Boys</p>
           </div>
 
           {/* Order Summary Card */}
@@ -470,7 +470,7 @@ const CheckOutForm = () => {
 
             {/* Order Status */}
             <div className="order-status-box">
-              <div className="status-icon">⏳</div>
+              <div className="status-icon"></div>
               <div className="status-content">
                 <h4 className="status-title">Order Processing</h4>
                 <p className="status-text">Your order is being prepared. We'll notify you once it's on the way!</p>
@@ -494,7 +494,7 @@ const CheckOutForm = () => {
 
   return (
     <div className="checkout-container container-fluid py-4">
-      <h2 className="text-center text-white mb-4">🧾 Checkout</h2>
+      <h2 className="text-center text-white mb-4">Checkout</h2>
       {error && <div className="alert alert-danger">{error}</div>}
       
       {loading && (
@@ -666,7 +666,7 @@ const CheckOutForm = () => {
               }}
               title="Refresh payment details"
             >
-              🔄 Refresh
+              Refresh
             </button>
           </div>
           <div style={{ 
@@ -684,11 +684,29 @@ const CheckOutForm = () => {
         {/* Online Payment Info */}
         <div className="col-md-6">
           <label className="form-label">Account Title *</label>
-          <input type="text" className="form-control dark-input" name="accountTitle" value={form.accountTitle} onChange={handleChange} required />
+          <input 
+            type="text" 
+            className="form-control dark-input" 
+            name="accountTitle" 
+            value={form.accountTitle} 
+            onChange={handleChange} 
+            pattern="[A-Za-z\s]+"
+            title="Only letters and spaces are allowed"
+            required 
+          />
         </div>
         <div className="col-md-6">
           <label className="form-label">Bank Name *</label>
-          <input type="text" className="form-control dark-input" name="bankName" value={form.bankName} onChange={handleChange} required />
+          <input 
+            type="text" 
+            className="form-control dark-input" 
+            name="bankName" 
+            value={form.bankName} 
+            onChange={handleChange} 
+            pattern="[A-Za-z\s]+"
+            title="Only letters and spaces are allowed"
+            required 
+          />
         </div>
         <div className="col-12">
           <label className="form-label">Upload Screenshot *</label>
@@ -798,7 +816,7 @@ const CheckOutForm = () => {
               }
             }}
           >
-            {loading ? "⏳ Processing..." : "🛒 Complete Checkout"}
+            {loading ? "Processing..." : "Complete Checkout"}
           </button>
         </div>
       </form>

@@ -11,7 +11,7 @@ const Unauthorized = () => {
         <div className="row justify-content-center">
           <div className="col-md-6 text-center">
             <div className="unauthorized-card">
-              <div className="unauthorized-icon">🚫</div>
+              <div className="unauthorized-icon"></div>
               <h1 className="unauthorized-title">Access Denied</h1>
               <p className="unauthorized-message">
                 You don't have permission to access this page.

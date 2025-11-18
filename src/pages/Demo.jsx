@@ -92,13 +92,13 @@ const MyComponent = () => {
               <div className="mt-4">
                 <h5 style={{ color: '#e4002b' }}>Features:</h5>
                 <ul>
-                  <li>✅ Nested dropdown selection (University → Campus)</li>
-                  <li>✅ Global state management with React Context</li>
-                  <li>✅ Persistent storage in localStorage</li>
-                  <li>✅ Dark theme styling matching your design</li>
-                  <li>✅ Loading states and error handling</li>
-                  <li>✅ Responsive design</li>
-                  <li>✅ Clear selection option</li>
+                  <li>Nested dropdown selection (University → Campus)</li>
+                  <li>Global state management with React Context</li>
+                  <li>Persistent storage in localStorage</li>
+                  <li>Dark theme styling matching your design</li>
+                  <li>Loading states and error handling</li>
+                  <li>Responsive design</li>
+                  <li>Clear selection option</li>
                 </ul>
               </div>
             </div>

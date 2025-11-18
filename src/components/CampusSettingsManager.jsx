@@ -301,6 +301,8 @@ const CampusSettingsManager = () => {
                       value={editingSettings.accountTitle}
                       onChange={(e) => handleSettingsChange('accountTitle', e.target.value)}
                       placeholder="Enter account title"
+                      pattern="[A-Za-z\s]+"
+                      title="Only letters and spaces are allowed"
                       required
                     />
                   </div>
@@ -312,6 +314,8 @@ const CampusSettingsManager = () => {
                       value={editingSettings.bankName}
                       onChange={(e) => handleSettingsChange('bankName', e.target.value)}
                       placeholder="Enter bank name"
+                      pattern="[A-Za-z\s]+"
+                      title="Only letters and spaces are allowed"
                       required
                     />
                   </div>

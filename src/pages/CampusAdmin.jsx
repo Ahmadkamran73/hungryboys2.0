@@ -577,7 +577,7 @@ const CampusAdmin = () => {
                   className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
                   onClick={() => setActiveTab("orders")}
                 >
-                  📦 Orders
+                  Orders
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -585,7 +585,7 @@ const CampusAdmin = () => {
                   className={`nav-link ${activeTab === "crm" ? "active" : ""}`}
                   onClick={() => setActiveTab("crm")}
                 >
-                  📈 CRM
+                  CRM
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -593,7 +593,7 @@ const CampusAdmin = () => {
                   className={`nav-link ${activeTab === "dashboard" ? "active" : ""}`}
                   onClick={() => setActiveTab("dashboard")}
                 >
-                  📊 Dashboard
+                  Dashboard
                 </button>
               </li>
             </ul>

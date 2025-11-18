@@ -69,7 +69,7 @@ const CartSummary = () => {
             </h5>
             <div className="checkout-action">
               <button className="checkout-btn" onClick={handleCheckout} aria-label="Proceed to checkout">
-                <span className="btn-icon" aria-hidden>🛒</span>
+                <span className="btn-icon" aria-hidden></span>
                 <span className="btn-text">Checkout</span>
                 <span className="btn-amount">Rs {total.toFixed(2)}</span>
               </button>

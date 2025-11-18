@@ -140,91 +140,51 @@ function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        {/* Left Side - Illustration/Branding */}
-        <div className="auth-side-panel">
-          <div className="auth-branding">
-            <div className="auth-logo-container">
-              <img 
-                src={logo} 
-                alt="Hungry Boys Logo" 
-                className="auth-logo-icon"
-              />
-              <h1 className="auth-logo-text">Hungry Boys</h1>
-            </div>
-            <p className="auth-tagline">Your cravings, delivered fresh to your campus</p>
-            
-            <div className="auth-features">
-              <div className="auth-feature">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                <div>
-                  <h4>Fast Delivery</h4>
-                  <p>Get your food delivered quickly within campus</p>
-                </div>
-              </div>
-              <div className="auth-feature">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 2v7c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V2M7 2v20M17 2v20" />
-                  <path d="M21 12H3" />
-                </svg>
-                <div>
-                  <h4>Multiple Restaurants</h4>
-                  <p>Choose from a variety of campus restaurants</p>
-                </div>
-              </div>
-              <div className="auth-feature">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="21" r="1" />
-                  <circle cx="20" cy="21" r="1" />
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                </svg>
-                <div>
-                  <h4>Easy Ordering</h4>
-                  <p>Simple and intuitive ordering process</p>
-                </div>
-              </div>
-            </div>
+    <div className="auth-page-centered">
+      <div className="auth-container-centered">
+        {/* Logo and Branding */}
+        <div className="auth-header-centered">
+          <div className="auth-logo-container-centered">
+            <img 
+              src={logo} 
+              alt="Hungry Boys Logo" 
+              className="auth-logo-icon-centered"
+            />
           </div>
+          <h1 className="auth-title-centered">Hungry Boys</h1>
+          <p className="auth-welcome-centered">
+            {showForgotPassword ? "Reset your password" : "Welcome back! Sign in to your account"}
+          </p>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="auth-form-panel">
-          <div className="auth-form-content">
-            <div className="auth-form-header">
-              <h2>{showForgotPassword ? "Reset Password" : "Welcome Back!"}</h2>
-              <p>{showForgotPassword ? "Enter your email to receive a password reset link" : "Sign in to continue to Hungry Boys"}</p>
+        {/* Form Section */}
+        <div className="auth-form-content-centered">
+          {error && (
+            <div className="auth-alert auth-alert-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{error}</span>
             </div>
-
-            {error && (
-              <div className="auth-alert auth-alert-error">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span>{error}</span>
-              </div>
-            )}
-            
-            {success && (
-              <div className="auth-alert auth-alert-success">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <span>{success}</span>
-              </div>
-            )}
-            
-            {loading && (
-              <div className="auth-loading">
-                <LoadingSpinner message={showForgotPassword ? "Sending..." : "Signing In..."} />
-              </div>
-            )}
+          )}
+          
+          {success && (
+            <div className="auth-alert auth-alert-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span>{success}</span>
+            </div>
+          )}
+          
+          {loading && (
+            <div className="auth-loading">
+              <LoadingSpinner message={showForgotPassword ? "Sending..." : "Signing In..."} />
+            </div>
+          )}
 
             {!showForgotPassword ? (
               <form onSubmit={handleLogin} className="auth-form">
@@ -377,7 +337,6 @@ function Login() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
