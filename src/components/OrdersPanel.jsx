@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { useAuth } from '../context/AuthContext';
 import { api, authHeaders } from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
@@ -47,6 +49,10 @@ export default function OrdersPanel({ campusId, campusName }) {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
+
+  // Date picker for aggregated export
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [exportDate, setExportDate] = useState('');
 
   useEffect(() => {
     if (campusId) {
@@ -290,11 +296,309 @@ export default function OrdersPanel({ campusId, campusName }) {
     }
   };
 
+  const exportAggregatedOrdersByDate = () => {
+    if (!exportDate) {
+      setError('Please select a date for export');
+      return;
+    }
+
+    try {
+      // Filter orders by selected date
+      const selectedDate = new Date(exportDate);
+      const startOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0);
+      const endOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59);
+
+      const ordersForDate = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= startOfDay && orderDate <= endOfDay;
+      });
+
+      if (ordersForDate.length === 0) {
+        setError('No orders found for the selected date');
+        return;
+      }
+
+      // Aggregate items by restaurant
+      const restaurantAggregation = {};
+
+      ordersForDate.forEach(order => {
+        // Parse cart items from the order
+        let items = [];
+        
+        // Try to use cartItemsArray if available
+        if (Array.isArray(order.cartItemsArray) && order.cartItemsArray.length > 0) {
+          items = order.cartItemsArray;
+        } else if (order.cartItems) {
+          // Parse from string format
+          const lines = order.cartItems.split('\n');
+          let currentRestaurant = null;
+          
+          lines.forEach(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('📍')) {
+              currentRestaurant = trimmedLine.replace('📍', '').replace(':', '').trim();
+              if (!restaurantAggregation[currentRestaurant]) {
+                restaurantAggregation[currentRestaurant] = {};
+              }
+            } else if (trimmedLine && currentRestaurant) {
+              // Parse item line like "Crispy Chicken (x2) - Rs 500"
+              const match = trimmedLine.match(/^(.+?)\s*\(x(\d+)\)/);
+              if (match) {
+                const itemName = match[1].trim();
+                const quantity = parseInt(match[2]);
+                
+                if (!restaurantAggregation[currentRestaurant][itemName]) {
+                  restaurantAggregation[currentRestaurant][itemName] = 0;
+                }
+                restaurantAggregation[currentRestaurant][itemName] += quantity;
+              }
+            }
+          });
+        }
+
+        // If we have structured array data, use that
+        if (items.length > 0) {
+          items.forEach(item => {
+            const restaurantName = item.restaurantName || 'Unknown';
+            if (!restaurantAggregation[restaurantName]) {
+              restaurantAggregation[restaurantName] = {};
+            }
+            
+            const itemName = item.name;
+            const quantity = item.quantity || 1;
+            
+            if (!restaurantAggregation[restaurantName][itemName]) {
+              restaurantAggregation[restaurantName][itemName] = 0;
+            }
+            restaurantAggregation[restaurantName][itemName] += quantity;
+          });
+        }
+      });
+
+      // Create Excel data
+      const excelData = [];
+      
+      // Add header row
+      excelData.push(['Restaurant', 'Orders']);
+      excelData.push(['', '']); // Empty row for spacing
+
+      // Add data for each restaurant
+      Object.keys(restaurantAggregation).sort().forEach(restaurantName => {
+        const items = restaurantAggregation[restaurantName];
+        const itemNames = Object.keys(items).sort();
+        
+        if (itemNames.length > 0) {
+          // First item with restaurant name
+          excelData.push([restaurantName, `${itemNames[0]} (x${items[itemNames[0]]})`]);
+          
+          // Rest of the items without restaurant name
+          for (let i = 1; i < itemNames.length; i++) {
+            excelData.push(['', `${itemNames[i]} (x${items[itemNames[i]]})`]);
+          }
+          
+          // Empty row between restaurants
+          excelData.push(['', '']);
+        }
+      });
+
+      // Create worksheet and workbook
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+      
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 25 }, // Restaurant column
+        { wch: 50 }  // Orders column
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Aggregated Orders');
+
+      // Download file
+      const safeCampus = (campusName || 'campus').replace(/[^a-z0-9-_]+/gi, '_');
+      const filename = `aggregated_orders_${safeCampus}_${exportDate}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      
+      setShowDatePicker(false);
+      setExportDate('');
+      setError('');
+    } catch (e) {
+      const handledError = handleError(e, 'OrdersPanel - exportAggregatedOrdersByDate');
+      setError(handledError.message);
+    }
+  };
+
+  const exportAggregatedOrdersToPDF = () => {
+    if (!exportDate) {
+      setError('Please select a date for export');
+      return;
+    }
+
+    try {
+      // Filter orders by selected date
+      const selectedDate = new Date(exportDate);
+      const startOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0);
+      const endOfDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59);
+
+      const ordersForDate = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= startOfDay && orderDate <= endOfDay;
+      });
+
+      if (ordersForDate.length === 0) {
+        setError('No orders found for the selected date');
+        return;
+      }
+
+      // Aggregate items by restaurant
+      const restaurantAggregation = {};
+
+      ordersForDate.forEach(order => {
+        // Parse cart items from the order
+        let items = [];
+        
+        // Try to use cartItemsArray if available
+        if (Array.isArray(order.cartItemsArray) && order.cartItemsArray.length > 0) {
+          items = order.cartItemsArray;
+        } else if (order.cartItems) {
+          // Parse from string format
+          const lines = order.cartItems.split('\n');
+          let currentRestaurant = null;
+          
+          lines.forEach(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('📍')) {
+              currentRestaurant = trimmedLine.replace('📍', '').replace(':', '').trim();
+              if (!restaurantAggregation[currentRestaurant]) {
+                restaurantAggregation[currentRestaurant] = {};
+              }
+            } else if (trimmedLine && currentRestaurant) {
+              // Parse item line like "Crispy Chicken (x2) - Rs 500"
+              const match = trimmedLine.match(/^(.+?)\s*\(x(\d+)\)/);
+              if (match) {
+                const itemName = match[1].trim();
+                const quantity = parseInt(match[2]);
+                
+                if (!restaurantAggregation[currentRestaurant][itemName]) {
+                  restaurantAggregation[currentRestaurant][itemName] = 0;
+                }
+                restaurantAggregation[currentRestaurant][itemName] += quantity;
+              }
+            }
+          });
+        }
+
+        // If we have structured array data, use that
+        if (items.length > 0) {
+          items.forEach(item => {
+            const restaurantName = item.restaurantName || 'Unknown';
+            if (!restaurantAggregation[restaurantName]) {
+              restaurantAggregation[restaurantName] = {};
+            }
+            
+            const itemName = item.name;
+            const quantity = item.quantity || 1;
+            
+            if (!restaurantAggregation[restaurantName][itemName]) {
+              restaurantAggregation[restaurantName][itemName] = 0;
+            }
+            restaurantAggregation[restaurantName][itemName] += quantity;
+          });
+        }
+      });
+
+      // Create PDF
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Aggregated Orders Report', 14, 20);
+      
+      // Add campus and date info
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Campus: ${campusName || 'N/A'}`, 14, 30);
+      doc.text(`Date: ${new Date(exportDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`, 14, 36);
+      doc.text(`Total Orders: ${ordersForDate.length}`, 14, 42);
+      
+      let yPosition = 52;
+
+      // Add data for each restaurant
+      Object.keys(restaurantAggregation).sort().forEach((restaurantName, index) => {
+        const items = restaurantAggregation[restaurantName];
+        const itemNames = Object.keys(items).sort();
+        
+        if (itemNames.length > 0) {
+          // Check if we need a new page
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          // Restaurant name header
+          doc.setFontSize(13);
+          doc.setFont('helvetica', 'bold');
+          doc.setFillColor(79, 70, 229); // Primary color
+          doc.rect(14, yPosition - 5, 182, 8, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.text(restaurantName, 16, yPosition);
+          yPosition += 10;
+          
+          // Items table
+          const tableData = itemNames.map(itemName => [
+            itemName,
+            `x${items[itemName]}`
+          ]);
+          
+          doc.autoTable({
+            startY: yPosition,
+            head: [['Item Name', 'Quantity']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+              fillColor: [99, 102, 241],
+              fontSize: 10,
+              fontStyle: 'bold'
+            },
+            bodyStyles: {
+              fontSize: 9
+            },
+            columnStyles: {
+              0: { cellWidth: 140 },
+              1: { cellWidth: 32, halign: 'center' }
+            },
+            margin: { left: 14, right: 14 },
+          });
+          
+          yPosition = doc.lastAutoTable.finalY + 8;
+        }
+      });
+
+      // Download PDF
+      const safeCampus = (campusName || 'campus').replace(/[^a-z0-9-_]+/gi, '_');
+      const filename = `aggregated_orders_${safeCampus}_${exportDate}.pdf`;
+      doc.save(filename);
+      
+      setShowDatePicker(false);
+      setExportDate('');
+      setError('');
+    } catch (e) {
+      const handledError = handleError(e, 'OrdersPanel - exportAggregatedOrdersToPDF');
+      setError(handledError.message);
+    }
+  };
+
   return (
     <div className="orders-panel-enhanced">
       <div className="orders-header">
         <h3>📦 Orders for {campusName}</h3>
         <div className="d-flex gap-2">
+          <button 
+            className="btn btn-info" 
+            onClick={() => setShowDatePicker(!showDatePicker)}
+          >
+            📅 Export by Date
+          </button>
           <button className="btn btn-success" onClick={exportToExcel} disabled={loading || filteredOrders.length === 0}>
             ⬇️ Export (.xlsx)
           </button>
@@ -305,6 +609,57 @@ export default function OrdersPanel({ campusId, campusName }) {
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+
+      {/* Date Picker for Aggregated Export */}
+      {showDatePicker && (
+        <div className="card p-3 mb-3">
+          <h5 className="mb-3">📅 Export Aggregated Orders by Date</h5>
+          <p className="text-muted mb-3">
+            Select a date to generate an aggregated Excel report with all orders grouped by restaurant with combined quantities.
+          </p>
+          <div className="row g-3 align-items-end">
+            <div className="col-md-4">
+              <label className="form-label">Select Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={exportDate}
+                onChange={(e) => setExportDate(e.target.value)}
+              />
+            </div>
+            <div className="col-md-4">
+              <button 
+                className="btn btn-primary w-100" 
+                onClick={exportAggregatedOrdersByDate}
+                disabled={!exportDate}
+              >
+                Generate Excel Report
+              </button>
+            </div>
+            <div className="col-md-4">
+              <button 
+                className="btn btn-danger w-100" 
+                onClick={exportAggregatedOrdersToPDF}
+                disabled={!exportDate}
+              >
+                Generate PDF Report
+              </button>
+            </div>
+            <div className="col-md-4">
+              <button 
+                className="btn btn-secondary w-100" 
+                onClick={() => {
+                  setShowDatePicker(false);
+                  setExportDate('');
+                  setError('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters Section */}
       <div className="filters-section card p-3 mb-3">

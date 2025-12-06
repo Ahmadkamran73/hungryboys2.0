@@ -40,7 +40,7 @@ const CheckOutForm = () => {
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [campusSettings, setCampusSettings] = useState({
-    deliveryChargePerPerson: 150,
+    deliveryChargePerPerson: null, // Will be fetched from backend
     accountTitle: "Maratib Ali",
     bankName: "Habib bank limited",
     accountNumber: "54427000095103"
@@ -63,14 +63,7 @@ const CheckOutForm = () => {
       
       try {
         const settings = await getCampusSettings(selectedCampus, user);
-        // Ensure delivery charge is at least 150 (remove old 30% discount)
-        const validSettings = {
-          ...settings,
-          deliveryChargePerPerson: (settings?.deliveryChargePerPerson && settings.deliveryChargePerPerson >= 150) 
-            ? settings.deliveryChargePerPerson 
-            : 150
-        };
-        setCampusSettings(validSettings);
+        setCampusSettings(settings);
       } catch (err) {
         console.warn('Failed to fetch campus settings, using defaults:', err);
         // Keep default settings if fetch fails
@@ -87,14 +80,7 @@ const CheckOutForm = () => {
       
       try {
         const settings = await getCampusSettings(selectedCampus, user);
-        // Ensure delivery charge is at least 150 (remove old 30% discount)
-        const validSettings = {
-          ...settings,
-          deliveryChargePerPerson: (settings?.deliveryChargePerPerson && settings.deliveryChargePerPerson >= 150) 
-            ? settings.deliveryChargePerPerson 
-            : 150
-        };
-        setCampusSettings(validSettings);
+        setCampusSettings(settings);
       } catch (err) {
         console.warn('Failed to refresh campus settings:', err);
       }
@@ -145,9 +131,44 @@ const CheckOutForm = () => {
 
   // Email validation removed - any valid email format is accepted
 
-  const deliveryCharge = form.persons * campusSettings.deliveryChargePerPerson;
   const itemTotal = getTotalCost();
+  
+  // Count cake items (by category, isCake flag, or restaurant cuisine)
+  const cakeCount = cartItems.reduce((count, item) => {
+    const isCakeItem = item.isCake || 
+                       (item.category && item.category.toLowerCase().includes('cake')) ||
+                       (item.restaurantCuisine && (item.restaurantCuisine.toLowerCase() === 'cake' || item.restaurantCuisine.toLowerCase() === 'cakes'));
+    return isCakeItem ? count + item.quantity : count;
+  }, 0);
+  
+  const hasCake = cakeCount > 0;
+  
+  // Calculate minimum delivery persons
+  let minDeliveryPersons = 1;
+  if (hasCake) {
+    // Special case: Each cake requires 4 persons delivery
+    // 1 cake = 4 persons (Rs 600), 2 cakes = 8 persons (Rs 1200), etc.
+    minDeliveryPersons = cakeCount * 4;
+  } else {
+    // Calculate based on order amount (every 1000 after 2500 adds 1 person)
+    if (itemTotal >= 2500) {
+      minDeliveryPersons = 2 + Math.floor((itemTotal - 2500) / 1000);
+    } else {
+      minDeliveryPersons = 1;
+    }
+  }
+  
+  // Ensure persons is at least minimum
+  const actualPersons = Math.max(minDeliveryPersons, form.persons);
+  const deliveryCharge = actualPersons * (campusSettings.deliveryChargePerPerson || 0);
   const grandTotal = itemTotal + deliveryCharge;
+
+  // Update form persons if it's less than minimum
+  useEffect(() => {
+    if (form.persons < minDeliveryPersons) {
+      setForm(prev => ({ ...prev, persons: minDeliveryPersons }));
+    }
+  }, [minDeliveryPersons, form.persons]);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -321,7 +342,7 @@ const CheckOutForm = () => {
         phone: form.phone,
         email: form.email,
         gender: form.gender,
-        persons: form.persons,
+        persons: actualPersons, // Use calculated actual persons
         deliveryCharge,
         itemTotal,
         grandTotal,
@@ -433,7 +454,7 @@ const CheckOutForm = () => {
                   <span className="payment-value">Rs {orderSnapshot?.itemTotal ?? itemTotal}</span>
                 </div>
                 <div className="payment-row">
-                  <span className="payment-label">Delivery Charges ({form.persons} person{form.persons > 1 ? 's' : ''}):</span>
+                  <span className="payment-label">Delivery Charges ({actualPersons} person{actualPersons > 1 ? 's' : ''}):</span>
                   <span className="payment-value">Rs {orderSnapshot?.deliveryCharge ?? deliveryCharge}</span>
                 </div>
                 <div className="payment-row payment-total">
@@ -589,7 +610,9 @@ const CheckOutForm = () => {
             <button 
               type="button" 
               className="counter-btn counter-minus" 
-              onClick={() => setForm(prev => ({ ...prev, persons: Math.max(1, prev.persons - 1) }))}
+              onClick={() => setForm(prev => ({ ...prev, persons: Math.max(minDeliveryPersons, prev.persons - 1) }))}
+              disabled={form.persons <= minDeliveryPersons}
+              style={{ opacity: form.persons <= minDeliveryPersons ? 0.5 : 1, cursor: form.persons <= minDeliveryPersons ? 'not-allowed' : 'pointer' }}
             >
               −
             </button>
@@ -597,9 +620,9 @@ const CheckOutForm = () => {
               type="number" 
               className="counter-input" 
               name="persons" 
-              value={form.persons} 
+              value={actualPersons} 
               onChange={handleChange} 
-              min="1" 
+              min={minDeliveryPersons} 
               required 
               readOnly
             />
@@ -611,7 +634,23 @@ const CheckOutForm = () => {
               +
             </button>
           </div>
-          <small className="text-muted" style={{ color: '#6B7280' }}>Each delivery is Rs {campusSettings.deliveryChargePerPerson} per person</small>
+          <small className="text-muted d-block mt-2" style={{ color: '#6B7280' }}>
+            {campusSettings.deliveryChargePerPerson 
+              ? `Delivery: Rs ${campusSettings.deliveryChargePerPerson} per person` 
+              : 'Loading delivery fee...'}
+          </small>
+          {hasCake && (
+            <small className="text-warning d-block mt-1" style={{ fontWeight: '600' }}>
+              ⚠️ {cakeCount} cake{cakeCount > 1 ? 's' : ''} in cart = {minDeliveryPersons}-person delivery (Rs {(campusSettings.deliveryChargePerPerson || 0) * minDeliveryPersons})
+              <br />
+              <span style={{ fontSize: '0.85em' }}>Other items don't add extra delivery charges</span>
+            </small>
+          )}
+          {!hasCake && itemTotal >= 2500 && (
+            <small className="text-info d-block mt-1">
+              ℹ️ Orders ≥ Rs {2500 + (minDeliveryPersons - 2) * 1000} require {minDeliveryPersons}-person delivery
+            </small>
+          )}
         </div>
 
         {/* Special Instructions */}

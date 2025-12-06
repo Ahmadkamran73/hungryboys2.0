@@ -167,6 +167,7 @@ const MenuPage = () => {
                       openTime={restaurantData?.openTime}
                       closeTime={restaurantData?.closeTime}
                       is24x7={restaurantData?.is24x7}
+                      restaurantCuisine={restaurantData?.cuisine}
                     />
                   </div>
                 ))}

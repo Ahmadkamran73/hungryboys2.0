@@ -10,7 +10,7 @@ function Home() {
     {
       icon: "",
       title: "Fast Delivery",
-      description: "Get your food delivered within 30-45 minutes"
+      description: "Get your food delivered right to your doorstep"
     },
     {
       icon: "",

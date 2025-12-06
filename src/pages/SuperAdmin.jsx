@@ -8,6 +8,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { handleError } from "../utils/errorHandler";
 // import SuperAdminDashboard from "../components/SuperAdminDashboard"; // Removed: Google Sheets dashboard
 import CampusSettingsManager from "../components/CampusSettingsManager";
+import GlobalDeliveryFeeManager from "../components/GlobalDeliveryFeeManager";
 import BulkMenuImport from "../components/BulkMenuImport";
 import SuperAdminOrdersPanel from "../components/SuperAdminOrdersPanel";
 const SuperAdminCRM = React.lazy(() => import("../components/SuperAdminCRM"));

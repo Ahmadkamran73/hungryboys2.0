@@ -5,6 +5,10 @@ import "../styles/MartItemCard.css";
 const MartItemCard = ({ name, price, description, category, stock, photoURL, campusId }) => {
   const { addToCart, cartItems, incrementItem, decrementItem } = useCart();
 
+  // Detect if this is a cake item
+  const isCake = (category && category.toLowerCase().includes('cake')) || 
+                 (name && name.toLowerCase().includes('cake'));
+
   // Find the item using name + "Mart" combination (since mart items don't have restaurant names)
   const cartItem = cartItems.find(
     (item) => item.name === name && item.restaurantName === "Mart"
@@ -17,6 +21,8 @@ const MartItemCard = ({ name, price, description, category, stock, photoURL, cam
         {
           name: name,
           price: price,
+          category: category, // Pass category
+          isCake: isCake, // Pass cake flag
         },
         "Mart", // Use "Mart" as the restaurant name for mart items
         campusId

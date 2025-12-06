@@ -1250,25 +1250,23 @@ app.get('/api/campus-settings/:campusId', async (req, res) => {
     const settings = await db.collection('campusSettings').findOne({ campusId });
 
     if (!settings) {
-      // Return default settings if none exist
+      // Fetch global delivery fee as default
+      const globalSettings = await db.collection('globalSettings').findOne({ key: 'deliveryFee' });
+      const defaultDeliveryFee = globalSettings?.value || 150;
+      
+      // Return default settings with global delivery fee
       return res.json({
         campusId,
-        deliveryChargePerPerson: 150,
+        deliveryChargePerPerson: defaultDeliveryFee,
         accountTitle: "Maratib Ali",
         bankName: "Habib bank limited",
         accountNumber: "54427000095103"
       });
     }
 
-    // Ensure deliveryChargePerPerson is at least 150 (remove old 30% discount)
-    // If it's 105 (which is 150 * 0.7), upgrade it to 150
-    const deliveryCharge = settings.deliveryChargePerPerson;
-    if (deliveryCharge < 150) {
-      settings.deliveryChargePerPerson = 150;
-    }
-
     res.json(settings);
   } catch (e) {
+    console.error('Error fetching campus settings:', e);
     res.status(500).json({ error: 'Failed to fetch campus settings' });
   }
 });
@@ -1327,6 +1325,62 @@ app.post('/api/campus-settings', verifyFirebaseToken, loadUserProfile, async (re
     res.json(result.value || settingsDoc);
   } catch (e) {
     res.status(500).json({ error: 'Failed to save campus settings' });
+  }
+});
+
+// ===== GLOBAL DELIVERY FEE SETTINGS =====
+
+// Get global delivery fee (accessible to all authenticated users)
+app.get('/api/global-delivery-fee', verifyFirebaseToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const settings = await db.collection('globalSettings').findOne({ key: 'deliveryFee' });
+    
+    if (!settings) {
+      // Return default delivery fee if not set
+      return res.json({ deliveryFee: 150 });
+    }
+    
+    res.json({ deliveryFee: settings.value });
+  } catch (e) {
+    console.error('Error fetching global delivery fee:', e);
+    res.status(500).json({ error: 'Failed to fetch global delivery fee' });
+  }
+});
+
+// Update global delivery fee (super admin only)
+app.post('/api/global-delivery-fee', verifyFirebaseToken, loadUserProfile, async (req, res) => {
+  try {
+    if (!isSuperAdmin(req.userProfile)) {
+      return res.status(403).json({ error: 'Only super admin can update global delivery fee' });
+    }
+
+    const db = await getDb();
+    const { deliveryFee } = req.body || {};
+    
+    // Validate delivery fee
+    if (!deliveryFee || deliveryFee <= 0 || isNaN(deliveryFee)) {
+      return res.status(400).json({ error: 'Delivery fee must be a positive number' });
+    }
+
+    const settingsDoc = {
+      key: 'deliveryFee',
+      value: parseInt(deliveryFee),
+      updatedAt: new Date(),
+      updatedBy: req.userProfile.email || req.user.email
+    };
+
+    // Upsert global delivery fee
+    await db.collection('globalSettings').findOneAndUpdate(
+      { key: 'deliveryFee' },
+      { $set: settingsDoc },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    res.json({ deliveryFee: settingsDoc.value, message: 'Global delivery fee updated successfully' });
+  } catch (e) {
+    console.error('Error updating global delivery fee:', e);
+    res.status(500).json({ error: 'Failed to update global delivery fee' });
   }
 });
 

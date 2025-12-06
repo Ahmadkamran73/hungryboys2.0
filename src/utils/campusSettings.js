@@ -1,18 +1,10 @@
 import { api, authHeaders } from "./api";
 
 /**
- * Fetch campus settings for a specific campus
- * @param {string} universityId - University ID
- * @param {string} campusId - Campus ID
- * @param {boolean} forceRefresh - Force refresh from server (bypass cache)
- * @returns {Promise<Object>} Campus settings object
- */
-/**
  * Fetch campus settings for a specific campus.
  * Prefer the backend (MongoDB) endpoint when available. If a `user` is
  * provided the request will include auth headers. On any failure we fall
- * back to the Firestore document (preserve previous behaviour) and finally
- * to sensible defaults.
+ * back to sensible defaults (backend will return global delivery fee).
  *
  * @param {string} universityId
  * @param {string} campusId
@@ -30,31 +22,25 @@ export const fetchCampusSettings = async (universityId, campusId, forceRefresh =
       return res.data;
     }
   } catch (err) {
-  // On error we return defaults (keep checkout resilient)
-    // On failure return defaults — keep checkout resilient.
-    return {
-      deliveryChargePerPerson: 150,
-      accountTitle: "Maratib Ali",
-      bankName: "Habib bank limited",
-      accountNumber: "54427000095103"
-    };
+    console.error('Error fetching campus settings:', err);
   }
+  
+  // Fallback to default values (will use global delivery fee from backend)
+  return {
+    accountTitle: "Maratib Ali",
+    bankName: "Habib bank limited",
+    accountNumber: "54427000095103"
+  };
 };
 
 /**
- * Get campus settings with fallback to defaults
- * @param {Object} campus - Campus object with universityId and id
- * @returns {Promise<Object>} Campus settings object
- */
-/**
  * Convenience wrapper used by components. Accepts an optional `user` so callers
  * can include auth for backend requests. If no user is supplied the function
- * will attempt the backend without auth and then fall back to Firestore.
+ * will attempt the backend without auth.
  */
 export const getCampusSettings = async (campus, user = null) => {
   if (!campus?.universityId || !campus?.id) {
     return {
-      deliveryChargePerPerson: 150,
       accountTitle: "Maratib Ali",
       bankName: "Habib bank limited",
       accountNumber: "54427000095103"

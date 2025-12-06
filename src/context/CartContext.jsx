@@ -80,6 +80,9 @@ export const CartProvider = ({ children }) => {
             restaurantId: restaurantData?.restaurantId,
             campusId: itemCampusId || userData?.campusId,
             restaurantData: restaurantData,
+            category: item.category || null, // Store category
+            isCake: item.isCake || false, // Store cake flag
+            restaurantCuisine: item.restaurantCuisine || null, // Store restaurant cuisine
           },
         ];
       }

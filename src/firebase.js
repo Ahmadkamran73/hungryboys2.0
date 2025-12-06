@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence, CACHE_SIZE_UNLIMITED, initializeFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, setPersistence, browserSessionPersistence } from "firebase/auth";
 
@@ -16,8 +16,30 @@ const firebaseConfig = {
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
-// Export Firebase services
-export const db = getFirestore(app);
+// Initialize Firestore with settings to prevent offline issues
+export const db = initializeFirestore(app, {
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+  experimentalForceLongPolling: false, // Use WebChannel for better performance
+  ignoreUndefinedProperties: true,
+});
+
+// Try to enable offline persistence, but don't crash if it fails
+try {
+  enableIndexedDbPersistence(db, {
+    forceOwnership: false // Allow multiple tabs
+  }).catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Firestore persistence failed: Multiple tabs open');
+    } else if (err.code === 'unimplemented') {
+      console.warn('Firestore persistence not available in this browser');
+    } else {
+      console.error('Firestore persistence error:', err);
+    }
+  });
+} catch (err) {
+  console.warn('Offline persistence setup failed:', err);
+}
+
 export const auth = getAuth(app);
 export const storage = getStorage(app); // ✅ Required for screenshot uploads
 

@@ -13,11 +13,12 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check localStorage first, then system preference
+    // Always use dark mode as default
     const savedTheme = localStorage.getItem('hungryboys-theme');
     if (savedTheme) return savedTheme;
     
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Default to dark mode
+    return 'dark';
   });
 
   useEffect(() => {

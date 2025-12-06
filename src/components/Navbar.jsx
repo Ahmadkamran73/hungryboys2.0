@@ -260,8 +260,8 @@ function Navbar() {
               <UniversitySelector />
             </div>
 
-            {/* Settings Dropdown with Theme Toggle */}
-            <div className="navbar-dropdown-wrapper">
+            {/* Settings Dropdown with Theme Toggle - Hidden (dark mode is default) */}
+            <div className="navbar-dropdown-wrapper" style={{ display: 'none' }}>
               <button 
                 className="navbar-settings-trigger"
                 onClick={toggleSettingsMenu}
@@ -278,10 +278,7 @@ function Navbar() {
                     <p className="navbar-dropdown-title">Settings</p>
                   </div>
                   <div className="navbar-dropdown-links">
-                    <div className="navbar-dropdown-theme">
-                      <span>Theme</span>
-                      <ThemeToggle />
-                    </div>
+                    {/* Settings content removed - dark mode is now default */}
                   </div>
                 </div>
               )}
@@ -602,12 +599,6 @@ function Navbar() {
             <div className="navbar-mobile-footer">
               <div className="navbar-mobile-university">
                 <UniversitySelector />
-              </div>
-
-              {/* Theme Toggle in Mobile */}
-              <div className="navbar-mobile-theme">
-                <span className="navbar-mobile-theme-label">Theme</span>
-                <ThemeToggle />
               </div>
               
               {user ? (

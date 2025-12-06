@@ -1,0 +1,227 @@
+/* Global Delivery Fee Manager Styles */
+
+.global-delivery-fee-manager {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.fee-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.fee-header h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.fee-header .text-muted {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.fee-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+/* Display Mode */
+.fee-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.fee-info {
+  flex: 1;
+}
+
+.fee-label {
+  display: block;
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.fee-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.fee-value .currency {
+  font-size: 24px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.fee-value .amount {
+  font-size: 48px;
+  color: #28a745;
+  font-weight: 700;
+}
+
+.fee-display .btn {
+  padding: 12px 30px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.fee-display .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Edit Mode */
+.fee-edit .form-group {
+  margin-bottom: 25px;
+}
+
+.fee-edit .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.fee-edit .input-group {
+  max-width: 300px;
+}
+
+.fee-edit .input-group-text {
+  background-color: #e9ecef;
+  border-right: none;
+  font-weight: 600;
+  color: #495057;
+}
+
+.fee-edit .form-control {
+  border-left: none;
+  font-size: 18px;
+  padding: 12px;
+}
+
+.fee-edit .form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.fee-edit .form-text {
+  margin-top: 8px;
+  display: block;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.button-group .btn {
+  padding: 10px 25px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.button-group .btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.button-group .btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Info Section */
+.fee-info-section {
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.fee-info-section h5 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.fee-info-section ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.fee-info-section li {
+  color: #495057;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .global-delivery-fee-manager {
+    padding: 15px;
+  }
+
+  .fee-card {
+    padding: 20px;
+  }
+
+  .fee-display {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fee-value .amount {
+    font-size: 36px;
+  }
+
+  .fee-edit .input-group {
+    max-width: 100%;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group .btn {
+    width: 100%;
+  }
+}
+
+/* Dark mode support (if theme context exists) */
+[data-theme="dark"] .fee-card {
+  background: #2c3e50;
+  color: #ecf0f1;
+}
+
+[data-theme="dark"] .fee-header h3 {
+  color: #ecf0f1;
+}
+
+[data-theme="dark"] .fee-label {
+  color: #bdc3c7;
+}
+
+[data-theme="dark"] .fee-info-section {
+  background: #34495e;
+  color: #ecf0f1;
+  border-left-color: #3498db;
+}
+
+[data-theme="dark"] .fee-info-section h5,
+[data-theme="dark"] .fee-info-section li {
+  color: #ecf0f1;
+}

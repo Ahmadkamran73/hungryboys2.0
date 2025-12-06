@@ -3,11 +3,15 @@ import { useCart } from "../context/CartContext";
 import { isRestaurantOpen, getNextOpeningTime } from "../utils/isRestaurantOpen";
 import "../styles/MenuItemCard.css";
 
-const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId, openTime, closeTime, is24x7 }) => {
+const MenuItemCard = ({ name, price, restaurantName, photoURL, description, campusId, openTime, closeTime, is24x7, restaurantCuisine }) => {
   const { addToCart, cartItems, incrementItem, decrementItem } = useCart();
   
   const isOpen = isRestaurantOpen({ openTime, closeTime, is24x7 });
   const nextOpeningTime = getNextOpeningTime({ openTime, closeTime, is24x7 });
+  
+  // Detect if this is a cake item (by name or restaurant cuisine)
+  const isCake = (name && name.toLowerCase().includes('cake')) || 
+                 (restaurantCuisine && (restaurantCuisine.toLowerCase() === 'cake' || restaurantCuisine.toLowerCase() === 'cakes'));
 
   // Find the item using name + restaurantName combination
   const cartItem = cartItems.find(
@@ -116,7 +120,7 @@ const MenuItemCard = ({ name, price, restaurantName, photoURL, description, camp
           ) : (
             <button
               className="menu-item-btn add"
-              onClick={() => addToCart({ name, price }, restaurantName, campusId, { openTime, closeTime, is24x7 })}
+              onClick={() => addToCart({ name, price, isCake, restaurantCuisine }, restaurantName, campusId, { openTime, closeTime, is24x7 })}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="9" cy="21" r="1" />

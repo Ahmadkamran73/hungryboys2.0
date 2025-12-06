@@ -81,7 +81,7 @@ const CampusSettingsManager = () => {
       setEditingSettings(campusSettings[campusId]);
     } else {
       setEditingSettings({
-        deliveryChargePerPerson: 150,
+        deliveryChargePerPerson: '', // Empty for user to fill
         accountTitle: "Maratib Ali",
         bankName: "SadaPay",
         accountNumber: "03330374616"

@@ -16,7 +16,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { buildStatusCounts, buildDailySeries, buildCollectionSplit, buildDeliveredStats, buildHourlyCounts, buildTopRestaurants } from '../utils/crm';
+import { buildStatusCounts, buildDailySeries, buildCollectionSplit, buildDeliveredStats, buildHourlyCounts, buildTopRestaurants, buildOrdersByDay, buildDeliveriesByPeriod } from '../utils/crm';
 
 ChartJS.register(
   ArcElement,
@@ -35,6 +35,10 @@ export default function CampusAdminCRM() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [orders, setOrders] = useState([]);
+  const [chartType, setChartType] = useState('line'); // 'line' or 'bar'
+  const [selectedDay, setSelectedDay] = useState('all'); // 'all' or specific day index
+  const [deliveryPeriod, setDeliveryPeriod] = useState('1day'); // '1day', '7days', '1month', '6months', '1year', 'all'
+  const [ordersByDayPeriod, setOrdersByDayPeriod] = useState('7days'); // Period for orders by day chart
 
   useEffect(() => {
     let timer;
@@ -60,26 +64,62 @@ export default function CampusAdminCRM() {
   }, [user]);
 
   const stats = useMemo(() => {
-    if (!orders?.length) return { total: 0, revenue: 0, today: 0, week: 0, avg: 0 };
+    if (!orders?.length) return { total: 0, revenue: 0, today: 0, week: 0, month: 0, avg: 0, deliveriesToday: 0, deliveriesMonth: 0, deliveriesTotal: 0 };
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-    let revenue = 0, today = 0, week = 0;
+    let revenue = 0, today = 0, week = 0, month = 0, deliveriesToday = 0, deliveriesMonth = 0, deliveriesTotal = 0;
     for (const o of orders) {
       const created = new Date(o.createdAt);
       revenue += Number(o.grandTotal || 0);
-      if (created >= startOfToday) today += 1;
+      const persons = Number(o.persons || 0);
+      deliveriesTotal += persons;
+      if (created >= startOfToday) {
+        today += 1;
+        deliveriesToday += persons;
+      }
       if (created >= weekAgo) week += 1;
+      if (created >= startOfMonth) {
+        month += 1;
+        deliveriesMonth += persons;
+      }
     }
-    return { total: orders.length, revenue, today, week, avg: orders.length ? revenue / orders.length : 0 };
+    return { total: orders.length, revenue, today, week, month, avg: orders.length ? revenue / orders.length : 0, deliveriesToday, deliveriesMonth, deliveriesTotal };
   }, [orders]);
 
   const statusCounts = useMemo(() => buildStatusCounts(orders), [orders]);
   const series = useMemo(() => buildDailySeries(orders, 14), [orders]);
   const collection = useMemo(() => buildCollectionSplit(orders), [orders]);
   const deliveredStats = useMemo(() => buildDeliveredStats(orders), [orders]);
-  const hourly = useMemo(() => buildHourlyCounts(orders, 7), [orders]);
+  const hourly = useMemo(() => {
+    if (selectedDay === 'all') {
+      return buildHourlyCounts(orders, 7);
+    } else {
+      // Filter orders for specific day
+      const dayIndex = parseInt(selectedDay);
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - dayIndex);
+      const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(endOfDay.getDate() + 1);
+      
+      const dayOrders = orders.filter(o => {
+        const created = new Date(o.createdAt);
+        return created >= startOfDay && created < endOfDay;
+      });
+      
+      const counts = new Array(24).fill(0);
+      for (const o of dayOrders) {
+        const h = new Date(o.createdAt).getHours();
+        counts[h] += 1;
+      }
+      return counts;
+    }
+  }, [orders, selectedDay]);
   const topRestaurants = useMemo(() => buildTopRestaurants(orders, 5), [orders]);
+  const ordersByDay = useMemo(() => buildOrdersByDay(orders, ordersByDayPeriod), [orders, ordersByDayPeriod]);
+  const deliveriesByPeriod = useMemo(() => buildDeliveriesByPeriod(orders, deliveryPeriod), [orders, deliveryPeriod]);
   
   // Theming for charts (dark/light)
   const axisColor = isDark ? '#E5E7EB' : '#374151';
@@ -104,6 +144,18 @@ export default function CampusAdminCRM() {
   const topRestaurantsData = { labels: topRestaurants.labels, datasets: [{ label: 'Revenue (Rs)', data: topRestaurants.values, backgroundColor: '#3B82F6' }] };
   const topRestaurantsOptions = { indexAxis: 'y', responsive: true, plugins: { legend: { display: false, labels: { color: axisColor } }, tooltip: { backgroundColor: tooltipBg, titleColor: axisColor, bodyColor: axisColor, borderColor: tooltipBorder, borderWidth: 1, padding: 10 } }, scales: { x: { ticks: { color: axisColor }, grid: { color: gridColor } }, y: { ticks: { color: axisColor }, grid: { color: gridColor } } } };
 
+  const ordersByDayData = {
+    labels: ordersByDay.labels,
+    datasets: [{
+      label: 'Orders by Day',
+      data: ordersByDay.counts,
+      backgroundColor: '#10B981',
+      borderColor: '#059669',
+      borderWidth: 2
+    }]
+  };
+  const ordersByDayOptions = { responsive: true, plugins: { legend: { display: false, labels: { color: axisColor } }, tooltip: { backgroundColor: tooltipBg, titleColor: axisColor, bodyColor: axisColor, borderColor: tooltipBorder, borderWidth: 1, padding: 10 } }, scales: { x: { ticks: { color: axisColor }, grid: { color: gridColor } }, y: { ticks: { precision: 0, color: axisColor }, grid: { color: gridColor } } } };
+
   if (loading) return <LoadingSpinner message="Loading CRM..." />;
   if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -116,16 +168,32 @@ export default function CampusAdminCRM() {
 
       {/* Charts Section - Moved to Top */}
       <div className="row g-4 mt-1">
-        <div className="col-12 col-lg-8">
+        <div className="col-12">
           <div className="card p-3 h-100">
-            <h5 className="mb-3">Orders & Revenue (Last 14 days)</h5>
-            <Line data={lineData} options={lineOptions} height={120} />
-          </div>
-        </div>
-        <div className="col-12 col-lg-4">
-          <div className="card p-3 h-100">
-            <h5 className="mb-3">Collection Split</h5>
-            <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="mb-0">Orders & Revenue (Last 14 days)</h5>
+              <div className="btn-group" role="group">
+                <button 
+                  type="button" 
+                  className={`btn btn-sm ${chartType === 'line' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setChartType('line')}
+                >
+                  Line Chart
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn btn-sm ${chartType === 'bar' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setChartType('bar')}
+                >
+                  Bar Chart
+                </button>
+              </div>
+            </div>
+            {chartType === 'line' ? (
+              <Line data={lineData} options={lineOptions} height={80} />
+            ) : (
+              <Bar data={lineData} options={lineOptions} height={80} />
+            )}
           </div>
         </div>
       </div>
@@ -139,8 +207,81 @@ export default function CampusAdminCRM() {
         </div>
         <div className="col-12 col-lg-6">
           <div className="card p-3 h-100">
-            <h5 className="mb-3">Orders by Hour (Last 7 days)</h5>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="mb-0">Orders by Hour</h5>
+              <select 
+                className="form-select form-select-sm" 
+                style={{ width: 'auto' }}
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(e.target.value)}
+              >
+                <option value="all">Last 7 days</option>
+                <option value="0">Today</option>
+                <option value="1">Yesterday</option>
+                <option value="2">2 days ago</option>
+                <option value="3">3 days ago</option>
+                <option value="4">4 days ago</option>
+                <option value="5">5 days ago</option>
+                <option value="6">6 days ago</option>
+              </select>
+            </div>
             <Bar data={hourlyData} options={hourlyOptions} height={120} />
+          </div>
+        </div>
+      </div>
+
+      {/* New Charts: Orders by Day and Deliveries by Period */}
+      <div className="row g-4 mt-3">
+        <div className="col-12 col-lg-6">
+          <div className="card p-3 h-100">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="mb-0">Orders by Day</h5>
+              <select 
+                className="form-select form-select-sm" 
+                style={{ width: 'auto' }}
+                value={ordersByDayPeriod}
+                onChange={(e) => setOrdersByDayPeriod(e.target.value)}
+              >
+                <option value="1day">Today</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="1month">This Month</option>
+                <option value="6months">Last 6 Months</option>
+                <option value="1year">This Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+            <Bar data={ordersByDayData} options={ordersByDayOptions} height={120} />
+          </div>
+        </div>
+        <div className="col-12 col-lg-6">
+          <div className="card p-3 h-100">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="mb-0">Deliveries by Period</h5>
+              <select 
+                className="form-select form-select-sm" 
+                style={{ width: 'auto' }}
+                value={deliveryPeriod}
+                onChange={(e) => setDeliveryPeriod(e.target.value)}
+              >
+                <option value="1day">Today</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="1month">This Month</option>
+                <option value="6months">Last 6 Months</option>
+                <option value="1year">This Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+            <div className="text-center py-4">
+              <div style={{ fontSize: '3rem', fontWeight: '700', color: '#3B82F6' }}>
+                {deliveriesByPeriod.totalDeliveries}
+              </div>
+              <div style={{ fontSize: '1.2rem', color: 'var(--text-color, #6B7280)', marginTop: '0.5rem' }}>
+                Total Delivery Persons
+              </div>
+              <div style={{ fontSize: '0.95rem', color: 'var(--text-muted, #9CA3AF)', marginTop: '0.5rem' }}>
+                From {deliveriesByPeriod.totalOrders} orders
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -149,7 +290,11 @@ export default function CampusAdminCRM() {
       <div className="stats-grid mt-4">
         <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.total}</div><div className="stat-label">Total Orders</div></div></div>
         <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {stats.revenue.toFixed(0)}</div><div className="stat-label">Total Revenue</div></div></div>
-        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.today}</div><div className="stat-label">Today</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.today}</div><div className="stat-label">Orders Today</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.month}</div><div className="stat-label">Orders This Month</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.deliveriesToday}</div><div className="stat-label">Deliveries Today</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.deliveriesMonth}</div><div className="stat-label">Deliveries This Month</div></div></div>
+        <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{stats.deliveriesTotal}</div><div className="stat-label">Total Deliveries</div></div></div>
         <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {stats.avg.toFixed(0)}</div><div className="stat-label">Avg Order Value</div></div></div>
         <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">{Math.round(deliveredStats.rate*100)}%</div><div className="stat-label">Delivered Rate</div></div></div>
         <div className="stat-card"><div className="stat-icon"></div><div className="stat-content"><div className="stat-value">Rs. {Math.round(deliveredStats.receivableAmount)}</div><div className="stat-label">Receivable</div></div></div>
